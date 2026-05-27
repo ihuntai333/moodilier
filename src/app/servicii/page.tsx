@@ -63,7 +63,7 @@ const services = [
       "Amenajări retail",
       "Restaurante & HoReCa",
     ],
-    image: "/images-scraped/birou_03.jpg",
+    image: "/images-scraped/carusel_office.jpg",
     imageAlt: "Mobilier pentru spații comerciale — Moodilier",
     imageLeft: false,
   },
