@@ -77,7 +77,7 @@ const legalSections = [
         subtitle: null,
         paragraphs: [
           "Întreg conținutul prezentului site — inclusiv, dar fără a se limita la: texte, fotografii, imagini, grafice, logo-uri, ilustrații, elemente de interfață, cod sursă, structura paginilor și baze de date — este protejat de legislația privind drepturile de autor în vigoare în România (Legea nr. 8/1996) și în Uniunea Europeană.",
-          "Marca „Moodilier" și logo-ul asociat sunt mărci înregistrate/în curs de înregistrare, aparținând SC Moodilier SRL. Utilizarea acestora fără acordul prealabil scris al societății este interzisă.",
+          `Marca \u201EMoodilier\u201D și logo-ul asociat sunt mărci înregistrate/în curs de înregistrare, aparținând SC Moodilier SRL. Utilizarea acestora fără acordul prealabil scris al societății este interzisă.`,
         ],
         list: null,
       },
