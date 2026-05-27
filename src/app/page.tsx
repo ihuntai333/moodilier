@@ -15,37 +15,37 @@ const featuredProjects = [
     title: "Vila Cosmopolis",
     category: "Rezidențial",
     image: "/images-scraped/Cosmopolis_Vila_Andrei_Tudoran_02-scaled.jpg",
-    href: "/proiecte",
+    href: "/proiecte/executie_vila-cosmopolis",
   },
   {
     title: "Apt. Olimp",
     category: "Rezidențial",
     image: "/images-scraped/Olimp_03.jpg",
-    href: "/proiecte",
+    href: "/proiecte/executie_apt-olimp",
   },
   {
     title: "Casa Mogoșoaia",
     category: "Rezidențial",
     image: "/images-scraped/Mogosoaia_01.jpg",
-    href: "/proiecte",
+    href: "/proiecte/executie_casa-mogosoaia",
   },
   {
     title: "Apt. Mamaia Nord",
     category: "Rezidențial",
     image: "/images-scraped/Black_Pearl_01.jpg",
-    href: "/proiecte",
+    href: "/proiecte/executie_apt-mamaia-nord",
   },
   {
     title: "AppTown North",
     category: "Rezidențial",
     image: "/images-scraped/apptown_exec_28.jpg",
-    href: "/proiecte",
+    href: "/proiecte/executie_apptown-north",
   },
   {
     title: "Sediu de Birouri",
     category: "Comercial",
     image: "/images-scraped/carusel_office.jpg",
-    href: "/proiecte",
+    href: "/proiecte/executie_sediu-office",
   },
 ];
 
@@ -217,31 +217,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============== SERVICES ============== */}
-      <section className="section" style={{ background: "var(--color-bg-alt)", padding: "var(--space-xl) 0" }}>
-        <div className="container">
-          <div style={{ textAlign: "center", marginBottom: "4rem" }}>
-            <p className="label" style={{ marginBottom: "1rem" }}>Ce oferim</p>
-            <h2>Servicii oferite</h2>
-          </div>
-          <div className="services-grid">
-            {services.map((service, i) => (
-              <div key={i} className="service-card reveal" style={{ transitionDelay: `${(i % 3) * 0.1}s` }}>
-                <p className="service-number">{service.num}</p>
-                <h3 className="service-title">{service.title}</h3>
-                <p className="service-desc">{service.desc}</p>
-              </div>
-            ))}
-          </div>
-          <div style={{ textAlign: "center", marginTop: "3rem" }}>
-            <Link href="/servicii" className="btn btn-outline">
-              Toate serviciile noastre
-              <ArrowRight size={14} />
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {/* ============== PROJECTS ============== */}
       <section className="section">
         <div className="section-header-flex">
@@ -266,6 +241,31 @@ export default function HomePage() {
               index={i}
             />
           ))}
+        </div>
+      </section>
+
+      {/* ============== SERVICES ============== */}
+      <section className="section" style={{ background: "var(--color-bg-alt)", padding: "var(--space-xl) 0" }}>
+        <div className="container">
+          <div style={{ textAlign: "center", marginBottom: "4rem" }}>
+            <p className="label" style={{ marginBottom: "1rem" }}>Ce oferim</p>
+            <h2>Servicii oferite</h2>
+          </div>
+          <div className="services-grid">
+            {services.map((service, i) => (
+              <div key={i} className="service-card reveal" style={{ transitionDelay: `${(i % 3) * 0.1}s` }}>
+                <p className="service-number">{service.num}</p>
+                <h3 className="service-title">{service.title}</h3>
+                <p className="service-desc">{service.desc}</p>
+              </div>
+            ))}
+          </div>
+          <div style={{ textAlign: "center", marginTop: "3rem" }}>
+            <Link href="/servicii" className="btn btn-outline">
+              Toate serviciile noastre
+              <ArrowRight size={14} />
+            </Link>
+          </div>
         </div>
       </section>
 
