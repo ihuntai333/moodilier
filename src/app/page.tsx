@@ -218,7 +218,7 @@ export default function HomePage() {
       </section>
 
       {/* ============== PROJECTS ============== */}
-      <section className="section">
+      <section className="section" style={{ paddingTop: "2rem" }}>
         <div className="section-header-flex">
           <div>
             <p className="label" style={{ marginBottom: "1rem" }}>Portofoliu</p>
