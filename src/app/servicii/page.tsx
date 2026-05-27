@@ -92,29 +92,34 @@ const stats = [
 
 const processSteps = [
   {
-    step: "1",
-    title: "Consultare inițială",
-    desc: "Analizăm cerințele, stilul dorit și particularitățile spațiului. Prima consultare este gratuită.",
+    step: "01",
+    title: "Ofertarea Proiectului",
+    desc: "În urma discuției inițiale analizăm cerințele proiectului, stilul dorit și particularitățile spațiului, pentru a realiza o ofertă personalizată, adaptată nevoilor și bugetului clientului.",
   },
   {
-    step: "2",
-    title: "Design & proiectare 3D",
-    desc: "Măsurători la fața locului și elaborarea conceptului cu randări 3D realiste.",
+    step: "02",
+    title: "Relevarea Spațiului",
+    desc: "Efectuăm măsurătorile exacte ale spațiului și verificăm toate detaliile tehnice necesare pentru ca proiectul să fie executat cu precizie și eficiență.",
   },
   {
-    step: "3",
-    title: "Ofertă și materiale",
-    desc: "Prezentăm oferta detaliată cu materiale, finisaje și termene de execuție.",
+    step: "03",
+    title: "Analiza și Dezvoltarea Proiectului",
+    desc: "Stabilim soluțiile tehnice și funcționale ale mobilierului, optimizând fiecare detaliu pentru integrarea perfectă în spațiul amenajat.",
   },
   {
-    step: "4",
-    title: "Producție în atelier",
-    desc: "Execuție în atelierul propriu cu tehnologie CNC modernă și control calitate riguros.",
+    step: "04",
+    title: "Proiectare și Documentare",
+    desc: "Realizăm proiectul tehnic complet și documentația necesară pentru producție, incluzând dimensiuni, materiale, finisaje și accesorii.",
   },
   {
-    step: "5",
-    title: "Livrare & montaj",
-    desc: "Montaj profesionist la fața locului cu reglaj de precizie și verificare finală.",
+    step: "05",
+    title: "Execuție în Atelier",
+    desc: "Producția se realizează în atelierul propriu cu tehnologie CNC modernă și control riguros al calității la fiecare etapă a procesului.",
+  },
+  {
+    step: "06",
+    title: "Livrare & Montaj",
+    desc: "Livrăm și montăm mobilierul cu precizie, verificând fiecare detaliu pentru a garanta calitatea așteptată.",
   },
 ];
 
@@ -393,7 +398,7 @@ export default function ServiciiPage() {
             style={{ textAlign: "center", marginBottom: "5rem" }}
           >
             <p className="label" style={{ marginBottom: "1rem" }}>
-              Cum lucrăm
+              Etapele unui proiect
             </p>
             <h2
               style={{
@@ -403,18 +408,19 @@ export default function ServiciiPage() {
                 color: "var(--color-fg)",
               }}
             >
-              Procesul nostru
+              Etapele unui proiect
             </h2>
             <p
               style={{
-                maxWidth: "50ch",
+                maxWidth: "58ch",
                 margin: "1.5rem auto 0",
                 color: "var(--color-fg-muted)",
                 lineHeight: 1.7,
               }}
             >
-              Un proces clar, transparent și adaptat fiecărui client — de la
-              prima discuție până la livrarea finală.
+              Abordarea noastră în fiecare proiect este construită în jurul preciziei,
+              comunicării și execuției premium, pentru a transforma fiecare spațiu
+              íntr-un rezultat impecabil.
             </p>
           </div>
 
@@ -521,11 +527,17 @@ export default function ServiciiPage() {
           }
           @media (min-width: 768px) {
             .process-steps {
-              grid-template-columns: repeat(5, 1fr);
-              gap: 1rem;
+              grid-template-columns: repeat(3, 1fr);
+              gap: 2rem;
             }
             .process-connector {
               display: block !important;
+            }
+          }
+          @media (min-width: 1100px) {
+            .process-steps {
+              grid-template-columns: repeat(6, 1fr);
+              gap: 1rem;
             }
           }
         `}</style>

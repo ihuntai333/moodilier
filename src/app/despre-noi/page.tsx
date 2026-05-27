@@ -133,21 +133,29 @@ export default function DespreNoiPage() {
               </p>
               <span className="gold-line" />
               <p style={{ marginBottom: "1.25rem", lineHeight: 1.8 }}>
-                Cu peste 10 ani de experiență în producția de mobilier la
-                comandă și amenajări interioare premium, am dezvoltat un proces
-                complet care îmbină designul contemporan, precizia tehnică și
-                atenția impecabilă la detalii.
+                La Moodilier credăm că mobilierul premium nu înseamnă doar obiecte bine executate,
+                ci spații care transmit emoție, echilibru și identitate. Fiecare proiect începe
+                cu o idee, o nevoie sau o viziune, iar rolul nostru este să o transformăm
+                íntr-un rezultat autentic, construit în jurul stilului de viață al fiecărui client.
               </p>
               <p style={{ marginBottom: "1.25rem", lineHeight: 1.8 }}>
-                În atelierul nostru de 1.200 mp din București, tehnologia
-                modernă și măiestria execuției lucrează împreună pentru a crea
-                mobilier personalizat cu linii curate, materiale premium și
-                finisaje rafinate.
+                Cu peste 10 ani de experiență în producția de mobilier la comandă și amenajări
+                interioare premium, am dezvoltat un proces complet care îmbină designul contemporan,
+                precizia tehnică și atenția impecabilă la detalii. De la concept, până la execuție,
+                finisare și montaj, fiecare etapă este gestionată intern pentru a garanta calitate
+                și coerență în fiecare proiect.
+              </p>
+              <p style={{ marginBottom: "1.25rem", lineHeight: 1.8 }}>
+                În atelierul nostru, tehnologia modernă și măiestria execuției lucrează împreună
+                pentru a crea mobilier personalizat cu linii curate, materiale premium și finisaje
+                rafinate. Fiecare piesă este realizată cu grijă pentru proporții, funcționalitate
+                și estetică, astfel încât rezultatul final să rămână relevant și elegant în timp.
               </p>
               <p style={{ lineHeight: 1.8 }}>
-                Pe lângă producția de mobilier premium la comandă, dezvoltăm și
-                servicii specializate dedicate industriei de design interior și
-                producție.
+                Pe lângă producția de mobilier premium, dezvoltăm și servicii specializate:
+                prelucrări CNC de înaltă precizie, servicii premium de vopsitorie MDF, termoformare
+                materiale compozite și execuție de elemente personalizate pentru proiecte
+                rezidențiale și comerciale.
               </p>
             </div>
           </div>

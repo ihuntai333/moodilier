@@ -188,12 +188,12 @@ export default function Header() {
             onClick={closeMobile}
           >
             <Image
-              src="/images-scraped/Moodelier-L-WS-White.png"
-              alt="Moodilier"
-              width={200}
-              height={50}
+              src="/brand/logo-white.png"
+              alt="Moodilier Signature"
+              width={220}
+              height={60}
               style={{
-                height: "40px",
+                height: "clamp(36px, 5vw, 52px)",
                 width: "auto",
                 objectFit: "contain",
               }}

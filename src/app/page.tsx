@@ -184,17 +184,18 @@ export default function HomePage() {
               </h2>
               <span className="gold-line" />
               <p style={{ marginBottom: "1.25rem" }}>
-                La Moodilier credem că mobilierul premium nu înseamnă doar obiecte bine executate,
-                ci spații care transmit emoție, echilibru și identitate.
+                La Moodilier transformăm ideile de amenajare în piese de mobilier premium la
+                comandă, create pentru spații elegante, funcționale şi atemporale.
               </p>
               <p style={{ marginBottom: "1.25rem" }}>
-                Cu peste 10 ani de experiență în producția de mobilier la comandă și amenajări
-                interioare premium, am dezvoltat un proces complet care îmbină designul contemporan,
-                precizia tehnică și atenția impecabilă la detalii.
+                Cu peste 10 ani de experiență în proiectarea și producția de mobilier premium,
+                realizăm soluții personalizate pentru interioare rezidențiale și comerciale,
+                punând accent pe design contemporan, materiale atent selecționate și execuție impecabilă.
               </p>
               <p style={{ marginBottom: "2.5rem" }}>
-                De la concept și proiectare, până la execuție, finisare și montaj, fiecare etapă
-                este gestionată intern pentru a garanta calitate și coerență în fiecare proiect.
+                Fiecare proiect este conceput în jurul stilului și nevoilor fiecărui client —
+                de la bucătării premium, livinguri și dormitoare, până la recepții, birouri,
+                showroom-uri și spații comerciale moderne.
               </p>
               <Link href="/despre-noi" className="btn btn-ghost">
                 Află mai multe despre noi

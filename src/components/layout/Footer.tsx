@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { Phone, Mail, MapPin, Clock } from "lucide-react";
 
 const quickLinks = [
@@ -161,7 +162,20 @@ export default function Footer() {
           {/* ── Brand + tagline ───────────────────────────────── */}
           <div style={{ textAlign: "center", marginBottom: "3rem" }}>
             <div className="footer-logo" style={{ marginBottom: "0.75rem" }}>
-              Mood<span>ilier</span>
+              <Image
+                src="/brand/logo-white.png"
+                alt="Moodilier Signature"
+                width={240}
+                height={70}
+                style={{
+                  height: "clamp(44px, 6vw, 64px)",
+                  width: "auto",
+                  objectFit: "contain",
+                  margin: "0 auto",
+                  display: "block",
+                }}
+                unoptimized
+              />
             </div>
             <p
               className="footer-desc"
@@ -172,7 +186,7 @@ export default function Footer() {
               }}
             >
               Atelier de mobilier premium la comandă din București. Design
-              contemporan, materiale atent selecționate și execuție impecabilă.
+              contemporan, materiale atent selecționate şi execuție impecabilă.
             </p>
           </div>
 
