@@ -16,26 +16,15 @@ interface GalleryClientProps {
 
 export default function GalleryClient({ images, title }: GalleryClientProps) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  // Track broken images — hide them from grid
+  const [brokenImages, setBrokenImages] = useState<Set<number>>(new Set());
 
-  const handleItemMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
-    const el = e.currentTarget;
-    el.style.borderBottomColor = "var(--color-gold)";
-    const img = el.querySelector("img") as HTMLImageElement | null;
-    if (img) {
-      img.style.transform = "scale(1.04)";
-      img.style.filter = "brightness(1.05)";
-    }
+  const handleError = (index: number) => {
+    setBrokenImages((prev) => new Set([...prev, index]));
   };
 
-  const handleItemMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
-    const el = e.currentTarget;
-    el.style.borderBottomColor = "var(--color-border)";
-    const img = el.querySelector("img") as HTMLImageElement | null;
-    if (img) {
-      img.style.transform = "scale(1)";
-      img.style.filter = "brightness(1)";
-    }
-  };
+  // Filter out broken images for lightbox
+  const validImages = images.filter((_, i) => !brokenImages.has(i));
 
   return (
     <>
@@ -49,10 +38,7 @@ export default function GalleryClient({ images, title }: GalleryClientProps) {
             marginBottom: "0.5rem",
           }}
         >
-          <p
-            className="label"
-            style={{ margin: 0, letterSpacing: "0.2em" }}
-          >
+          <p className="label" style={{ margin: 0, letterSpacing: "0.2em" }}>
             Galerie fotografii
           </p>
           <span
@@ -65,7 +51,7 @@ export default function GalleryClient({ images, title }: GalleryClientProps) {
               padding: "0.2rem 0.6rem",
             }}
           >
-            {images.length} foto
+            {validImages.length} foto
           </span>
         </div>
       </div>
@@ -79,43 +65,64 @@ export default function GalleryClient({ images, title }: GalleryClientProps) {
           gap: "0.5rem",
         }}
       >
-        {images.map((img, i) => (
-          <div
-            key={i}
-            className={`gallery-item${i === 0 ? " gallery-item-featured" : ""}`}
-            style={{
-              gridColumn: i === 0 ? "span 2" : "span 1",
-              position: "relative",
-              aspectRatio: i === 0 ? "3/2" : "4/3",
-              overflow: "hidden",
-              background: "var(--color-surface)",
-              cursor: "zoom-in",
-              border: "1px solid var(--color-border)",
-              borderBottomColor: "var(--color-border)",
-              transition: "border-color 0.3s ease",
-            }}
-            onClick={() => setLightboxIndex(i)}
-            onMouseEnter={handleItemMouseEnter}
-            onMouseLeave={handleItemMouseLeave}
-          >
-            <Image
-              src={img}
-              alt={`${title} — fotografie ${i + 1}`}
-              fill
-              unoptimized
+        {images.map((img, i) => {
+          if (brokenImages.has(i)) return null;
+
+          // Recalculate visual position after removing broken images
+          const visibleIndex = images.slice(0, i).filter((_, j) => !brokenImages.has(j)).length;
+          const isFeatured = visibleIndex === 0;
+
+          return (
+            <div
+              key={i}
+              className={`gallery-item${isFeatured ? " gallery-item-featured" : ""}`}
               style={{
-                objectFit: "cover",
-                transition: "transform 0.5s ease, filter 0.5s ease",
-                pointerEvents: "none",
+                gridColumn: isFeatured ? "span 2" : "span 1",
+                position: "relative",
+                aspectRatio: isFeatured ? "3/2" : "4/3",
+                overflow: "hidden",
+                background: "var(--color-surface)",
+                cursor: "zoom-in",
+                border: "1px solid var(--color-border)",
+                transition: "border-color 0.3s ease",
               }}
-              sizes={
-                i === 0
-                  ? "(max-width: 767px) 100vw, 66vw"
-                  : "(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 33vw"
-              }
-            />
-          </div>
-        ))}
+              onClick={() => {
+                const lightboxIdx = validImages.indexOf(img);
+                if (lightboxIdx !== -1) setLightboxIndex(lightboxIdx);
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderBottomColor = "var(--color-gold)";
+                const imgEl = e.currentTarget.querySelector("img") as HTMLImageElement | null;
+                if (imgEl) { imgEl.style.transform = "scale(1.04)"; imgEl.style.filter = "brightness(1.05)"; }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderBottomColor = "var(--color-border)";
+                const imgEl = e.currentTarget.querySelector("img") as HTMLImageElement | null;
+                if (imgEl) { imgEl.style.transform = "scale(1)"; imgEl.style.filter = "brightness(1)"; }
+              }}
+            >
+              <Image
+                src={img}
+                alt={`${title} — fotografie ${i + 1}`}
+                fill
+                unoptimized
+                priority={i < 3}
+                loading={i < 3 ? "eager" : "lazy"}
+                style={{
+                  objectFit: "cover",
+                  transition: "transform 0.5s ease, filter 0.5s ease",
+                  pointerEvents: "none",
+                }}
+                sizes={
+                  isFeatured
+                    ? "(max-width: 767px) 100vw, 66vw"
+                    : "(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 33vw"
+                }
+                onError={() => handleError(i)}
+              />
+            </div>
+          );
+        })}
       </div>
 
       {/* Caption */}
@@ -134,7 +141,7 @@ export default function GalleryClient({ images, title }: GalleryClientProps) {
       {/* Lightbox */}
       {lightboxIndex !== null && (
         <ProjectLightbox
-          images={images}
+          images={validImages}
           initialIndex={lightboxIndex}
           projectTitle={title}
           onClose={() => setLightboxIndex(null)}
