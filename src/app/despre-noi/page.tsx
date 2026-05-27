@@ -42,16 +42,29 @@ const stats = [
 
 const galleryImages = [
   {
-    src: "/images-scraped/apptown_exec_28.jpg",
-    alt: "Proiect AppTown — mobilier premium la comandă",
+    src: "/images-despre-noi/living-01.jpg",
+    alt: "Living premium cu perete de marmură și mobilier la comandă",
+    span: 2,
   },
   {
-    src: "/images-scraped/Mogosoaia_01.jpg",
-    alt: "Casa Mogoșoaia — amenajare interioară",
+    src: "/images-despre-noi/dormitor-01.jpg",
+    alt: "Dormitor premium cu tăblie tapițată aurie",
+    span: 1,
   },
   {
-    src: "/images-scraped/vila_cosmopolis_exec_living_5.jpg",
-    alt: "Vila Cosmopolis — living la comandă",
+    src: "/images-despre-noi/living-02.jpg",
+    alt: "Living contemporan cu candelabru",
+    span: 1,
+  },
+  {
+    src: "/images-despre-noi/dressing-01.jpg",
+    alt: "Dressing premium cu oglindă și iluminare LED",
+    span: 1,
+  },
+  {
+    src: "/images-despre-noi/bucatarie-01.jpg",
+    alt: "Bucătărie premium cu blat de marmură",
+    span: 1,
   },
 ];
 
@@ -84,8 +97,8 @@ export default function DespreNoiPage() {
         label="Despre noi"
         title="Despre noi"
         subtitle="Cu peste 10 ani de experiență în producția de mobilier la comandă, creăm spații care transmit emoție, echilibru și identitate."
-        bgImage="/images-scraped/mobilier-premium-01.webp"
-        overlayOpacity={0.65}
+        bgImage="/images-despre-noi/living-02.jpg"
+        overlayOpacity={0.6}
       />
 
       {/* ============== SECTION 1 — BRAND STORY 2 COLS ============== */}
@@ -185,57 +198,63 @@ export default function DespreNoiPage() {
         `}</style>
       </section>
 
-      {/* ============== SECTION 2 — FULL-WIDTH IMAGE STRIP ============== */}
-      <section className="gallery-strip">
-        {galleryImages.map((img, i) => (
-          <div
-            key={i}
-            className="gallery-strip-item"
-            style={{
-              position: "relative",
-              overflow: "hidden",
-              height: "400px",
-            }}
-          >
-            <Image
-              src={img.src}
-              alt={img.alt}
-              fill
-              style={{
-                objectFit: "cover",
-                objectPosition: "center",
-                transition: "transform 0.8s cubic-bezier(0.25,0.46,0.45,0.94)",
-              }}
-              unoptimized
-            />
-          </div>
-        ))}
+      {/* ============== SECTION 2 — GALLERY MOSAIC ============== */}
+      <section className="gallery-mosaic-section">
+        <div className="gallery-mosaic">
+          {galleryImages.map((img, i) => (
+            <div
+              key={i}
+              className="gallery-mosaic-item"
+              style={{ gridColumn: `span ${img.span}` }}
+            >
+              <Image
+                src={img.src}
+                alt={img.alt}
+                fill
+                style={{
+                  objectFit: "cover",
+                  objectPosition: "center",
+                  transition: "transform 0.8s cubic-bezier(0.25,0.46,0.45,0.94)",
+                }}
+                unoptimized
+              />
+            </div>
+          ))}
+        </div>
       </section>
 
       <style>{`
-        .gallery-strip {
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: 0;
+        .gallery-mosaic-section {
           border-top: 1px solid var(--color-border);
           border-bottom: 1px solid var(--color-border);
+          background: var(--color-bg);
         }
-        .gallery-strip .gallery-strip-item:not(:first-child) {
-          display: none;
+        .gallery-mosaic {
+          display: grid;
+          grid-template-columns: 1fr;
+          grid-template-rows: auto;
+          gap: 3px;
         }
-        .gallery-strip .gallery-strip-item:first-child {
-          height: 300px;
+        .gallery-mosaic-item {
+          position: relative;
+          height: 260px;
+          overflow: hidden;
+          grid-column: span 1 !important;
+        }
+        .gallery-mosaic-item:hover img {
+          transform: scale(1.05);
         }
         @media (min-width: 768px) {
-          .gallery-strip {
+          .gallery-mosaic {
             grid-template-columns: repeat(3, 1fr);
           }
-          .gallery-strip .gallery-strip-item {
-            display: block !important;
-            height: 400px !important;
+          .gallery-mosaic-item {
+            height: 380px;
+            grid-column: span var(--span, 1) !important;
           }
-          .gallery-strip .gallery-strip-item:hover img {
-            transform: scale(1.06);
+          /* First item spans 2 cols */
+          .gallery-mosaic-item:first-child {
+            grid-column: span 2 !important;
           }
         }
       `}</style>
