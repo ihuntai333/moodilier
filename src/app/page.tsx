@@ -219,15 +219,11 @@ export default function HomePage() {
 
       {/* ============== PROJECTS ============== */}
       <section className="section" style={{ paddingTop: "2rem" }}>
-        <div className="section-header-flex">
-          <div>
+        <div className="container">
+          <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
             <p className="label" style={{ marginBottom: "1rem" }}>Portofoliu</p>
             <h2>Proiecte realizate</h2>
           </div>
-          <Link href="/proiecte" className="btn btn-ghost">
-            Vezi toate proiectele
-            <ArrowRight size={14} />
-          </Link>
         </div>
 
         <div className="projects-grid">
@@ -241,6 +237,13 @@ export default function HomePage() {
               index={i}
             />
           ))}
+        </div>
+
+        <div style={{ textAlign: "center", marginTop: "2.5rem" }}>
+          <Link href="/proiecte" className="btn btn-ghost">
+            Vezi toate proiectele
+            <ArrowRight size={14} />
+          </Link>
         </div>
       </section>
 
@@ -270,7 +273,7 @@ export default function HomePage() {
       </section>
 
       {/* ============== PROCESS ============== */}
-      <section className="section" style={{ background: "var(--color-bg-alt)" }}>
+      <section className="section" style={{ background: "var(--color-bg)", paddingTop: "2rem" }}>
         <div className="container">
           <div style={{ textAlign: "center", marginBottom: "4rem" }}>
             <p className="label" style={{ marginBottom: "1rem" }}>Cum lucrăm</p>
@@ -339,7 +342,7 @@ export default function HomePage() {
 
       {/* ============== CTA ============== */}
       <section className="cta-section">
-        <div className="container" style={{ position: "relative", zIndex: 1 }}>
+        <div className="container" style={{ position: "relative", zIndex: 1, textAlign: "center" }}>
           <p className="label" style={{ marginBottom: "1.5rem" }}>Hai să lucrăm împreună</p>
           <h2 style={{ maxWidth: "600px", margin: "0 auto 1.5rem" }}>
             Transformăm viziunea ta în mobilier premium
