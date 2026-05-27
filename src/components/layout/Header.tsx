@@ -1,8 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Menu, X, ArrowRight } from "lucide-react";
+import Logo from "@/components/Logo";
 
 const navLinks = [
   { href: "/", label: "Acasă" },
@@ -181,26 +181,11 @@ export default function Header() {
           }}
         >
           {/* Logo */}
-          <Link
+          <Logo
+            variant="light"
             href="/"
-            className="nav-logo"
-            style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}
             onClick={closeMobile}
-          >
-            <Image
-              src="/brand/logo-white.png"
-              alt="Moodilier Signature"
-              width={220}
-              height={60}
-              style={{
-                height: "clamp(36px, 5vw, 52px)",
-                width: "auto",
-                objectFit: "contain",
-              }}
-              priority
-              unoptimized
-            />
-          </Link>
+          />
 
           {/* Desktop Nav */}
           <div

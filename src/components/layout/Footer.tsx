@@ -2,6 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Phone, Mail, MapPin, Clock } from "lucide-react";
+import Logo from "@/components/Logo";
 
 const quickLinks = [
   { href: "/", label: "Acasă" },
@@ -161,21 +162,8 @@ export default function Footer() {
 
           {/* ── Brand + tagline ───────────────────────────────── */}
           <div style={{ textAlign: "center", marginBottom: "3rem" }}>
-            <div className="footer-logo" style={{ marginBottom: "0.75rem" }}>
-              <Image
-                src="/brand/logo-white.png"
-                alt="Moodilier Signature"
-                width={240}
-                height={70}
-                style={{
-                  height: "clamp(44px, 6vw, 64px)",
-                  width: "auto",
-                  objectFit: "contain",
-                  margin: "0 auto",
-                  display: "block",
-                }}
-                unoptimized
-              />
+            <div className="footer-logo" style={{ marginBottom: "0.75rem", display: "flex", justifyContent: "center" }}>
+              <Logo variant="light" href="/" />
             </div>
             <p
               className="footer-desc"
