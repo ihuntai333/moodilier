@@ -87,29 +87,11 @@ export default async function ProjectPage({
             flexWrap: "wrap",
           }}
         >
-          <Link
-            href="/"
-            style={{ color: "var(--color-fg-subtle)", transition: "color 0.3s" }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.color = "var(--color-gold)")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.color = "var(--color-fg-subtle)")
-            }
-          >
+          <Link href="/" className="breadcrumb-link">
             Acasă
           </Link>
           <ChevronRight size={12} style={{ flexShrink: 0 }} />
-          <Link
-            href="/proiecte"
-            style={{ color: "var(--color-fg-subtle)", transition: "color 0.3s" }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.color = "var(--color-gold)")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.color = "var(--color-fg-subtle)")
-            }
-          >
+          <Link href="/proiecte" className="breadcrumb-link">
             Proiecte
           </Link>
           <ChevronRight size={12} style={{ flexShrink: 0 }} />
@@ -279,7 +261,7 @@ export default async function ProjectPage({
           </div>
         </div>
 
-        {/* Details strip mobile styles */}
+        {/* Details strip + nav + breadcrumb styles */}
         <style>{`
           @media (max-width: 767px) {
             .project-details-strip {
@@ -290,6 +272,13 @@ export default async function ProjectPage({
               display: none;
             }
           }
+          .breadcrumb-link {
+            color: var(--color-fg-subtle);
+            transition: color 0.3s;
+            text-decoration: none;
+          }
+          .breadcrumb-link:hover { color: var(--color-gold); }
+          .project-nav-link:hover { background: var(--color-surface) !important; }
         `}</style>
       </section>
 
@@ -313,6 +302,7 @@ export default async function ProjectPage({
           {prevProject ? (
             <Link
               href={`/proiecte/${prevProject.slug}`}
+              className="project-nav-link"
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -322,12 +312,6 @@ export default async function ProjectPage({
                 transition: "background 0.3s",
                 textDecoration: "none",
               }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.background = "var(--color-surface)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.background = "var(--color-bg-alt)")
-              }
             >
               <ArrowLeft
                 size={20}
@@ -370,6 +354,7 @@ export default async function ProjectPage({
           {nextProject ? (
             <Link
               href={`/proiecte/${nextProject.slug}`}
+              className="project-nav-link"
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -381,12 +366,6 @@ export default async function ProjectPage({
                 textDecoration: "none",
                 textAlign: "right",
               }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.background = "var(--color-surface)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.background = "var(--color-bg-alt)")
-              }
             >
               <div>
                 <p
