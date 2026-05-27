@@ -515,41 +515,53 @@ img { display: block; max-width: 100%; }
 }
 
 /* --- Scroll animations ---
-   Elements are ALWAYS VISIBLE by default.
-   The hide state only kicks in after JS marks body with .js-loaded,
-   so content never flickers or disappears if JS is slow.
+   NEW APPROACH: Elements are ALWAYS VISIBLE by default.
+   Animation is ADDITIVE — .revealed triggers a one-shot @keyframes animation.
+   No element can ever be stuck invisible. No js-loaded dependency.
 --- */
-.reveal {
-  transition: opacity 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-              transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
 
-/* Only hide elements after JS has confirmed it's running */
-.js-loaded .reveal:not(.revealed) {
-  opacity: 0;
-  transform: translateY(16px);
-}
-
-.reveal.revealed {
-  opacity: 1 !important;
-  transform: translateY(0) !important;
-}
-
-.reveal-delay-1 { transition-delay: 0.08s; }
-.reveal-delay-2 { transition-delay: 0.16s; }
-.reveal-delay-3 { transition-delay: 0.24s; }
-.reveal-delay-4 { transition-delay: 0.32s; }
-.reveal-delay-5 { transition-delay: 0.40s; }
-.reveal-delay-6 { transition-delay: 0.48s; }
-
-/* Safety: disable animations for users who prefer reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  .reveal, .reveal.revealed {
-    transition: none !important;
-    opacity: 1 !important;
-    transform: none !important;
+@keyframes revealUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
+
+/* Base: always visible, no hiding */
+.reveal {
+  opacity: 1;
+  transform: none;
+}
+
+/* When entering viewport: play animation once */
+.reveal.revealed:not(.no-anim) {
+  animation: revealUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+/* Elements already in viewport on load: no animation, instant */
+.reveal.no-anim {
+  animation: none;
+}
+
+/* Staggered delays for groups */
+.reveal-delay-1 { animation-delay: 0.08s; }
+.reveal-delay-2 { animation-delay: 0.16s; }
+.reveal-delay-3 { animation-delay: 0.24s; }
+.reveal-delay-4 { animation-delay: 0.32s; }
+.reveal-delay-5 { animation-delay: 0.40s; }
+.reveal-delay-6 { animation-delay: 0.48s; }
+
+/* Accessibility: no animations for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .reveal.revealed:not(.no-anim) {
+    animation: none !important;
+  }
+}
+
 
 /* --- Services Grid --- */
 .services-grid {
