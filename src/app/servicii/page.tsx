@@ -212,7 +212,7 @@ export default function ServiciiPage() {
         {services.map((service, i) => (
           <div
             key={i}
-            className="service-row"
+            className="service-row reveal"
             style={{
               background:
                 i % 2 === 0
