@@ -1,17 +1,26 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, Images } from "lucide-react";
+import { ArrowRight, Images } from "lucide-react";
 import PageHero from "@/components/PageHero";
 import { projects } from "@/data/projects-clean";
 
-const CATEGORIES = ["Toate", "Rezidențial", "Comercial", "Bucătărie", "Vizualizare 3D"] as const;
+const CATEGORIES = [
+  "Toate",
+  "Rezidențial",
+  "Comercial",
+  "Bucătărie",
+  "Vizualizare 3D",
+] as const;
 type Category = (typeof CATEGORIES)[number];
 
 export default function ProiectePage() {
   const [activeCategory, setActiveCategory] = useState<Category>("Toate");
+  const [indicator, setIndicator] = useState({ left: 0, width: 0 });
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const filtered = useMemo(() => {
     if (activeCategory === "Toate") return projects;
@@ -26,6 +35,36 @@ export default function ProiectePage() {
     return map;
   }, []);
 
+  // Animated sliding indicator
+  useEffect(() => {
+    const idx = CATEGORIES.indexOf(activeCategory);
+    const btn = buttonRefs.current[idx];
+    const container = tabsRef.current;
+    if (btn && container) {
+      const bRect = btn.getBoundingClientRect();
+      const cRect = container.getBoundingClientRect();
+      setIndicator({
+        left: bRect.left - cRect.left + container.scrollLeft,
+        width: bRect.width,
+      });
+    }
+  }, [activeCategory]);
+
+  // 3D card handlers
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    e.currentTarget.style.transform = `perspective(800px) rotateX(${-y * 6}deg) rotateY(${x * 6}deg) translateZ(8px)`;
+    e.currentTarget.style.boxShadow = `${-x * 20}px ${-y * 20}px 40px rgba(0,0,0,0.4)`;
+  };
+
+  const handleMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.currentTarget.style.transform =
+      "perspective(800px) rotateX(0) rotateY(0) translateZ(0)";
+    e.currentTarget.style.boxShadow = "none";
+  };
+
   return (
     <>
       <PageHero
@@ -39,32 +78,37 @@ export default function ProiectePage() {
       {/* ── Filter tabs ──────────────────────────────────────────── */}
       <div
         style={{
-          borderBottom: "1px solid var(--color-border)",
-          background: "var(--color-bg-alt)",
           position: "sticky",
           top: 0,
           zIndex: 90,
+          borderBottom: "1px solid var(--color-border)",
+          background: "var(--color-bg-alt)",
         }}
       >
         <div className="container">
           <div
+            ref={tabsRef}
             style={{
               display: "flex",
               gap: 0,
               overflowX: "auto",
               scrollbarWidth: "none",
+              position: "relative",
             }}
           >
-            {CATEGORIES.map((cat) => (
+            {CATEGORIES.map((cat, idx) => (
               <button
                 key={cat}
+                ref={(el) => {
+                  buttonRefs.current[idx] = el;
+                }}
                 onClick={() => setActiveCategory(cat)}
                 style={{
-                  padding: "1.1rem 1.75rem",
+                  padding: "1.25rem 1.5rem",
                   fontFamily: "var(--font-body)",
                   fontSize: "0.65rem",
                   fontWeight: 600,
-                  letterSpacing: "0.22em",
+                  letterSpacing: "0.2em",
                   textTransform: "uppercase",
                   color:
                     activeCategory === cat
@@ -72,213 +116,218 @@ export default function ProiectePage() {
                       : "var(--color-fg-subtle)",
                   background: "none",
                   border: "none",
-                  borderBottom:
-                    activeCategory === cat
-                      ? "2px solid var(--color-gold)"
-                      : "2px solid transparent",
                   cursor: "pointer",
-                  transition: "all 0.3s ease",
+                  transition: "color 0.3s ease",
                   whiteSpace: "nowrap",
+                  flexShrink: 0,
                 }}
               >
-                {cat}
+                {cat}{" "}
                 <span
                   style={{
-                    marginLeft: "0.5rem",
                     fontSize: "0.6rem",
-                    opacity: 0.6,
-                    fontWeight: 400,
+                    color: "var(--color-fg-subtle)",
+                    marginLeft: "0.25rem",
                   }}
                 >
                   ({counts[cat] ?? 0})
                 </span>
               </button>
             ))}
+
+            {/* Animated gold sliding indicator */}
+            <div
+              style={{
+                position: "absolute",
+                bottom: 0,
+                left: indicator.left,
+                width: indicator.width,
+                height: "2px",
+                background: "var(--color-gold)",
+                transition: "all 0.35s cubic-bezier(0.4,0,0.2,1)",
+                pointerEvents: "none",
+              }}
+            />
           </div>
         </div>
       </div>
 
-      {/* ── Projects masonry grid ────────────────────────────────── */}
+      {/* ── Projects uniform grid ─────────────────────────────────── */}
       <section className="section" style={{ paddingTop: "3rem" }}>
         <div className="container">
           <div
+            className="projects-grid"
             style={{
-              columnCount: 3,
-              columnGap: "1px",
-              background: "var(--color-border)",
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              gap: "1.5rem",
             }}
-            className="projects-masonry"
           >
             {filtered.map((project) => (
               <Link
                 key={project.slug}
                 href={`/proiecte/${project.slug}`}
-                style={{
-                  display: "block",
-                  breakInside: "avoid",
-                  marginBottom: "1px",
-                  textDecoration: "none",
-                }}
+                style={{ textDecoration: "none", display: "block" }}
               >
-                <article
-                  className="project-card-new"
+                <div
+                  className="project-card"
+                  onMouseMove={handleMouseMove}
+                  onMouseLeave={handleMouseLeave}
                   style={{
-                    background: "var(--color-bg)",
-                    overflow: "hidden",
                     position: "relative",
+                    overflow: "hidden",
+                    background: "var(--color-surface)",
+                    border: "1px solid var(--color-border)",
+                    transition: "transform 0.4s ease, box-shadow 0.4s ease",
+                    transformStyle: "preserve-3d",
                     cursor: "pointer",
+                    height: "100%",
                   }}
                 >
                   {/* Cover image */}
                   <div
-                    style={{ position: "relative", aspectRatio: "4/3" }}
-                    className="img-overlay"
+                    className="project-card-img"
+                    style={{
+                      position: "relative",
+                      aspectRatio: "4/3",
+                      overflow: "hidden",
+                    }}
                   >
                     {project.coverImage ? (
                       <Image
                         src={project.coverImage}
                         alt={project.title}
                         fill
-                        style={{ objectFit: "cover" }}
                         unoptimized
-                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        style={{
+                          objectFit: "cover",
+                          transition: "transform 0.5s ease",
+                        }}
+                        sizes="(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 33vw"
                       />
                     ) : (
                       <div
                         style={{
                           width: "100%",
                           height: "100%",
-                          background: "var(--color-surface)",
+                          background: "var(--color-bg)",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
                         }}
                       >
-                        <span style={{ color: "var(--color-fg-subtle)", fontSize: "0.75rem" }}>
+                        <span
+                          style={{
+                            color: "var(--color-fg-subtle)",
+                            fontSize: "0.75rem",
+                          }}
+                        >
                           Fără imagine
                         </span>
                       </div>
                     )}
-
-                    {/* Hover overlay */}
-                    <div className="img-overlay-content">
-                      <p className="project-card-cat">{project.category}</p>
-                      <h3
-                        className="project-card-title"
-                        style={{ fontSize: "1.15rem" }}
-                      >
-                        {project.title}
-                      </h3>
-                      {project.location && (
-                        <p
-                          style={{
-                            fontSize: "0.7rem",
-                            color: "var(--color-fg-muted)",
-                            marginTop: "0.25rem",
-                          }}
-                        >
-                          {project.location}
-                        </p>
-                      )}
-                    </div>
                   </div>
 
-                  {/* Card body */}
+                  {/* Card content */}
                   <div style={{ padding: "1.25rem 1.5rem 1.5rem" }}>
-                    <div
+                    {/* Category badge */}
+                    <span
                       style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "flex-start",
-                        marginBottom: "0.6rem",
-                        gap: "1rem",
+                        display: "inline-block",
+                        fontSize: "0.6rem",
+                        fontWeight: 700,
+                        letterSpacing: "0.2em",
+                        textTransform: "uppercase",
+                        color: "var(--color-gold)",
+                        marginBottom: "0.5rem",
                       }}
                     >
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        {/* Category badge */}
-                        <span
-                          style={{
-                            display: "inline-block",
-                            fontSize: "0.6rem",
-                            fontWeight: 700,
-                            letterSpacing: "0.2em",
-                            textTransform: "uppercase",
-                            color: "var(--color-bg)",
-                            background: "var(--color-gold)",
-                            padding: "0.2rem 0.6rem",
-                            marginBottom: "0.6rem",
-                          }}
-                        >
-                          {project.category}
-                        </span>
-                        <h3
-                          style={{
-                            fontFamily: "var(--font-display)",
-                            fontSize: "1.1rem",
-                            fontWeight: 400,
-                            color: "var(--color-fg)",
-                            lineHeight: 1.2,
-                            overflow: "hidden",
-                            display: "-webkit-box",
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: "vertical",
-                          }}
-                        >
-                          {project.title}
-                        </h3>
-                      </div>
-                      <ArrowUpRight
-                        size={16}
-                        style={{
-                          color: "var(--color-gold)",
-                          flexShrink: 0,
-                          marginTop: "0.25rem",
-                        }}
-                      />
-                    </div>
+                      {project.category}
+                    </span>
 
+                    {/* Title */}
+                    <h3
+                      style={{
+                        fontFamily: "var(--font-display)",
+                        fontSize: "1.2rem",
+                        fontWeight: 400,
+                        color: "var(--color-fg)",
+                        lineHeight: 1.25,
+                        marginBottom: "0.6rem",
+                        overflow: "hidden",
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                      }}
+                    >
+                      {project.title}
+                    </h3>
+
+                    {/* Description — 2 lines clamped */}
                     {project.description && (
                       <p
                         style={{
                           fontSize: "0.8rem",
-                          color: "var(--color-fg-subtle)",
+                          color: "var(--color-fg-muted)",
                           lineHeight: 1.6,
                           overflow: "hidden",
                           display: "-webkit-box",
                           WebkitLineClamp: 2,
                           WebkitBoxOrient: "vertical",
-                          maxWidth: "100%",
+                          marginBottom: "0.85rem",
                         }}
                       >
                         {project.description}
                       </p>
                     )}
 
-                    {/* Photo count */}
-                    {project.images.length > 0 && (
+                    {/* Footer: photo count + arrow */}
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        marginTop: "auto",
+                        paddingTop: project.description ? 0 : "0.5rem",
+                      }}
+                    >
                       <div
                         style={{
                           display: "flex",
                           alignItems: "center",
                           gap: "0.35rem",
-                          marginTop: "0.75rem",
                           color: "var(--color-fg-subtle)",
                         }}
                       >
                         <Images size={12} />
-                        <span style={{ fontSize: "0.68rem", letterSpacing: "0.1em" }}>
+                        <span
+                          style={{
+                            fontSize: "0.68rem",
+                            letterSpacing: "0.1em",
+                          }}
+                        >
                           {project.images.length} fotografii
                         </span>
                       </div>
-                    )}
+                      <ArrowRight
+                        size={14}
+                        style={{ color: "var(--color-gold)" }}
+                      />
+                    </div>
                   </div>
-                </article>
+                </div>
               </Link>
             ))}
           </div>
 
           {filtered.length === 0 && (
-            <div style={{ textAlign: "center", padding: "5rem 0", color: "var(--color-fg-subtle)" }}>
+            <div
+              style={{
+                textAlign: "center",
+                padding: "5rem 0",
+                color: "var(--color-fg-subtle)",
+              }}
+            >
               <p>Niciun proiect în această categorie.</p>
             </div>
           )}
@@ -317,16 +366,37 @@ export default function ProiectePage() {
         </div>
       </section>
 
-      {/* Masonry responsive styles */}
+      {/* ── Responsive styles ─────────────────────────────────────── */}
       <style>{`
         @media (max-width: 767px) {
-          .projects-masonry { column-count: 1 !important; }
+          .projects-grid { grid-template-columns: 1fr !important; gap: 1rem !important; }
+          .project-card { transform-style: flat !important; }
         }
         @media (min-width: 768px) and (max-width: 1023px) {
-          .projects-masonry { column-count: 2 !important; }
+          .projects-grid { grid-template-columns: repeat(2, 1fr) !important; }
         }
-        .project-card-new { transition: opacity 0.2s ease; }
-        .project-card-new:hover { opacity: 0.92; }
+
+        /* Image zoom on hover */
+        .project-card:hover .project-card-img img {
+          transform: scale(1.08);
+        }
+
+        /* Mobile touch shimmer */
+        .project-card::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(135deg, transparent 40%, rgba(201,169,132,0.08) 50%, transparent 60%);
+          opacity: 0;
+          transition: opacity 0.3s;
+          pointer-events: none;
+          z-index: 1;
+        }
+        .project-card:active::after { opacity: 1; }
+
+        @media (max-width: 767px) {
+          .project-card { touch-action: pan-y; }
+        }
       `}</style>
     </>
   );

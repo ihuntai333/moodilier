@@ -1,3 +1,14 @@
+/*
+ * Run in Supabase SQL editor before using new fields:
+ *
+ * ALTER TABLE projects ADD COLUMN IF NOT EXISTS status text DEFAULT 'published';
+ * ALTER TABLE projects ADD COLUMN IF NOT EXISTS year text;
+ * ALTER TABLE projects ADD COLUMN IF NOT EXISTS surface text;
+ * ALTER TABLE projects ADD COLUMN IF NOT EXISTS seo_title text;
+ * ALTER TABLE projects ADD COLUMN IF NOT EXISTS seo_description text;
+ * ALTER TABLE projects ADD COLUMN IF NOT EXISTS is_featured boolean DEFAULT false;
+ */
+
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 
@@ -33,6 +44,13 @@ export async function POST(request: NextRequest) {
         description: body.description || "",
         cover_image: body.coverImage || body.cover_image || "",
         images: body.images || [],
+        // New fields
+        status: body.status || "published",
+        year: body.year || null,
+        surface: body.surface || null,
+        seo_title: body.seoTitle || body.seo_title || null,
+        seo_description: body.seoDescription || body.seo_description || null,
+        is_featured: body.isFeatured ?? body.is_featured ?? false,
       })
       .select()
       .single();

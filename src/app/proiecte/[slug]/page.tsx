@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ArrowLeft, ChevronRight } from "lucide-react";
+import { ArrowRight, ArrowLeft, ChevronRight, Images, MapPin, Tag } from "lucide-react";
 import PageHero from "@/components/PageHero";
+import GalleryClient from "@/components/GalleryClient";
 import { projects } from "@/data/projects-clean";
 
 // ── Static params ────────────────────────────────────────────
@@ -49,6 +49,9 @@ export default async function ProjectPage({
   const nextProject =
     projectIndex < projects.length - 1 ? projects[projectIndex + 1] : null;
 
+  const hasLocation = Boolean(project.location);
+  const detailCols = hasLocation ? "1fr 1px 1fr 1px 1fr" : "1fr 1px 1fr";
+
   return (
     <>
       {/* ── Hero ─────────────────────────────────────────────── */}
@@ -60,7 +63,7 @@ export default async function ProjectPage({
           project.coverImage ||
           "/images-scraped/Cosmopolis_Vila_Andrei_Tudoran_02-scaled.jpg"
         }
-        overlayOpacity={0.55}
+        overlayOpacity={0.5}
         align="left"
       />
 
@@ -86,10 +89,7 @@ export default async function ProjectPage({
         >
           <Link
             href="/"
-            style={{
-              color: "var(--color-fg-subtle)",
-              transition: "color 0.3s",
-            }}
+            style={{ color: "var(--color-fg-subtle)", transition: "color 0.3s" }}
             onMouseEnter={(e) =>
               (e.currentTarget.style.color = "var(--color-gold)")
             }
@@ -102,10 +102,7 @@ export default async function ProjectPage({
           <ChevronRight size={12} style={{ flexShrink: 0 }} />
           <Link
             href="/proiecte"
-            style={{
-              color: "var(--color-fg-subtle)",
-              transition: "color 0.3s",
-            }}
+            style={{ color: "var(--color-fg-subtle)", transition: "color 0.3s" }}
             onMouseEnter={(e) =>
               (e.currentTarget.style.color = "var(--color-gold)")
             }
@@ -124,105 +121,182 @@ export default async function ProjectPage({
       {project.images.length > 0 && (
         <section
           style={{
-            padding: "4rem 0 5rem",
+            padding: "4rem 0 2rem",
             background: "var(--color-bg)",
           }}
         >
           <div className="container">
-            {/* Section header */}
-            <div style={{ marginBottom: "2.5rem" }}>
-              <p className="label" style={{ marginBottom: "0.5rem" }}>
-                Galerie fotografii
-              </p>
-              <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                <h2
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    fontSize: "clamp(1.75rem, 3vw, 2.5rem)",
-                    fontWeight: 400,
-                  }}
-                >
-                  {project.title}
-                </h2>
-                <span
-                  style={{
-                    fontSize: "0.7rem",
-                    color: "var(--color-fg-subtle)",
-                    letterSpacing: "0.1em",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {project.images.length} fotografii
-                </span>
-              </div>
-              {project.description && (
-                <p
-                  style={{
-                    fontSize: "0.9rem",
-                    color: "var(--color-fg-muted)",
-                    marginTop: "1rem",
-                    maxWidth: "70ch",
-                    lineHeight: 1.7,
-                  }}
-                >
-                  {project.description}
-                </p>
-              )}
-            </div>
-
-            {/* 3-col masonry grid */}
-            <div
-              style={{
-                columnCount: 3,
-                columnGap: "4px",
-              }}
-              className="gallery-masonry"
-            >
-              {project.images.map((img, i) => (
-                <div
-                  key={i}
-                  style={{
-                    breakInside: "avoid",
-                    marginBottom: "4px",
-                    position: "relative",
-                    overflow: "hidden",
-                    aspectRatio: i % 5 === 0 ? "3/4" : i % 3 === 0 ? "16/9" : "4/3",
-                    background: "var(--color-surface)",
-                  }}
-                  className="gallery-item"
-                >
-                  <Image
-                    src={img}
-                    alt={`${project.title} — fotografie ${i + 1}`}
-                    fill
-                    unoptimized
-                    style={{ objectFit: "cover" }}
-                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  />
-                </div>
-              ))}
-            </div>
+            <GalleryClient images={project.images} title={project.title} />
           </div>
-
-          {/* Responsive gallery styles */}
-          <style>{`
-            @media (max-width: 767px) {
-              .gallery-masonry { column-count: 1 !important; }
-            }
-            @media (min-width: 768px) and (max-width: 1023px) {
-              .gallery-masonry { column-count: 2 !important; }
-            }
-            .gallery-item { transition: transform 0.4s ease; cursor: zoom-in; }
-            .gallery-item:hover { transform: scale(1.01); z-index: 1; }
-          `}</style>
         </section>
       )}
+
+      {/* ── Project details strip ─────────────────────────────── */}
+      <section
+        style={{
+          background: "var(--color-bg-alt)",
+          borderTop: "1px solid var(--color-border)",
+          borderBottom: "1px solid var(--color-border)",
+          padding: "2.5rem 0",
+        }}
+      >
+        <div className="container">
+          <div
+            className="project-details-strip"
+            style={{
+              display: "grid",
+              gridTemplateColumns: detailCols,
+              gap: 0,
+              alignItems: "center",
+            }}
+          >
+            {/* Category */}
+            <div style={{ textAlign: "center", padding: "0 2rem" }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.5rem",
+                  marginBottom: "0.4rem",
+                }}
+              >
+                <Tag size={14} style={{ color: "var(--color-gold)" }} />
+                <span
+                  style={{
+                    fontSize: "0.6rem",
+                    letterSpacing: "0.2em",
+                    textTransform: "uppercase",
+                    color: "var(--color-fg-subtle)",
+                  }}
+                >
+                  Categorie
+                </span>
+              </div>
+              <p
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: "1.1rem",
+                  fontWeight: 400,
+                  color: "var(--color-fg)",
+                }}
+              >
+                {project.category}
+              </p>
+            </div>
+
+            {/* Gold separator */}
+            <div
+              style={{
+                width: "1px",
+                height: "3rem",
+                background: "var(--color-border)",
+              }}
+            />
+
+            {/* Location (conditional) */}
+            {hasLocation && (
+              <>
+                <div style={{ textAlign: "center", padding: "0 2rem" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "0.5rem",
+                      marginBottom: "0.4rem",
+                    }}
+                  >
+                    <MapPin size={14} style={{ color: "var(--color-gold)" }} />
+                    <span
+                      style={{
+                        fontSize: "0.6rem",
+                        letterSpacing: "0.2em",
+                        textTransform: "uppercase",
+                        color: "var(--color-fg-subtle)",
+                      }}
+                    >
+                      Locație
+                    </span>
+                  </div>
+                  <p
+                    style={{
+                      fontFamily: "var(--font-display)",
+                      fontSize: "1.1rem",
+                      fontWeight: 400,
+                      color: "var(--color-fg)",
+                    }}
+                  >
+                    {project.location}
+                  </p>
+                </div>
+
+                {/* Gold separator */}
+                <div
+                  style={{
+                    width: "1px",
+                    height: "3rem",
+                    background: "var(--color-border)",
+                  }}
+                />
+              </>
+            )}
+
+            {/* Photo count */}
+            <div style={{ textAlign: "center", padding: "0 2rem" }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.5rem",
+                  marginBottom: "0.4rem",
+                }}
+              >
+                <Images size={14} style={{ color: "var(--color-gold)" }} />
+                <span
+                  style={{
+                    fontSize: "0.6rem",
+                    letterSpacing: "0.2em",
+                    textTransform: "uppercase",
+                    color: "var(--color-fg-subtle)",
+                  }}
+                >
+                  Fotografii
+                </span>
+              </div>
+              <p
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: "1.1rem",
+                  fontWeight: 400,
+                  color: "var(--color-fg)",
+                }}
+              >
+                {project.images.length}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Details strip mobile styles */}
+        <style>{`
+          @media (max-width: 767px) {
+            .project-details-strip {
+              grid-template-columns: 1fr !important;
+              gap: 1.5rem !important;
+            }
+            .project-details-strip > div[style*="width: 1px"] {
+              display: none;
+            }
+          }
+        `}</style>
+      </section>
 
       {/* ── Prev / Next navigation ───────────────────────────── */}
       <nav
         style={{
           background: "var(--color-bg-alt)",
-          borderTop: "1px solid var(--color-border)",
           borderBottom: "1px solid var(--color-border)",
         }}
       >

@@ -1,3 +1,14 @@
+/*
+ * Run in Supabase SQL editor before using new fields:
+ *
+ * ALTER TABLE projects ADD COLUMN IF NOT EXISTS status text DEFAULT 'published';
+ * ALTER TABLE projects ADD COLUMN IF NOT EXISTS year text;
+ * ALTER TABLE projects ADD COLUMN IF NOT EXISTS surface text;
+ * ALTER TABLE projects ADD COLUMN IF NOT EXISTS seo_title text;
+ * ALTER TABLE projects ADD COLUMN IF NOT EXISTS seo_description text;
+ * ALTER TABLE projects ADD COLUMN IF NOT EXISTS is_featured boolean DEFAULT false;
+ */
+
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import fs from "fs";
@@ -51,6 +62,16 @@ export async function PATCH(
     if (body.coverImage !== undefined) updatePayload.cover_image = body.coverImage;
     if (body.cover_image !== undefined) updatePayload.cover_image = body.cover_image;
     if (body.images !== undefined) updatePayload.images = body.images;
+    // New fields
+    if (body.status !== undefined) updatePayload.status = body.status;
+    if (body.year !== undefined) updatePayload.year = body.year || null;
+    if (body.surface !== undefined) updatePayload.surface = body.surface || null;
+    if (body.seoTitle !== undefined) updatePayload.seo_title = body.seoTitle || null;
+    if (body.seo_title !== undefined) updatePayload.seo_title = body.seo_title || null;
+    if (body.seoDescription !== undefined) updatePayload.seo_description = body.seoDescription || null;
+    if (body.seo_description !== undefined) updatePayload.seo_description = body.seo_description || null;
+    if (body.isFeatured !== undefined) updatePayload.is_featured = body.isFeatured;
+    if (body.is_featured !== undefined) updatePayload.is_featured = body.is_featured;
 
     const { data, error } = await supabaseAdmin
       .from("projects")
