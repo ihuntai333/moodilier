@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Menu, X, ArrowRight } from "lucide-react";
 import Logo from "@/components/Logo";
@@ -57,14 +58,23 @@ const socialLinks = [
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [currentPath, setCurrentPath] = useState("/");
+  const pathname = usePathname();
+
+  // Helper: is this nav link active?
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   useEffect(() => {
-    setCurrentPath(window.location.pathname);
     const handler = () => setScrolled(window.scrollY > 40);
+    handler(); // check on mount
     window.addEventListener("scroll", handler, { passive: true });
     return () => window.removeEventListener("scroll", handler);
   }, []);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {
@@ -196,7 +206,7 @@ export default function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`nav-link ${currentPath === link.href ? "active" : ""}`}
+                className={`nav-link ${isActive(link.href) ? "active" : ""}`}
               >
                 {link.label}
               </Link>
@@ -273,7 +283,7 @@ export default function Header() {
                   <Link
                     href={link.href}
                     onClick={closeMobile}
-                    className={`mobile-nav-link ${currentPath === link.href ? "active" : ""}`}
+                    className={`mobile-nav-link ${isActive(link.href) ? "active" : ""}`}
                   >
                     {link.label}
                   </Link>
