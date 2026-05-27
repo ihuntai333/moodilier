@@ -141,14 +141,7 @@ export default function ProiectePage() {
       {/* ── Projects uniform grid ─────────────────────────────────── */}
       <section className="section" style={{ paddingTop: "3rem" }}>
         <div className="container">
-          <div
-            className="projects-grid"
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
-              gap: "1.5rem",
-            }}
-          >
+          <div className="gatsby-projects-grid">
             {filtered.map((project, i) => (
               <GatsbyProjectCard
                 key={project.slug}

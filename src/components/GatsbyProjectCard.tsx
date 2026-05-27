@@ -33,6 +33,15 @@ export default function GatsbyProjectCard({
   const spotRef = useRef<HTMLDivElement>(null);
   const [revealed, setRevealed] = useState(false);
   const [noAnim, setNoAnim] = useState(false);
+  const [isTouch, setIsTouch] = useState(false);
+
+  // ── Detect touch device ────────────────────────────────────────────
+  useEffect(() => {
+    setIsTouch(
+      window.matchMedia("(hover: none)").matches ||
+        navigator.maxTouchPoints > 0
+    );
+  }, []);
 
   // ── Entrance via IntersectionObserver ──────────────────────────────
   useEffect(() => {
@@ -61,13 +70,14 @@ export default function GatsbyProjectCard({
     return () => obs.disconnect();
   }, []);
 
-  // ── 3D magnetic tilt + gold spotlight ─────────────────────────────
+  // ── 3D magnetic tilt + gold spotlight (desktop only) ──────────────
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
+      if (isTouch) return;
       const el = wrapRef.current;
       if (!el) return;
       const rect = el.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width - 0.5;  // -0.5 → 0.5
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
       const y = (e.clientY - rect.top) / rect.height - 0.5;
 
       // 3D tilt
@@ -82,24 +92,44 @@ export default function GatsbyProjectCard({
         spotRef.current.style.opacity = "1";
       }
     },
-    []
+    [isTouch]
   );
 
   const handleMouseLeave = useCallback(() => {
+    if (isTouch) return;
     const el = wrapRef.current;
     if (!el) return;
     el.style.transform = "";
     el.style.boxShadow = "";
     if (spotRef.current) spotRef.current.style.opacity = "0";
+  }, [isTouch]);
+
+  // ── Touch press feedback (mobile) ─────────────────────────────────
+  const handleTouchStart = useCallback(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    el.style.transform = "scale(0.97)";
+    el.style.transition = "transform 0.15s ease";
   }, []);
 
-  const entranceDelay = noAnim ? 0 : (index % 4) * 0.12;
+  const handleTouchEnd = useCallback(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    el.style.transform = "";
+    el.style.transition = "transform 0.3s ease";
+    setTimeout(() => {
+      if (wrapRef.current) wrapRef.current.style.transition = "";
+    }, 300);
+  }, []);
+
+  // Stagger: column-aware (0, 0.1, 0.2s per row on 3-col grid)
+  const entranceDelay = noAnim ? 0 : (index % 3) * 0.1;
 
   return (
     <Link href={href} className={`gatsby-card-link ${className}`} style={style}>
       <div
         ref={wrapRef}
-        className={`gatsby-card${revealed ? " gatsby-revealed" : ""}${noAnim ? " gatsby-no-anim" : ""}`}
+        className={`gatsby-card${revealed ? " gatsby-revealed" : ""}${noAnim ? " gatsby-no-anim" : ""}${isTouch ? " gatsby-touch" : ""}`}
         style={{
           animationDelay: `${entranceDelay}s`,
           transformStyle: "preserve-3d",
@@ -107,6 +137,8 @@ export default function GatsbyProjectCard({
         }}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
       >
         {/* ── Image ───────────────────────────────────────────── */}
         <div className="gatsby-img-wrap">
@@ -127,8 +159,8 @@ export default function GatsbyProjectCard({
             </div>
           )}
 
-          {/* Gold mouse spotlight */}
-          <div ref={spotRef} className="gatsby-spotlight" />
+          {/* Gold mouse spotlight (desktop only) */}
+          {!isTouch && <div ref={spotRef} className="gatsby-spotlight" />}
         </div>
 
         {/* ── SVG laser-trace border ───────────────────────────── */}
@@ -138,13 +170,11 @@ export default function GatsbyProjectCard({
           preserveAspectRatio="none"
           aria-hidden
         >
-          {/* Main perimeter draw */}
           <rect
             className="gatsby-svg-border"
             x="4" y="4" width="992" height="742"
             vectorEffect="non-scaling-stroke"
           />
-          {/* Inner offset frame (appears after border) */}
           <rect
             className="gatsby-svg-inner"
             x="14" y="14" width="972" height="722"
@@ -152,7 +182,7 @@ export default function GatsbyProjectCard({
           />
         </svg>
 
-        {/* ── Gold L-corners (CSS) ─────────────────────────────── */}
+        {/* ── Gold L-corners ─────────────────────────────────── */}
         <div className="gatsby-corners" aria-hidden />
 
         {/* ── Content overlay ─────────────────────────────────── */}

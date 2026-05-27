@@ -844,10 +844,68 @@ img { display: block; max-width: 100%; }
   font-size: 0.75rem;
 }
 
-/* ── Responsive ─────────────────────────────────────────────────── */
+/* ── Responsive project grid ────────────────────────────────────── */
+.gatsby-projects-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+@media (min-width: 480px) {
+  .gatsby-projects-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.1rem;
+  }
+}
+@media (min-width: 1024px) {
+  .gatsby-projects-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+/* ── Mobile / touch-specific overrides ──────────────────────────── */
 @media (max-width: 767px) {
-  .gatsby-title { font-size: 1.1rem; }
-  .gatsby-overlay-inner { padding: 1.1rem; }
+  .gatsby-title { font-size: 1rem; }
+  .gatsby-overlay-inner { padding: 0.9rem; }
+
+  /* Faster SVG draw on mobile (less waiting) */
+  .gatsby-card.gatsby-revealed .gatsby-svg-border {
+    animation-duration: 0.9s;
+    animation-delay: 0.2s;
+  }
+  .gatsby-card.gatsby-revealed .gatsby-svg-inner {
+    animation-delay: 0.9s;
+  }
+
+  /* Smaller corner ornaments on phone */
+  .gatsby-corners { inset: 6px; }
+  .gatsby-card.gatsby-revealed .gatsby-corners,
+  .gatsby-card:hover .gatsby-corners {
+    background:
+      linear-gradient(to right,  rgba(201,169,132,.9), transparent) top    left  / 24% 1px no-repeat,
+      linear-gradient(to bottom, rgba(201,169,132,.9), transparent) top    left  / 1px 24% no-repeat,
+      linear-gradient(to left,   rgba(201,169,132,.9), transparent) top    right / 24% 1px no-repeat,
+      linear-gradient(to bottom, rgba(201,169,132,.9), transparent) top    right / 1px 24% no-repeat,
+      linear-gradient(to right,  rgba(201,169,132,.9), transparent) bottom left  / 24% 1px no-repeat,
+      linear-gradient(to top,    rgba(201,169,132,.9), transparent) bottom left  / 1px 24% no-repeat,
+      linear-gradient(to left,   rgba(201,169,132,.9), transparent) bottom right / 24% 1px no-repeat,
+      linear-gradient(to top,    rgba(201,169,132,.9), transparent) bottom right / 1px 24% no-repeat;
+  }
+
+  /* Touch: simpler entrance (scale only, faster) */
+  .gatsby-card.gatsby-revealed:not(.gatsby-no-anim) {
+    animation-duration: 0.5s;
+    animation-delay: 0s !important;
+  }
+
+  /* Touch: always show meta (no hover needed) */
+  .gatsby-touch .gatsby-meta {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .gatsby-touch .gatsby-overlay-inner {
+    transform: translateY(0);
+  }
 }
 
 /* ── Reduced motion ─────────────────────────────────────────────── */
@@ -856,6 +914,7 @@ img { display: block; max-width: 100%; }
   .gatsby-svg-border, .gatsby-svg-inner { animation: none !important; stroke-dashoffset: 0 !important; }
   .gatsby-img { transition: none !important; }
 }
+
 
 
 
