@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useMemo, useRef, useEffect } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, Images } from "lucide-react";
 import PageHero from "@/components/PageHero";
+import GatsbyProjectCard from "@/components/GatsbyProjectCard";
 import { projects } from "@/data/projects-clean";
 
 const CATEGORIES = [
@@ -50,20 +50,6 @@ export default function ProiectePage() {
     }
   }, [activeCategory]);
 
-  // 3D card tilt handlers (desktop only)
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    e.currentTarget.style.transform = `perspective(800px) rotateX(${-y * 6}deg) rotateY(${x * 6}deg) translateZ(8px)`;
-    e.currentTarget.style.boxShadow = `${-x * 20}px ${-y * 20}px 40px rgba(0,0,0,0.4)`;
-  };
-
-  const handleMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.currentTarget.style.transform =
-      "perspective(800px) rotateX(0) rotateY(0) translateZ(0)";
-    e.currentTarget.style.boxShadow = "none";
-  };
 
   return (
     <>
@@ -163,167 +149,20 @@ export default function ProiectePage() {
               gap: "1.5rem",
             }}
           >
-            {filtered.map((project) => (
-              <Link
+            {filtered.map((project, i) => (
+              <GatsbyProjectCard
                 key={project.slug}
+                title={project.title}
+                category={project.category}
+                image={project.coverImage || ""}
                 href={`/proiecte/${project.slug}`}
-                style={{ textDecoration: "none", display: "block" }}
-              >
-                <div
-                  className="project-card"
-                  onMouseMove={handleMouseMove}
-                  onMouseLeave={handleMouseLeave}
-                  style={{
-                    position: "relative",
-                    overflow: "hidden",
-                    background: "var(--color-surface)",
-                    border: "1px solid var(--color-border)",
-                    transition: "transform 0.4s ease, box-shadow 0.4s ease",
-                    transformStyle: "preserve-3d",
-                    cursor: "pointer",
-                    height: "100%",
-                  }}
-                >
-                  {/* Gold overlay — sits on top of image, below content */}
-                  <div className="project-card-overlay" />
-
-                  {/* Cover image */}
-                  <div
-                    className="project-card-img"
-                    style={{
-                      position: "relative",
-                      aspectRatio: "4/3",
-                      overflow: "hidden",
-                    }}
-                  >
-                    {project.coverImage ? (
-                      <Image
-                        src={project.coverImage}
-                        alt={project.title}
-                        fill
-                        unoptimized
-                        style={{
-                          objectFit: "cover",
-                          transition: "transform 0.5s ease",
-                        }}
-                        sizes="(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 33vw"
-                      />
-                    ) : (
-                      <div
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          background: "var(--color-bg)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <span
-                          style={{
-                            color: "var(--color-fg-subtle)",
-                            fontSize: "0.75rem",
-                          }}
-                        >
-                          Fără imagine
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Card content */}
-                  <div style={{ padding: "1.25rem 1.5rem 1.5rem" }}>
-                    {/* Category badge */}
-                    <span
-                      style={{
-                        display: "inline-block",
-                        fontSize: "0.6rem",
-                        fontWeight: 700,
-                        letterSpacing: "0.2em",
-                        textTransform: "uppercase",
-                        color: "var(--color-gold)",
-                        marginBottom: "0.5rem",
-                      }}
-                    >
-                      {project.category}
-                    </span>
-
-                    {/* Title */}
-                    <h3
-                      style={{
-                        fontFamily: "var(--font-display)",
-                        fontSize: "1.2rem",
-                        fontWeight: 400,
-                        color: "var(--color-fg)",
-                        lineHeight: 1.25,
-                        marginBottom: "0.6rem",
-                        overflow: "hidden",
-                        display: "-webkit-box",
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical",
-                      }}
-                    >
-                      {project.title}
-                    </h3>
-
-                    {/* Description — 2 lines clamped */}
-                    {project.description && (
-                      <p
-                        style={{
-                          fontSize: "0.8rem",
-                          color: "var(--color-fg-muted)",
-                          lineHeight: 1.6,
-                          overflow: "hidden",
-                          display: "-webkit-box",
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: "vertical",
-                          marginBottom: "0.85rem",
-                        }}
-                      >
-                        {project.description}
-                      </p>
-                    )}
-
-                    {/* Footer: photo count + arrow */}
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        marginTop: "auto",
-                        paddingTop: project.description ? 0 : "0.5rem",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "0.35rem",
-                          color: "var(--color-fg-subtle)",
-                        }}
-                      >
-                        <Images size={12} />
-                        <span
-                          style={{
-                            fontSize: "0.68rem",
-                            letterSpacing: "0.1em",
-                          }}
-                        >
-                          {project.images.length} fotografii
-                        </span>
-                      </div>
-                      {/* Arrow icon — animated on hover via .card-arrow CSS */}
-                      <ArrowUpRight
-                        size={16}
-                        className="card-arrow"
-                        style={{ color: "var(--color-gold)" }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </Link>
+                index={i}
+                imageCount={project.images?.length}
+                description={project.description || undefined}
+              />
             ))}
           </div>
+
 
           {filtered.length === 0 && (
             <div

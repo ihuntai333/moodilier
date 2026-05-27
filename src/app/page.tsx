@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { ArrowRight } from "lucide-react";
+import GatsbyProjectCard from "@/components/GatsbyProjectCard";
 
 export const metadata: Metadata = {
   title: "Moodilier — Mobilier La Comandă Premium | București",
@@ -256,24 +257,14 @@ export default function HomePage() {
 
         <div className="projects-grid">
           {featuredProjects.map((project, i) => (
-            <Link
+            <GatsbyProjectCard
               key={i}
+              title={project.title}
+              category={project.category}
+              image={project.image}
               href={project.href}
-              className="project-card reveal"
-              style={{ transitionDelay: `${(i % 3) * 0.1}s` }}
-            >
-              <Image
-                src={project.image}
-                alt={project.title}
-                fill
-                style={{ objectFit: "cover" }}
-                unoptimized
-              />
-              <div className="project-card-overlay">
-                <p className="project-card-cat">{project.category}</p>
-                <h3 className="project-card-title">{project.title}</h3>
-              </div>
-            </Link>
+              index={i}
+            />
           ))}
         </div>
       </section>
