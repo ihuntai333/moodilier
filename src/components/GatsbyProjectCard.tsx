@@ -41,9 +41,11 @@ export default function GatsbyProjectCard({
 
     const rect = el.getBoundingClientRect();
     if (rect.top < window.innerHeight) {
-      setRevealed(true);
-      setNoAnim(true); // already visible → skip entrance animation
-      return;
+      // Already in viewport: skip blur/scale entrance but still play SVG draw
+      setNoAnim(true);
+      // Small delay so browser paints initial dashoffset:5000 before animating
+      const t = setTimeout(() => setRevealed(true), 80);
+      return () => clearTimeout(t);
     }
 
     const obs = new IntersectionObserver(
