@@ -520,13 +520,14 @@ img { display: block; max-width: 100%; }
    so content never flickers or disappears if JS is slow.
 --- */
 .reveal {
-  transition: opacity 0.7s ease, transform 0.7s ease;
+  transition: opacity 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* Only hide elements after JS has confirmed it's running */
 .js-loaded .reveal:not(.revealed) {
   opacity: 0;
-  transform: translateY(24px);
+  transform: translateY(16px);
 }
 
 .reveal.revealed {
@@ -534,10 +535,21 @@ img { display: block; max-width: 100%; }
   transform: translateY(0) !important;
 }
 
-.reveal-delay-1 { transition-delay: 0.1s; }
-.reveal-delay-2 { transition-delay: 0.2s; }
-.reveal-delay-3 { transition-delay: 0.3s; }
-.reveal-delay-4 { transition-delay: 0.4s; }
+.reveal-delay-1 { transition-delay: 0.08s; }
+.reveal-delay-2 { transition-delay: 0.16s; }
+.reveal-delay-3 { transition-delay: 0.24s; }
+.reveal-delay-4 { transition-delay: 0.32s; }
+.reveal-delay-5 { transition-delay: 0.40s; }
+.reveal-delay-6 { transition-delay: 0.48s; }
+
+/* Safety: disable animations for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .reveal.revealed {
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
 
 /* --- Services Grid --- */
 .services-grid {

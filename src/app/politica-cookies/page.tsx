@@ -6,7 +6,7 @@ import PageHero from "@/components/PageHero";
 export const metadata: Metadata = {
   title: "Politică cookies | Moodilier",
   description:
-    "Politica de utilizare a cookie-urilor pe site-ul Moodilier.com — tipuri de cookie-uri, scopuri și cum vă puteți gestiona preferințele.",
+    "Politica de utilizare a cookie-urilor pe site-ul moodilier.ro — tipuri de cookie-uri, scopuri și cum vă puteți gestiona preferințele. Ultima actualizare: Mai 2025.",
 };
 
 const cookieCategories = [
@@ -130,11 +130,23 @@ export default function PoliticaCookiesPage() {
           >
             {/* INTRO */}
             <div>
+              <p style={{ maxWidth: "none", marginBottom: "0.5rem" }}>
+                <span
+                  style={{
+                    fontSize: "0.72rem",
+                    letterSpacing: "0.18em",
+                    textTransform: "uppercase",
+                    color: "var(--color-gold)",
+                  }}
+                >
+                  Ultima actualizare: Mai 2025
+                </span>
+              </p>
               <p style={{ maxWidth: "none", marginBottom: "1rem" }}>
                 Această politică explică ce sunt cookie-urile, ce tipuri de
                 cookie-uri utilizează site-ul{" "}
                 <strong style={{ color: "var(--color-fg)" }}>
-                  moodilier.com
+                  moodilier.ro
                 </strong>
                 , de ce le folosim și cum vă puteți gestiona preferințele.
               </p>
@@ -143,8 +155,8 @@ export default function PoliticaCookiesPage() {
                 <strong style={{ color: "var(--color-fg)" }}>
                   SC Moodilier SRL
                 </strong>
-                , Blv. Basarabia 256, sector 3, București. Ne puteți contacta
-                la{" "}
+                , Bulevardul Basarabia 256, incinta FAUR, Sector 3, București.
+                Ne puteți contacta la{" "}
                 <a
                   href="mailto:ofertare@moodilier.com"
                   style={{ color: "var(--color-gold)" }}
@@ -425,10 +437,160 @@ export default function PoliticaCookiesPage() {
               ))}
             </div>
 
+            {/* COOKIE-URI DE LA TERTI */}
+            <div>
+              <p className="label" style={{ marginBottom: "0.75rem" }}>
+                4. Cookie-uri de la terți
+              </p>
+              <h3
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: "1.5rem",
+                  marginBottom: "1rem",
+                  color: "var(--color-fg)",
+                }}
+              >
+                Servicii terțe care plasează cookie-uri
+              </h3>
+              <span className="gold-line" style={{ marginTop: 0 }} />
+              <p style={{ maxWidth: "none", marginBottom: "1.5rem" }}>
+                Pe lângă cookie-urile proprii, site-ul moodilier.ro utilizează
+                servicii furnizate de terțe părți care pot plasa propriile
+                cookie-uri pe dispozitivul dumneavoastră. Principalele servicii
+                terțe utilizate sunt:
+              </p>
+
+              {/* Google Analytics */}
+              <div
+                style={{
+                  background: "var(--color-surface)",
+                  border: "1px solid var(--color-border)",
+                  borderLeft: "2px solid var(--color-gold)",
+                  padding: "1.5rem",
+                  marginBottom: "1.25rem",
+                }}
+              >
+                <p
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    fontSize: "1.1rem",
+                    color: "var(--color-fg)",
+                    marginBottom: "0.5rem",
+                    maxWidth: "none",
+                  }}
+                >
+                  Google Analytics
+                </p>
+                <p
+                  style={{
+                    fontSize: "0.85rem",
+                    color: "var(--color-fg-muted)",
+                    marginBottom: "0.75rem",
+                    maxWidth: "none",
+                  }}
+                >
+                  Serviciu de analiză web furnizat de Google LLC (SUA). Colectează
+                  date anonimizate privind comportamentul vizitatorilor (pagini
+                  vizitate, durata sesiunii, sursele de trafic) pentru a ne ajuta
+                  să îmbunătățim conținutul și structura site-ului. Cookie-urile
+                  principale utilizate sunt <code>_ga</code>, <code>_ga_*</code>,{" "}
+                  <code>_gid</code> și <code>_gat</code>.
+                </p>
+                <p style={{ maxWidth: "none", fontSize: "0.82rem" }}>
+                  Politica de confidențialitate Google:{" "}
+                  <a
+                    href="https://policies.google.com/privacy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: "var(--color-gold)" }}
+                  >
+                    policies.google.com/privacy
+                  </a>
+                  {" — "}
+                  Dezactivare:{" "}
+                  <a
+                    href="https://tools.google.com/dlpage/gaoptout"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: "var(--color-gold)" }}
+                  >
+                    Google Analytics Opt-out
+                  </a>
+                </p>
+              </div>
+
+              {/* Facebook Pixel */}
+              <div
+                style={{
+                  background: "var(--color-surface)",
+                  border: "1px solid var(--color-border)",
+                  borderLeft: "2px solid var(--color-gold)",
+                  padding: "1.5rem",
+                  marginBottom: "1.25rem",
+                }}
+              >
+                <p
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    fontSize: "1.1rem",
+                    color: "var(--color-fg)",
+                    marginBottom: "0.5rem",
+                    maxWidth: "none",
+                  }}
+                >
+                  Meta Pixel (Facebook Pixel)
+                </p>
+                <p
+                  style={{
+                    fontSize: "0.85rem",
+                    color: "var(--color-fg-muted)",
+                    marginBottom: "0.75rem",
+                    maxWidth: "none",
+                  }}
+                >
+                  Instrument de urmărire furnizat de Meta Platforms, Inc. Permite
+                  măsurarea eficienței campaniilor publicitare pe Facebook și
+                  Instagram, retargeting-ul vizitatorilor și optimizarea
+                  reclamelor. Cookie-urile principale utilizate sunt{" "}
+                  <code>_fbp</code> și <code>fr</code>. Funcționează exclusiv cu
+                  consimțământul dumneavoastră pentru cookie-uri de marketing.
+                </p>
+                <p style={{ maxWidth: "none", fontSize: "0.82rem" }}>
+                  Politica de confidențialitate Meta:{" "}
+                  <a
+                    href="https://www.facebook.com/privacy/policy/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: "var(--color-gold)" }}
+                  >
+                    facebook.com/privacy/policy
+                  </a>
+                  {" — "}
+                  Setări reclame:{" "}
+                  <a
+                    href="https://www.facebook.com/ads/preferences"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: "var(--color-gold)" }}
+                  >
+                    facebook.com/ads/preferences
+                  </a>
+                </p>
+              </div>
+
+              <p style={{ maxWidth: "none", fontSize: "0.85rem" }}>
+                Transferul datelor colectate de aceste servicii în afara Spațiului
+                Economic European este reglementat de mecanisme de transfer adecvate
+                (Standard Contractual Clauses) conform GDPR. Puteți refuza
+                cookie-urile de statistici și marketing prin bannerul de
+                consimțământ afișat la prima vizită.
+              </p>
+            </div>
+
             {/* GESTIONAREA PREFERINTELOR */}
             <div>
               <p className="label" style={{ marginBottom: "0.75rem" }}>
-                4. Preferințele dumneavoastră
+                5. Preferințele dumneavoastră
               </p>
               <h3
                 style={{
@@ -556,7 +718,7 @@ export default function PoliticaCookiesPage() {
             {/* MODIFICARI */}
             <div>
               <p className="label" style={{ marginBottom: "0.75rem" }}>
-                5. Modificări
+                6. Modificări
               </p>
               <h3
                 style={{
@@ -582,7 +744,7 @@ export default function PoliticaCookiesPage() {
             {/* CONTACT */}
             <div>
               <p className="label" style={{ marginBottom: "0.75rem" }}>
-                6. Contact
+                7. Contact
               </p>
               <h3
                 style={{
@@ -619,7 +781,7 @@ export default function PoliticaCookiesPage() {
                   SC Moodilier SRL
                 </p>
                 <p style={{ maxWidth: "none", marginBottom: "0.5rem" }}>
-                  Blv. Basarabia 256, sector 3, București
+                  Bulevardul Basarabia 256, incinta FAUR, Sector 3, București
                 </p>
                 <p style={{ maxWidth: "none" }}>
                   Email:{" "}

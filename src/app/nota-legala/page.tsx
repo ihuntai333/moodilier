@@ -165,7 +165,7 @@ const legalSections = [
 ];
 
 export default function NotaLegalaPage() {
-  const lastUpdated = "26 mai 2026";
+  const lastUpdated = "Mai 2025";
 
   return (
     <>
@@ -409,6 +409,16 @@ export default function NotaLegalaPage() {
               © {new Date().getFullYear()} SC Moodilier SRL — Toate drepturile
               rezervate. Conținutul acestui site este protejat de legislația
               privind dreptul de autor.
+            </p>
+            <p
+              style={{
+                fontSize: "0.72rem",
+                color: "var(--color-fg-subtle)",
+                marginTop: "0.5rem",
+                letterSpacing: "0.1em",
+              }}
+            >
+              Ultima actualizare: {lastUpdated}
             </p>
           </div>
         </div>

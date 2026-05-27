@@ -33,11 +33,23 @@ export default function PoliticaConfidentialitateePage() {
           >
             {/* INTRO */}
             <div>
+              <p style={{ maxWidth: "none", marginBottom: "0.5rem" }}>
+                <span
+                  style={{
+                    fontSize: "0.72rem",
+                    letterSpacing: "0.18em",
+                    textTransform: "uppercase",
+                    color: "var(--color-gold)",
+                  }}
+                >
+                  Ultima actualizare: Mai 2025
+                </span>
+              </p>
               <p style={{ maxWidth: "none", marginBottom: "1rem" }}>
-                SC Moodilier SRL, cu sediul în Blv. Basarabia 256, sector 3,
-                București, România, înregistrată la Registrul Comerțului,
-                vă informează cu privire la modul în care prelucrăm datele
-                dumneavoastră cu caracter personal, în conformitate cu
+                SC Moodilier SRL, cu sediul în Bulevardul Basarabia 256, incinta
+                FAUR, Sector 3, București, România, înregistrată la Registrul
+                Comerțului, vă informează cu privire la modul în care prelucrăm
+                datele dumneavoastră cu caracter personal, în conformitate cu
                 Regulamentul (UE) 2016/679 al Parlamentului European și al
                 Consiliului (GDPR).
               </p>
@@ -79,7 +91,8 @@ export default function PoliticaConfidentialitateePage() {
                   </strong>
                 </p>
                 <p style={{ maxWidth: "none", marginBottom: "0.5rem" }}>
-                  Blv. Basarabia 256, sector 3, București, România
+                  Bulevardul Basarabia 256, incinta FAUR, Sector 3, București,
+                  România
                 </p>
                 <p style={{ maxWidth: "none", marginBottom: "0.5rem" }}>
                   Email:{" "}
@@ -90,13 +103,22 @@ export default function PoliticaConfidentialitateePage() {
                     ofertare@moodilier.com
                   </a>
                 </p>
+                <p style={{ maxWidth: "none", marginBottom: "0.5rem" }}>
+                  Telefon:{" "}
+                  <a
+                    href="tel:+40729555431"
+                    style={{ color: "var(--color-gold)" }}
+                  >
+                    (+40) 729 555 431
+                  </a>
+                </p>
                 <p style={{ maxWidth: "none" }}>
                   Website:{" "}
                   <a
-                    href="https://www.moodilier.com"
+                    href="https://www.moodilier.ro"
                     style={{ color: "var(--color-gold)" }}
                   >
-                    www.moodilier.com
+                    www.moodilier.ro
                   </a>
                 </p>
               </div>
@@ -626,7 +648,8 @@ export default function PoliticaConfidentialitateePage() {
                   SC Moodilier SRL — Responsabil Protecția Datelor
                 </p>
                 <p style={{ maxWidth: "none", marginBottom: "0.5rem" }}>
-                  Adresă: Blv. Basarabia 256, sector 3, București
+                  Adresă: Bulevardul Basarabia 256, incinta FAUR, Sector 3,
+                  București
                 </p>
                 <p style={{ maxWidth: "none", marginBottom: "0.5rem" }}>
                   Email:{" "}

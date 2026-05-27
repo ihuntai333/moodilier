@@ -84,7 +84,7 @@ const sections = [
 ];
 
 export default function TermeniSiConditiiPage() {
-  const lastUpdated = "26 mai 2026";
+  const lastUpdated = "Mai 2025";
 
   return (
     <>
@@ -309,9 +309,8 @@ export default function TermeniSiConditiiPage() {
               <strong style={{ color: "var(--color-fg-muted)" }}>
                 SC Moodilier SRL
               </strong>{" "}
-              — CUI: RO12345678 | Reg. Com.: J40/1234/2015 | Sediu social:
-              Bulevardul Basarabia 256, incinta FAUR, Sector 3, București |
-              E-mail:{" "}
+              — Sediu social: Bulevardul Basarabia 256, incinta FAUR, Sector 3,
+              București | E-mail:{" "}
               <a
                 href="mailto:ofertare@moodilier.com"
                 style={{ color: "var(--color-gold)" }}
@@ -324,6 +323,13 @@ export default function TermeniSiConditiiPage() {
                 style={{ color: "var(--color-gold)" }}
               >
                 (+40) 729 555 431
+              </a>{" "}
+              | Web:{" "}
+              <a
+                href="https://moodilier.ro"
+                style={{ color: "var(--color-gold)" }}
+              >
+                moodilier.ro
               </a>
             </p>
             <p
