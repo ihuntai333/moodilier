@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Target, Award, Zap, Heart } from "lucide-react";
 import PageHero from "@/components/PageHero";
 
 export const metadata: Metadata = {
@@ -12,46 +12,32 @@ export const metadata: Metadata = {
 
 const values = [
   {
+    Icon: Target,
     title: "Precizie",
-    desc: "Fiecare piesă de mobilier este produsă cu toleranțe minime, respectând cu strictețe dimensiunile și detaliile tehnice din proiect.",
-    num: "01",
+    desc: "Fiecare detaliu este măsurat, verificat și executat cu precizie milimetrică.",
   },
   {
+    Icon: Award,
     title: "Calitate",
-    desc: "Folosim exclusiv materiale premium de la furnizori certificați — Egger, Blum, Häfele, Corian — pentru a garanta durabilitate și estetică pe termen lung.",
-    num: "02",
+    desc: "Folosim doar materiale certificate, hardware european și finisaje de înaltă clasă.",
   },
   {
+    Icon: Zap,
     title: "Inovație",
-    desc: "Investim constant în tehnologie modernă de prelucrare CNC și în pregătirea echipei noastre pentru a livra soluții contemporane, funcționale și elegante.",
-    num: "03",
+    desc: "Combinăm tehnologia CNC modernă cu designul contemporan pentru rezultate unice.",
   },
   {
+    Icon: Heart,
     title: "Pasiune",
-    desc: "Mobilierul nu este doar un produs — este expresia personalității tale. Aproachul nostru este mereu uman, empatic și dedicat excelenței.",
-    num: "04",
+    desc: "Fiecare proiect este tratat ca și cum ar fi propriul nostru spațiu de locuit.",
   },
 ];
 
-const servicesSummary = [
-  {
-    title: "Servicii de proiectare",
-    desc: "De la concept și mood board la vizualizări 3D și proiect tehnic complet. Designul este fundamentul oricărui proiect reușit.",
-    href: "/servicii",
-    num: "01",
-  },
-  {
-    title: "Mobilier la comandă",
-    desc: "Bucătării, dressinguri, livinguri, dormitoare — executate integral în atelierul propriu cu materiale de primă clasă.",
-    href: "/servicii",
-    num: "02",
-  },
-  {
-    title: "Moodilier Store",
-    desc: "Import selecționat de mobilier premium de la designeri consacrați din Italia, Danemarca și Grecia pentru completarea amenajărilor.",
-    href: "/servicii",
-    num: "03",
-  },
+const stats = [
+  { num: "10+", label: "Ani experiență" },
+  { num: "200+", label: "Proiecte finalizate" },
+  { num: "1.200 mp", label: "Atelier propriu" },
+  { num: "100%", label: "La comandă" },
 ];
 
 const galleryImages = [
@@ -64,8 +50,29 @@ const galleryImages = [
     alt: "Casa Mogoșoaia — amenajare interioară",
   },
   {
-    src: "/images-scraped/vila_corbeanca_exec_living_4.jpg",
-    alt: "Vila Corbeanca — living la comandă",
+    src: "/images-scraped/vila_cosmopolis_exec_living_5.jpg",
+    alt: "Vila Cosmopolis — living la comandă",
+  },
+];
+
+const serviceTeasers = [
+  {
+    image: "/images-scraped/proiectare.jpg",
+    alt: "Proiectare și design interior",
+    title: "Proiectare & Design",
+    href: "/servicii",
+  },
+  {
+    image: "/images-scraped/buc_giurgiu_1.jpg",
+    alt: "Mobilier la comandă — bucătărie premium",
+    title: "Mobilier la Comandă",
+    href: "/servicii",
+  },
+  {
+    image: "/images-scraped/executie_sediu-office15.jpg",
+    alt: "Spații comerciale — mobilier premium",
+    title: "Spații Comerciale",
+    href: "/servicii",
   },
 ];
 
@@ -81,325 +88,426 @@ export default function DespreNoiPage() {
         overlayOpacity={0.65}
       />
 
-      {/* ============== ABOUT — SECTION 1 ============== */}
+      {/* ============== SECTION 1 — BRAND STORY 2 COLS ============== */}
       <section className="section">
         <div className="container">
-          <div className="about-grid">
-            {/* Text Left */}
-            <div className="reveal">
-              <p className="label" style={{ marginBottom: "1.5rem" }}>
+          <div className="brand-story-grid">
+            {/* Left — Large italic quote */}
+            <div className="reveal brand-story-quote-col">
+              <blockquote
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: "clamp(1.5rem, 2.5vw, 2rem)",
+                  fontStyle: "italic",
+                  fontWeight: 300,
+                  color: "var(--color-fg)",
+                  lineHeight: 1.45,
+                  borderLeft: "2px solid var(--color-gold)",
+                  paddingLeft: "2rem",
+                  margin: 0,
+                }}
+              >
+                &ldquo;La Moodilier credem că mobilierul premium nu înseamnă
+                doar obiecte bine executate, ci spații care transmit emoție,
+                echilibru și identitate.&rdquo;
+              </blockquote>
+            </div>
+
+            {/* Right — Story paragraphs */}
+            <div className="reveal reveal-delay-2 brand-story-text-col">
+              <p className="label" style={{ marginBottom: "1.25rem" }}>
                 Povestea noastră
               </p>
-              <h2 style={{ marginBottom: "1.5rem" }}>
-                Mobilier care transmite emoție
-              </h2>
               <span className="gold-line" />
-              <p style={{ marginBottom: "1.25rem" }}>
-                La Moodilier credem că mobilierul premium nu înseamnă doar
-                obiecte bine executate, ci spații care transmit emoție,
-                echilibru și identitate.
-              </p>
-              <p style={{ marginBottom: "1.25rem" }}>
+              <p style={{ marginBottom: "1.25rem", lineHeight: 1.8 }}>
                 Cu peste 10 ani de experiență în producția de mobilier la
                 comandă și amenajări interioare premium, am dezvoltat un proces
                 complet care îmbină designul contemporan, precizia tehnică și
                 atenția impecabilă la detalii.
               </p>
-              <p style={{ marginBottom: "1.25rem" }}>
-                În atelierul nostru, tehnologia modernă și măiestria execuției
-                lucrează împreună pentru a crea mobilier personalizat cu linii
-                curate, materiale premium și finisaje rafinate.
+              <p style={{ marginBottom: "1.25rem", lineHeight: 1.8 }}>
+                În atelierul nostru de 1.200 mp din București, tehnologia
+                modernă și măiestria execuției lucrează împreună pentru a crea
+                mobilier personalizat cu linii curate, materiale premium și
+                finisaje rafinate.
               </p>
-              <p style={{ marginBottom: "2.5rem" }}>
-                Moodilier înseamnă mai mult decât mobilier. Înseamnă pasiune
-                pentru detalii, respect pentru calitate și dorința de a
-                construi spații care inspiră prin eleganță, funcționalitate și
-                autenticitate.
-              </p>
-              <Link href="/contact" className="btn btn-primary">
-                Solicită o ofertă
-                <ArrowRight size={14} />
-              </Link>
-            </div>
-
-            {/* Image Right */}
-            <div className="reveal reveal-delay-2">
-              <div className="about-image-wrap">
-                <Image
-                  src="/images-scraped/mobilier-premium-01.webp"
-                  alt="Atelier Moodilier — producție mobilier premium"
-                  width={700}
-                  height={500}
-                  style={{ width: "100%", height: "500px", objectFit: "cover" }}
-                  unoptimized
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ============== STATS ============== */}
-      <section
-        style={{
-          borderTop: "1px solid var(--color-border)",
-          borderBottom: "1px solid var(--color-border)",
-        }}
-      >
-        <div className="stats-row" style={{ marginTop: 0 }}>
-          {[
-            { num: "10+", label: "Ani experiență" },
-            { num: "200+", label: "Proiecte finalizate" },
-            { num: "100%", label: "Execuție proprie" },
-            { num: "24h", label: "Răspuns ofertă" },
-          ].map((stat, i) => (
-            <div key={i} className="stat-item reveal">
-              <p className="stat-num">{stat.num}</p>
-              <p className="stat-label">{stat.label}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ============== ABOUT — SECTION 2 (atelier) ============== */}
-      <section className="section" style={{ background: "var(--color-bg-alt)" }}>
-        <div className="container">
-          <div className="about-grid">
-            {/* Image Left */}
-            <div className="reveal">
-              <div className="about-image-wrap">
-                <Image
-                  src="/images-scraped/mobilier-premium-02.webp"
-                  alt="Atelier de producție mobilier la comandă Moodilier"
-                  width={700}
-                  height={500}
-                  style={{ width: "100%", height: "500px", objectFit: "cover" }}
-                  unoptimized
-                />
-              </div>
-            </div>
-
-            {/* Text Right */}
-            <div className="reveal reveal-delay-2">
-              <p className="label" style={{ marginBottom: "1.5rem" }}>
-                Atelierul nostru
-              </p>
-              <h2 style={{ marginBottom: "1.5rem" }}>
-                Tehnologie modernă, măiestrie autentică
-              </h2>
-              <span className="gold-line" />
-              <p style={{ marginBottom: "1.25rem" }}>
+              <p style={{ lineHeight: 1.8 }}>
                 Pe lângă producția de mobilier premium la comandă, dezvoltăm și
                 servicii specializate dedicate industriei de design interior și
                 producție.
               </p>
-              <p style={{ marginBottom: "1.25rem" }}>
-                Atelierul Moodilier este dotat cu echipamente CNC de ultimă
-                generație, iar fiecare piesă trece printr-un proces riguros de
-                control al calității înainte de livrare.
-              </p>
-              <p style={{ marginBottom: "2.5rem" }}>
-                De la concept și proiectare, până la execuție, finisare și
-                montaj, fiecare etapă este gestionată intern — pentru a garanta
-                calitate, coerență și respect pentru termenele convenite.
-              </p>
-              <Link href="/servicii" className="btn btn-outline">
-                Descoperă serviciile noastre
-                <ArrowRight size={14} />
-              </Link>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* ============== SERVICES SUMMARY ============== */}
-      <section className="section">
-        <div className="container">
+          {/* Stats below the story */}
           <div
-            className="section-header reveal"
-            style={{ textAlign: "center", marginBottom: "4rem" }}
+            className="brand-stats-row"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(2, 1fr)",
+              gap: "2px",
+              background: "var(--color-border)",
+              marginTop: "4rem",
+            }}
           >
-            <p className="label" style={{ marginBottom: "1rem" }}>
-              Ce oferim
-            </p>
-            <h2>Serviciile noastre principale</h2>
-          </div>
-          <div className="services-grid">
-            {servicesSummary.map((service, i) => (
-              <Link
-                key={i}
-                href={service.href}
-                className={`service-card reveal reveal-delay-${i + 1}`}
-                style={{ textDecoration: "none" }}
+            {stats.map((s) => (
+              <div
+                key={s.label}
+                className="stat-item reveal"
+                style={{ background: "var(--color-surface)" }}
               >
-                <p className="service-number">{service.num}</p>
-                <h3 className="service-title">{service.title}</h3>
-                <p className="service-desc">{service.desc}</p>
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "0.5rem",
-                    fontSize: "0.7rem",
-                    letterSpacing: "0.2em",
-                    textTransform: "uppercase",
-                    color: "var(--color-gold)",
-                    marginTop: "auto",
-                  }}
-                >
-                  Află mai mult <ArrowRight size={12} />
-                </span>
-              </Link>
+                <p className="stat-num">{s.num}</p>
+                <p className="stat-label">{s.label}</p>
+              </div>
             ))}
           </div>
         </div>
+
+        <style>{`
+          .brand-story-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 3rem;
+            align-items: start;
+          }
+          @media (min-width: 900px) {
+            .brand-story-grid {
+              grid-template-columns: 1fr 1fr;
+              gap: 5rem;
+              align-items: center;
+            }
+          }
+          @media (min-width: 640px) {
+            .brand-stats-row {
+              grid-template-columns: repeat(4, 1fr) !important;
+            }
+          }
+        `}</style>
       </section>
 
-      {/* ============== GALLERY STRIP ============== */}
-      <section
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: "2px",
-          background: "var(--color-border)",
-        }}
-      >
+      {/* ============== SECTION 2 — FULL-WIDTH IMAGE STRIP ============== */}
+      <section className="gallery-strip">
         {galleryImages.map((img, i) => (
           <div
             key={i}
-            className="img-overlay"
-            style={{ aspectRatio: "4/3", overflow: "hidden" }}
+            className="gallery-strip-item"
+            style={{
+              position: "relative",
+              overflow: "hidden",
+              height: "400px",
+            }}
           >
             <Image
               src={img.src}
               alt={img.alt}
               fill
-              style={{ objectFit: "cover" }}
+              style={{
+                objectFit: "cover",
+                objectPosition: "center",
+                transition: "transform 0.8s cubic-bezier(0.25,0.46,0.45,0.94)",
+              }}
               unoptimized
             />
-            <div className="img-overlay-content">
-              <p
-                style={{
-                  fontSize: "0.7rem",
-                  letterSpacing: "0.2em",
-                  textTransform: "uppercase",
-                  color: "var(--color-gold)",
-                }}
-              >
-                Portofoliu
-              </p>
-            </div>
           </div>
         ))}
       </section>
 
-      {/* ============== VALUES ============== */}
-      <section className="section" style={{ background: "var(--color-bg-alt)" }}>
+      <style>{`
+        .gallery-strip {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 0;
+          border-top: 1px solid var(--color-border);
+          border-bottom: 1px solid var(--color-border);
+        }
+        .gallery-strip .gallery-strip-item:not(:first-child) {
+          display: none;
+        }
+        .gallery-strip .gallery-strip-item:first-child {
+          height: 300px;
+        }
+        @media (min-width: 768px) {
+          .gallery-strip {
+            grid-template-columns: repeat(3, 1fr);
+          }
+          .gallery-strip .gallery-strip-item {
+            display: block !important;
+            height: 400px !important;
+          }
+          .gallery-strip .gallery-strip-item:hover img {
+            transform: scale(1.06);
+          }
+        }
+      `}</style>
+
+      {/* ============== SECTION 3 — VALUES ============== */}
+      <section
+        className="section"
+        style={{ background: "var(--color-bg-alt)" }}
+      >
         <div className="container">
           <div
-            className="section-header reveal"
+            className="reveal"
             style={{ textAlign: "center", marginBottom: "4rem" }}
           >
             <p className="label" style={{ marginBottom: "1rem" }}>
               Valorile noastre
             </p>
-            <h2>Principiile care ne ghidează</h2>
+            <h2
+              style={{
+                fontFamily: "var(--font-display)",
+                fontSize: "clamp(1.75rem, 3.5vw, 3rem)",
+                fontWeight: 400,
+                color: "var(--color-fg)",
+                marginBottom: "1rem",
+              }}
+            >
+              Valorile noastre
+            </h2>
+            <p
+              style={{
+                maxWidth: "52ch",
+                margin: "0 auto",
+                color: "var(--color-fg-muted)",
+              }}
+            >
+              Principiile care ghidează fiecare proiect Moodilier
+            </p>
           </div>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-              gap: "2px",
-              background: "var(--color-border)",
-            }}
-          >
-            {values.map((value, i) => (
+
+          <div className="values-grid">
+            {values.map(({ Icon, title, desc }, i) => (
               <div
                 key={i}
-                className={`service-card reveal reveal-delay-${i + 1}`}
-                style={{ textAlign: "center", alignItems: "center" }}
+                className={`reveal reveal-delay-${i + 1} value-card`}
               >
                 <div
                   style={{
-                    width: "3.5rem",
-                    height: "3.5rem",
-                    border: "1px solid var(--color-gold)",
-                    borderRadius: "50%",
+                    width: "3.25rem",
+                    height: "3.25rem",
+                    background: "var(--color-bg)",
+                    border: "1px solid var(--color-border-alt)",
+                    borderRadius: "8px",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     color: "var(--color-gold)",
+                    marginBottom: "1.25rem",
+                    transition: "border-color var(--transition-base), background var(--transition-base)",
+                  }}
+                  className="value-card-icon"
+                >
+                  <Icon size={22} strokeWidth={1.5} />
+                </div>
+                <h3
+                  style={{
                     fontFamily: "var(--font-display)",
-                    fontSize: "1.25rem",
-                    marginBottom: "0.5rem",
+                    fontSize: "1.5rem",
+                    fontWeight: 400,
+                    color: "var(--color-fg)",
+                    marginBottom: "0.75rem",
+                    lineHeight: 1.15,
                   }}
                 >
-                  {value.num}
-                </div>
-                <h3 className="service-title" style={{ fontSize: "1.4rem" }}>
-                  {value.title}
+                  {title}
                 </h3>
                 <p
-                  className="service-desc"
-                  style={{ textAlign: "center", maxWidth: "100%" }}
+                  style={{
+                    fontSize: "0.875rem",
+                    color: "var(--color-fg-subtle)",
+                    lineHeight: 1.75,
+                    maxWidth: "100%",
+                  }}
                 >
-                  {value.desc}
+                  {desc}
                 </p>
               </div>
             ))}
           </div>
         </div>
+
+        <style>{`
+          .values-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2px;
+            background: var(--color-border);
+          }
+          .value-card {
+            background: var(--color-surface);
+            padding: 2.75rem 2.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: border-color var(--transition-base), background var(--transition-base);
+            border: 1px solid transparent;
+          }
+          .value-card:hover {
+            border-color: var(--color-gold-dark);
+            background: var(--color-bg);
+          }
+          .value-card:hover .value-card-icon {
+            background: var(--color-gold-dark) !important;
+            border-color: var(--color-gold-dark) !important;
+            color: var(--color-bg) !important;
+          }
+          @media (min-width: 640px) {
+            .values-grid {
+              grid-template-columns: repeat(2, 1fr);
+            }
+          }
+          @media (min-width: 1024px) {
+            .values-grid {
+              grid-template-columns: repeat(4, 1fr);
+            }
+          }
+        `}</style>
       </section>
 
-      {/* ============== ABOUT IMAGE 3 ============== */}
+      {/* ============== SECTION 4 — SERVICE TEASERS ============== */}
       <section className="section">
         <div className="container">
-          <div className="about-grid">
-            {/* Text Left */}
-            <div className="reveal">
-              <p className="label" style={{ marginBottom: "1.5rem" }}>
-                Viziunea noastră
-              </p>
-              <h2 style={{ marginBottom: "1.5rem" }}>
-                Spații care inspiră prin eleganță
-              </h2>
-              <span className="gold-line" />
-              <p style={{ marginBottom: "1.25rem" }}>
-                Moodilier înseamnă mai mult decât mobilier. Înseamnă pasiune
-                pentru detalii, respect pentru calitate și dorința de a
-                construi spații care inspiră prin eleganță, funcționalitate și
-                autenticitate.
-              </p>
-              <p style={{ marginBottom: "2.5rem" }}>
-                Fie că este vorba despre o bucătărie modernă în nuanțe
-                neutre, un dressing cu oglinzi și iluminare integrată sau un
-                living care reunește familia — fiecare proiect Moodilier
-                reflectă identitatea unică a clientului nostru.
-              </p>
-              <Link href="/contact" className="btn btn-primary">
-                Contactează-ne
-                <ArrowRight size={14} />
-              </Link>
-            </div>
+          <div
+            className="reveal"
+            style={{ textAlign: "center", marginBottom: "3.5rem" }}
+          >
+            <p className="label" style={{ marginBottom: "1rem" }}>
+              Ce facem
+            </p>
+            <h2
+              style={{
+                fontFamily: "var(--font-display)",
+                fontSize: "clamp(1.75rem, 3.5vw, 3rem)",
+                fontWeight: 400,
+                color: "var(--color-fg)",
+              }}
+            >
+              Ce facem
+            </h2>
+          </div>
 
-            {/* Image Right */}
-            <div className="reveal reveal-delay-2">
-              <div className="about-image-wrap">
-                <Image
-                  src="/images-scraped/mobilier-premium-03.webp"
-                  alt="Mobilier premium Moodilier — eleganță și funcționalitate"
-                  width={700}
-                  height={500}
-                  style={{ width: "100%", height: "500px", objectFit: "cover" }}
-                  unoptimized
-                />
-              </div>
-            </div>
+          <div className="teasers-grid">
+            {serviceTeasers.map((teaser, i) => (
+              <Link
+                key={i}
+                href={teaser.href}
+                className={`reveal reveal-delay-${i + 1} teaser-card`}
+                aria-label={teaser.title}
+              >
+                {/* Background image */}
+                <div className="teaser-card-img">
+                  <Image
+                    src={teaser.image}
+                    alt={teaser.alt}
+                    fill
+                    style={{ objectFit: "cover", objectPosition: "center" }}
+                    unoptimized
+                  />
+                </div>
+
+                {/* Overlay */}
+                <div className="teaser-card-overlay" />
+
+                {/* Arrow top-right */}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "1.5rem",
+                    right: "1.5rem",
+                    zIndex: 2,
+                    width: "2.25rem",
+                    height: "2.25rem",
+                    border: "1px solid rgba(255,255,255,0.3)",
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "var(--color-fg)",
+                    transition: "background var(--transition-base), border-color var(--transition-base)",
+                  }}
+                  className="teaser-card-arrow"
+                >
+                  <ArrowRight size={14} strokeWidth={1.5} />
+                </div>
+
+                {/* Title bottom-left */}
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    padding: "1.75rem",
+                    zIndex: 2,
+                  }}
+                >
+                  <p
+                    style={{
+                      fontFamily: "var(--font-display)",
+                      fontSize: "1.5rem",
+                      fontWeight: 400,
+                      color: "var(--color-fg)",
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    {teaser.title}
+                  </p>
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
+
+        <style>{`
+          .teasers-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1px;
+            background: var(--color-border);
+          }
+          .teaser-card {
+            position: relative;
+            height: 320px;
+            overflow: hidden;
+            display: block;
+            text-decoration: none;
+          }
+          .teaser-card-img {
+            position: absolute;
+            inset: 0;
+            transition: transform 0.7s cubic-bezier(0.25,0.46,0.45,0.94);
+          }
+          .teaser-card:hover .teaser-card-img {
+            transform: scale(1.06);
+          }
+          .teaser-card-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.25) 60%, rgba(0,0,0,0.15) 100%);
+            z-index: 1;
+            transition: background var(--transition-base);
+          }
+          .teaser-card:hover .teaser-card-overlay {
+            background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.15) 60%, rgba(0,0,0,0.1) 100%);
+          }
+          .teaser-card:hover .teaser-card-arrow {
+            background: var(--color-gold) !important;
+            border-color: var(--color-gold) !important;
+            color: var(--color-bg) !important;
+          }
+          @media (min-width: 768px) {
+            .teasers-grid {
+              grid-template-columns: repeat(3, 1fr);
+            }
+            .teaser-card {
+              height: 420px;
+            }
+          }
+        `}</style>
       </section>
 
-      {/* ============== CTA ============== */}
+      {/* ============== SECTION 5 — CTA ============== */}
       <section className="cta-section">
         <div className="container" style={{ position: "relative", zIndex: 1 }}>
           <div className="reveal">

@@ -1,15 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import {
-  ArrowRight,
-  Pencil,
-  ChefHat,
-  LayoutGrid,
-  Sofa,
-  Building2,
-  Package,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import PageHero from "@/components/PageHero";
 
 export const metadata: Metadata = {
@@ -21,75 +13,73 @@ export const metadata: Metadata = {
 const services = [
   {
     num: "01",
-    icon: Pencil,
-    title: "Servicii de proiectare",
-    desc: "Proiectarea este fundația oricărui proiect reușit. Echipa noastră de designeri elaborează concepte personalizate pornind de la stilul dorit, dimensiunile spațiului și bugetul disponibil. Fiecare proiect include un mood board, vizualizări 3D realiste și un proiect tehnic complet.",
-    bullets: [
-      "Concept și mood board",
-      "Randări 3D realiste",
+    title: "Proiectare & Design 3D",
+    desc: "Conceptul vizual al spațiului tău prinde viață înainte ca orice piesă de mobilier să fie produsă. Lucrăm cu programe profesionale de randare 3D pentru a-ți arăta cum va arăta rezultatul final.",
+    features: [
+      "Concept & Mood Board",
+      "Randare 3D realistă",
       "Proiect tehnic detaliat",
       "Consultanță gratuită",
     ],
+    image: "/images-scraped/proiectare.jpg",
+    imageAlt: "Proiectare și design 3D mobilier la comandă Moodilier",
+    imageLeft: true,
   },
   {
     num: "02",
-    icon: ChefHat,
-    title: "Bucătării la comandă",
-    desc: "Realizăm bucătării cu fronturi din MDF vopsit, furnir natural, PAL melaminat sau HPL. Blat din granit, cuarț sau ceramică. Sistemele Blum asigură o experiență de utilizare silențioasă și durabilă pe termen lung.",
-    bullets: [
-      "Măsurare la domiciliu",
-      "Materiale premium",
+    title: "Bucătării la Comandă",
+    desc: "Bucătăria este inima casei. O proiectăm și o producem în totalitate în atelierul nostru, folosind materiale premium și hardware european.",
+    features: [
+      "MDF vopsit & furnir",
+      "Blaturi granit / cuarț",
       "Electrocasnice integrate",
-      "Blat granit/cuarț",
+      "Măsurare la domiciliu",
     ],
+    image: "/images-scraped/buc_giurgiu_1.jpg",
+    imageAlt: "Bucătărie la comandă Moodilier — materiale premium",
+    imageLeft: false,
   },
   {
     num: "03",
-    icon: LayoutGrid,
-    title: "Dressinguri și depozitare",
-    desc: "Proiectăm sisteme complete de dressing walk-in sau cu uși glisante, cu sau fără insulă centrală. Accesoriile premium și iluminarea integrată transformă depozitarea într-o experiență estetică și funcțională.",
-    bullets: [
-      "Design personalizat",
-      "Sisteme culisante",
-      "Iluminat integrat",
-      "Oglindă integrată",
+    title: "Living și Dormitoare",
+    desc: "De la biblioteci și unități TV la paturi tapițate și dressinguri, mobilierăm întreg spațiul rezidențial cu piese la comandă.",
+    features: [
+      "Unități TV custom",
+      "Paturi tapițate",
+      "Dressinguri complete",
+      "Biblioteci pe perete",
     ],
+    image: "/images-scraped/living_01_.jpg",
+    imageAlt: "Living la comandă — mobilier premium Moodilier",
+    imageLeft: true,
   },
   {
     num: "04",
-    icon: Sofa,
-    title: "Living și dormitoare",
-    desc: "De la biblioteca pe toată înălțimea peretelui la paturi tapițate și comode — realizăm mobilier complet pentru living, dormitor și orice zonă a casei, conceput în coerență cu ansamblul de design ales.",
-    bullets: [
-      "Paturi tapițate",
-      "Biblioteci pe perete",
-      "Comode și noptiere",
-      "TV units custom",
+    title: "Spații Comerciale",
+    desc: "Birouri, magazine, restaurante și hoteluri — proiectăm și executăm mobilier durabil și estetic pentru orice tip de spațiu comercial.",
+    features: [
+      "Recepții & front desk",
+      "Mobilier de birou",
+      "Amenajări retail",
+      "Restaurante & HoReCa",
     ],
+    image: "/images-scraped/executie_sediu-office15.jpg",
+    imageAlt: "Mobilier pentru spații comerciale — Moodilier",
+    imageLeft: false,
   },
   {
     num: "05",
-    icon: Building2,
-    title: "Spații comerciale",
-    desc: "Mediul comercial reflectă identitatea brandului. Realizăm mobilier pentru recepții de hotel sau clinică, birouri executive, showroom-uri, magazine de retail și HoReCa, de la concept la montaj final.",
-    bullets: [
-      "Recepții și front desk",
-      "Mobilier birou",
-      "Amenajări magazine",
-      "Restaurante și cafenele",
-    ],
-  },
-  {
-    num: "06",
-    icon: Package,
     title: "Moodilier Store",
-    desc: "Complementar producției proprii, Moodilier Store aduce în România colecții selecte de mobilier premium de la designeri și producători consacrați din Italia și Europa. Piese iconice disponibile în showroom-ul nostru.",
-    bullets: [
-      "Mărci europene selectate",
-      "Livrare și montaj",
-      "Garanție producător",
+    desc: "Importăm mobilier premium din Italia și Europa pentru clienții care însoțesc producția locală cu piese selectate din colecții europene.",
+    features: [
+      "Mărci europene",
       "Disponibil în showroom",
+      "Livrare & montaj",
+      "Garanție producător",
     ],
+    image: "/images-scraped/mobilier-premium-01.webp",
+    imageAlt: "Moodilier Store — mobilier premium importat din Europa",
+    imageLeft: true,
   },
 ];
 
@@ -140,314 +130,287 @@ export default function ServiciiPage() {
         overlayOpacity={0.7}
       />
 
-      {/* ============== SECTION 1 — INTRO + STATS ============== */}
-      <section className="section">
+      {/* ============== SECTION 1 — INTRO STRIP ============== */}
+      <section
+        style={{
+          background: "var(--color-bg-alt)",
+          padding: "5rem 0",
+          textAlign: "center",
+          borderBottom: "1px solid var(--color-border)",
+        }}
+      >
         <div className="container">
+          <p className="label" style={{ marginBottom: "1.25rem" }}>
+            CE OFERIM
+          </p>
+          <h2
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: "clamp(2rem, 4vw, 3rem)",
+              fontWeight: 400,
+              lineHeight: 1.2,
+              marginBottom: "1.5rem",
+              color: "var(--color-fg)",
+            }}
+          >
+            Un serviciu complet, de la concept la montaj
+          </h2>
+          <p
+            style={{
+              maxWidth: "60ch",
+              margin: "0 auto 3.5rem",
+              color: "var(--color-fg-muted)",
+              lineHeight: 1.8,
+              fontSize: "1.0625rem",
+            }}
+          >
+            Fiecare proiect Moodilier trece printr-un proces complet — de la
+            prima discuție până la livrarea mobilierului în spațiul tău. Totul
+            realizat în atelierul nostru din București.
+          </p>
+
+          {/* Stats row */}
           <div
+            className="intro-stats-row"
             style={{
               display: "grid",
-              gridTemplateColumns: "1fr",
-              gap: "4rem",
-              alignItems: "start",
+              gridTemplateColumns: "repeat(2, 1fr)",
+              gap: "2px",
+              background: "var(--color-border)",
+              maxWidth: "900px",
+              margin: "0 auto",
             }}
-            className="services-intro-grid"
           >
-            {/* Left — Text */}
-            <div className="reveal">
-              <p className="label" style={{ marginBottom: "1.5rem" }}>
-                Despre noi
-              </p>
-              <h2
-                style={{
-                  fontSize: "clamp(1.75rem, 3.5vw, 3rem)",
-                  lineHeight: 1.2,
-                  marginBottom: "1.5rem",
-                }}
+            {stats.map((s) => (
+              <div
+                key={s.label}
+                className="stat-item"
+                style={{ background: "var(--color-surface)", padding: "2.25rem 1.5rem" }}
               >
-                Un serviciu complet,
-                <br />
-                <em>de la schiță la montaj</em>
-              </h2>
-              <span className="gold-line" />
-              <p
-                style={{
-                  fontSize: "1.0625rem",
-                  lineHeight: 1.8,
-                  color: "var(--color-fg-muted)",
-                  maxWidth: "58ch",
-                }}
-              >
-                Moodilier oferă un serviciu complet de design și execuție
-                mobilier la comandă, de la prima schiță până la montajul final
-                în locuința sau spațiul tău. Fiecare proiect este tratat ca o
-                colaborare unică — ascultăm, proiectăm și executăm cu precizie
-                și atenție la fiecare detaliu.
-              </p>
-            </div>
-
-            {/* Right — Stats */}
-            <div
-              className="reveal reveal-delay-2"
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(2, 1fr)",
-                gap: "2px",
-                background: "var(--color-border)",
-              }}
-            >
-              {stats.map((s) => (
-                <div
-                  key={s.label}
-                  className="stat-item"
-                  style={{ background: "var(--color-surface)" }}
-                >
-                  <div className="stat-num">{s.num}</div>
-                  <div className="stat-label">{s.label}</div>
-                </div>
-              ))}
-            </div>
+                <div className="stat-num">{s.num}</div>
+                <div className="stat-label">{s.label}</div>
+              </div>
+            ))}
           </div>
-
           <style>{`
-            @media (min-width: 1024px) {
-              .services-intro-grid {
-                grid-template-columns: 1fr 1fr !important;
+            @media (min-width: 640px) {
+              .intro-stats-row {
+                grid-template-columns: repeat(4, 1fr) !important;
               }
             }
           `}</style>
         </div>
       </section>
 
-      {/* ============== SECTION 2 — 6 SERVICES GRID ============== */}
-      <section
-        className="section"
-        style={{ background: "var(--color-bg-alt)", paddingTop: "0" }}
-      >
-        <div className="container">
+      {/* ============== SECTION 2 — ALTERNATING SERVICE ROWS ============== */}
+      <div>
+        {services.map((service, i) => (
           <div
-            className="section-header reveal"
-            style={{ textAlign: "center", marginBottom: "4rem" }}
+            key={i}
+            className="service-row"
+            style={{
+              background:
+                i % 2 === 0
+                  ? "var(--color-bg)"
+                  : "var(--color-bg-alt)",
+            }}
           >
-            <p className="label" style={{ marginBottom: "1rem" }}>
-              Ce realizăm
-            </p>
-            <h2>Serviciile noastre</h2>
-            <p
+            {/* Image panel */}
+            <div
+              className="service-row-image"
               style={{
-                maxWidth: "50ch",
-                margin: "1.5rem auto 0",
-                textAlign: "center",
+                order: service.imageLeft ? 0 : 1,
               }}
             >
-              Șase domenii de expertiză, o singură echipă dedicată excelenței în
-              mobilier la comandă.
-            </p>
-          </div>
-
-          {/* 3×2 grid desktop, 2×3 tablet, 1×6 mobile */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(1, 1fr)",
-              gap: "1px",
-              background: "var(--color-border)",
-            }}
-            className="services-cards-grid"
-          >
-            {services.map((service, i) => {
-              const Icon = service.icon;
-              return (
+              <div
+                style={{
+                  position: "relative",
+                  width: "100%",
+                  height: "100%",
+                  minHeight: "340px",
+                }}
+              >
+                <Image
+                  src={service.image}
+                  alt={service.imageAlt}
+                  fill
+                  style={{ objectFit: "cover", objectPosition: "center" }}
+                  unoptimized
+                />
+                {/* Subtle dark tint */}
                 <div
-                  key={i}
-                  className={`reveal reveal-delay-${(i % 3) + 1}`}
                   style={{
-                    background: "var(--color-surface)",
-                    border: "none",
-                    padding: "2.75rem 2.5rem",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "1.25rem",
-                    position: "relative",
-                    overflow: "hidden",
-                    transition: "all var(--transition-base)",
-                    cursor: "default",
+                    position: "absolute",
+                    inset: 0,
+                    background: "rgba(0,0,0,0.18)",
                   }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.borderColor =
-                      "var(--color-gold-dark)";
-                    (e.currentTarget as HTMLElement).style.transform =
-                      "translateY(-4px)";
-                    (e.currentTarget as HTMLElement).style.boxShadow =
-                      "0 20px 60px rgba(0,0,0,0.35)";
-                    (e.currentTarget as HTMLElement).style.zIndex = "2";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.borderColor = "";
-                    (e.currentTarget as HTMLElement).style.transform = "";
-                    (e.currentTarget as HTMLElement).style.boxShadow = "";
-                    (e.currentTarget as HTMLElement).style.zIndex = "";
-                  }}
-                >
-                  {/* Gold accent bottom line */}
-                  <div
-                    aria-hidden
+                />
+              </div>
+            </div>
+
+            {/* Text panel */}
+            <div
+              className="service-row-text"
+              style={{
+                order: service.imageLeft ? 1 : 0,
+                padding: "4rem",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                gap: "1.5rem",
+                position: "relative",
+              }}
+            >
+              {/* Ghost number behind title */}
+              <span
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  top: "2rem",
+                  right: service.imageLeft ? "2rem" : "auto",
+                  left: service.imageLeft ? "auto" : "2rem",
+                  fontFamily: "var(--font-display)",
+                  fontSize: "8rem",
+                  fontWeight: 700,
+                  lineHeight: 1,
+                  color: "var(--color-fg)",
+                  opacity: 0.05,
+                  userSelect: "none",
+                  pointerEvents: "none",
+                }}
+              >
+                {service.num}
+              </span>
+
+              {/* Gold line */}
+              <div
+                style={{
+                  width: "60px",
+                  height: "2px",
+                  background: "var(--color-gold)",
+                }}
+              />
+
+              {/* Title */}
+              <h2
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: "clamp(1.75rem, 2.5vw, 2.5rem)",
+                  fontWeight: 400,
+                  color: "var(--color-fg)",
+                  lineHeight: 1.2,
+                  marginBottom: "0.25rem",
+                }}
+              >
+                {service.title}
+              </h2>
+
+              {/* Description */}
+              <p
+                style={{
+                  color: "var(--color-fg-muted)",
+                  fontSize: "0.9375rem",
+                  lineHeight: 1.8,
+                  maxWidth: "52ch",
+                }}
+              >
+                {service.desc}
+              </p>
+
+              {/* Features */}
+              <ul
+                style={{
+                  listStyle: "none",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.6rem",
+                }}
+              >
+                {service.features.map((feat, j) => (
+                  <li
+                    key={j}
                     style={{
-                      position: "absolute",
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      height: "2px",
-                      background: "var(--color-gold)",
-                      transformOrigin: "left",
-                      transform: "scaleX(0)",
-                      transition: "transform var(--transition-base)",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.875rem",
+                      fontSize: "0.875rem",
+                      color: "var(--color-fg-muted)",
                     }}
-                    className="service-card-line"
-                  />
-
-                  {/* Number */}
-                  <div className="service-number">{service.num}</div>
-
-                  {/* Icon + Title */}
-                  <div
-                    style={{ display: "flex", alignItems: "center", gap: "0.875rem" }}
                   >
-                    <div
+                    <span
                       style={{
-                        width: "2.5rem",
-                        height: "2.5rem",
-                        border: "1px solid var(--color-border-alt)",
-                        borderRadius: "6px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
                         color: "var(--color-gold)",
+                        fontWeight: 700,
+                        fontSize: "1rem",
+                        lineHeight: 1,
                         flexShrink: 0,
                       }}
                     >
-                      <Icon size={18} strokeWidth={1.5} />
-                    </div>
-                    <h3
-                      style={{
-                        fontFamily: "var(--font-display)",
-                        fontSize: "1.35rem",
-                        fontWeight: 400,
-                        color: "var(--color-fg)",
-                        lineHeight: 1.2,
-                      }}
-                    >
-                      {service.title}
-                    </h3>
-                  </div>
-
-                  {/* Description */}
-                  <p
-                    style={{
-                      fontSize: "0.875rem",
-                      color: "var(--color-fg-subtle)",
-                      lineHeight: 1.75,
-                      maxWidth: "100%",
-                    }}
-                  >
-                    {service.desc}
-                  </p>
-
-                  {/* Bullets */}
-                  <ul
-                    style={{
-                      listStyle: "none",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "0.5rem",
-                      flex: 1,
-                    }}
-                  >
-                    {service.bullets.map((b, j) => (
-                      <li
-                        key={j}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "0.75rem",
-                          fontSize: "0.8125rem",
-                          color: "var(--color-fg-muted)",
-                        }}
-                      >
-                        <span
-                          style={{
-                            display: "inline-block",
-                            width: "1.25rem",
-                            height: "1px",
-                            background: "var(--color-gold)",
-                            flexShrink: 0,
-                          }}
-                        />
-                        {b}
-                      </li>
-                    ))}
-                  </ul>
-
-                  {/* CTA link */}
-                  <Link
-                    href="/contact"
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "0.5rem",
-                      fontSize: "0.7rem",
-                      fontWeight: 600,
-                      letterSpacing: "0.2em",
-                      textTransform: "uppercase",
-                      color: "var(--color-gold)",
-                      marginTop: "0.5rem",
-                      transition: "gap var(--transition-base)",
-                    }}
-                  >
-                    Află mai multe
-                    <ArrowRight size={12} />
-                  </Link>
-                </div>
-              );
-            })}
+                      ✓
+                    </span>
+                    {feat}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
+        ))}
+      </div>
 
-          <style>{`
-            .services-cards-grid {
-              grid-template-columns: repeat(1, 1fr);
-            }
-            @media (min-width: 640px) {
-              .services-cards-grid {
-                grid-template-columns: repeat(2, 1fr);
-              }
-            }
-            @media (min-width: 1024px) {
-              .services-cards-grid {
-                grid-template-columns: repeat(3, 1fr);
-              }
-            }
-            .services-cards-grid > div:hover .service-card-line {
-              transform: scaleX(1) !important;
-            }
-          `}</style>
-        </div>
-      </section>
+      <style>{`
+        .service-row {
+          display: grid;
+          grid-template-columns: 1fr;
+          min-height: 400px;
+          border-bottom: 1px solid var(--color-border);
+        }
+        .service-row-image {
+          order: 0;
+        }
+        .service-row-text {
+          order: 1;
+          padding: 3rem 2rem;
+        }
+        @media (min-width: 900px) {
+          .service-row {
+            grid-template-columns: 1fr 1fr;
+            min-height: 500px;
+          }
+          .service-row-text {
+            padding: 4rem !important;
+          }
+        }
+      `}</style>
 
-      {/* ============== SECTION 3 — PROCESS ============== */}
-      <section className="section">
+      {/* ============== SECTION 3 — PROCESS TIMELINE ============== */}
+      <section
+        className="section"
+        style={{ background: "var(--color-bg-alt)" }}
+      >
         <div className="container">
           <div
-            className="section-header reveal"
+            className="reveal"
             style={{ textAlign: "center", marginBottom: "5rem" }}
           >
             <p className="label" style={{ marginBottom: "1rem" }}>
               Cum lucrăm
             </p>
-            <h2>Procesul nostru</h2>
+            <h2
+              style={{
+                fontFamily: "var(--font-display)",
+                fontSize: "clamp(2rem, 4vw, 3rem)",
+                fontWeight: 400,
+                color: "var(--color-fg)",
+              }}
+            >
+              Procesul nostru
+            </h2>
             <p
               style={{
                 maxWidth: "50ch",
                 margin: "1.5rem auto 0",
-                textAlign: "center",
+                color: "var(--color-fg-muted)",
+                lineHeight: 1.7,
               }}
             >
               Un proces clar, transparent și adaptat fiecărui client — de la
@@ -455,172 +418,181 @@ export default function ServiciiPage() {
             </p>
           </div>
 
-          {/* Steps with horizontal connector line on desktop */}
-          <div
-            style={{ position: "relative" }}
-            className="process-wrapper"
-          >
-            {/* Connector line — desktop only, rendered via CSS */}
+          {/* Timeline wrapper */}
+          <div style={{ position: "relative" }} className="process-wrapper">
+            {/* Horizontal connector line — desktop only */}
             <div
               aria-hidden
-              className="process-connector-line"
+              className="process-connector"
               style={{
                 position: "absolute",
-                top: "1.5rem", /* center of the circle */
-                left: "10%",
-                right: "10%",
+                top: "2.25rem",
+                left: "calc(10% + 2.25rem)",
+                right: "calc(10% + 2.25rem)",
                 height: "1px",
                 background:
-                  "linear-gradient(to right, transparent, var(--color-border-alt) 15%, var(--color-border-alt) 85%, transparent)",
+                  "linear-gradient(to right, transparent, var(--color-gold) 10%, var(--color-gold) 90%, transparent)",
+                opacity: 0.3,
                 display: "none",
                 pointerEvents: "none",
                 zIndex: 0,
               }}
             />
 
-            <div
-              className="process-steps-row"
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr",
-                gap: "2.5rem",
-                position: "relative",
-                zIndex: 1,
-              }}
-            >
+            {/* Steps */}
+            <div className="process-steps" style={{ position: "relative", zIndex: 1 }}>
               {processSteps.map((item, i) => (
                 <div
                   key={i}
-                  className={`reveal reveal-delay-${(i % 4) + 1}`}
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    textAlign: "center",
-                    gap: "1rem",
-                  }}
+                  className={`reveal reveal-delay-${(i % 4) + 1} process-step-item`}
                 >
-                  {/* Circle number */}
+                  {/* Circle with number */}
                   <div
                     style={{
-                      width: "3rem",
-                      height: "3rem",
+                      width: "4.5rem",
+                      height: "4.5rem",
                       border: "1px solid var(--color-gold)",
                       borderRadius: "50%",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      color: "var(--color-gold)",
-                      fontFamily: "var(--font-display)",
-                      fontSize: "1.25rem",
-                      background: "var(--color-bg)",
+                      background: "var(--color-bg-alt)",
+                      margin: "0 auto 1.25rem",
                       flexShrink: 0,
+                      position: "relative",
+                      zIndex: 1,
                     }}
                   >
-                    {item.step}
+                    <span
+                      style={{
+                        fontFamily: "var(--font-display)",
+                        fontSize: "2rem",
+                        fontWeight: 300,
+                        color: "var(--color-gold)",
+                        lineHeight: 1,
+                      }}
+                    >
+                      {item.step}
+                    </span>
                   </div>
 
-                  <div>
-                    <h4
-                      style={{
-                        color: "var(--color-fg)",
-                        fontSize: "1rem",
-                        fontWeight: 500,
-                        fontFamily: "var(--font-body)",
-                        marginBottom: "0.5rem",
-                        letterSpacing: "0.02em",
-                      }}
-                    >
-                      {item.title}
-                    </h4>
-                    <p
-                      style={{
-                        fontSize: "0.8375rem",
-                        color: "var(--color-fg-subtle)",
-                        textAlign: "center",
-                        maxWidth: "22ch",
-                        margin: "0 auto",
-                        lineHeight: 1.65,
-                      }}
-                    >
-                      {item.desc}
-                    </p>
-                  </div>
+                  <h4
+                    style={{
+                      fontFamily: "var(--font-display)",
+                      fontSize: "1.25rem",
+                      fontWeight: 400,
+                      color: "var(--color-fg)",
+                      marginBottom: "0.625rem",
+                      lineHeight: 1.2,
+                      textAlign: "center",
+                    }}
+                  >
+                    {item.title}
+                  </h4>
+                  <p
+                    style={{
+                      fontSize: "0.8125rem",
+                      color: "var(--color-fg-subtle)",
+                      textAlign: "center",
+                      maxWidth: "22ch",
+                      margin: "0 auto",
+                      lineHeight: 1.65,
+                    }}
+                  >
+                    {item.desc}
+                  </p>
                 </div>
               ))}
             </div>
           </div>
-
-          <style>{`
-            @media (min-width: 768px) {
-              .process-steps-row {
-                grid-template-columns: repeat(5, 1fr) !important;
-                gap: 0 !important;
-              }
-              .process-connector-line {
-                display: block !important;
-              }
-            }
-          `}</style>
         </div>
+
+        <style>{`
+          .process-steps {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 3rem;
+          }
+          .process-step-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+          }
+          @media (min-width: 768px) {
+            .process-steps {
+              grid-template-columns: repeat(5, 1fr);
+              gap: 1rem;
+            }
+            .process-connector {
+              display: block !important;
+            }
+          }
+        `}</style>
       </section>
 
-      {/* ============== SECTION 4 — FULL-BLEED IMAGE ============== */}
+      {/* ============== SECTION 4 — FULL-BLEED QUOTE ============== */}
       <section
         style={{
           position: "relative",
-          height: "55vh",
-          minHeight: "380px",
+          height: "60vh",
+          minHeight: "420px",
           overflow: "hidden",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
         <Image
           src="/images-scraped/Cosmopolis_Vila_Andrei_Tudoran_02-scaled.jpg"
-          alt="Atelier Moodilier București"
+          alt="Proiect Moodilier — vilă premium"
           fill
           style={{ objectFit: "cover", objectPosition: "center" }}
           unoptimized
         />
+        {/* Dark overlay */}
         <div
           style={{
             position: "absolute",
             inset: 0,
-            background: "rgba(0,0,0,0.7)",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
+            background: "rgba(0,0,0,0.75)",
+          }}
+        />
+        {/* Quote */}
+        <div
+          style={{
+            position: "relative",
+            zIndex: 1,
             textAlign: "center",
             padding: "2rem",
+            maxWidth: "860px",
           }}
         >
-          <p className="label" style={{ marginBottom: "1.25rem" }}>
-            Atelierul nostru
-          </p>
-          <h2
+          <p
             style={{
               fontFamily: "var(--font-display)",
-              fontSize: "clamp(1.75rem, 4vw, 3.5rem)",
+              fontSize: "clamp(1.5rem, 3.5vw, 2.75rem)",
               fontStyle: "italic",
               fontWeight: 300,
               color: "var(--color-fg)",
-              maxWidth: "700px",
-              lineHeight: 1.2,
-              marginBottom: "1.25rem",
+              lineHeight: 1.35,
+              marginBottom: "1.5rem",
+              maxWidth: "100%",
             }}
           >
-            Calitate executată în atelierul nostru din București
-          </h2>
+            &ldquo;Mobilierul pe care îl creăm nu este doar funcțional — este
+            expresia identității tale&rdquo;
+          </p>
           <p
             style={{
-              fontSize: "0.9375rem",
-              color: "var(--color-fg-muted)",
-              maxWidth: "52ch",
-              lineHeight: 1.7,
+              fontFamily: "var(--font-body)",
+              fontSize: "0.75rem",
+              letterSpacing: "0.3em",
+              textTransform: "uppercase",
+              color: "var(--color-gold)",
             }}
           >
-            Fiecare piesă de mobilier este produsă manual, cu precizie și atenție
-            la detalii, în atelierul propriu de 1.200 mp.
+            — Echipa Moodilier
           </p>
         </div>
       </section>
@@ -648,8 +620,8 @@ export default function ServiciiPage() {
                 textAlign: "center",
               }}
             >
-              Contactează-ne și un consultant Moodilier îți va răspunde în
-              maxim 24 de ore cu o propunere personalizată.
+              Contactează-ne și un consultant Moodilier îți va răspunde în maxim
+              24 de ore cu o propunere personalizată.
             </p>
             <div
               style={{

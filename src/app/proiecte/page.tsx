@@ -3,7 +3,7 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Images } from "lucide-react";
+import { ArrowUpRight, Images } from "lucide-react";
 import PageHero from "@/components/PageHero";
 import { projects } from "@/data/projects-clean";
 
@@ -50,7 +50,7 @@ export default function ProiectePage() {
     }
   }, [activeCategory]);
 
-  // 3D card handlers
+  // 3D card tilt handlers (desktop only)
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width - 0.5;
@@ -184,6 +184,9 @@ export default function ProiectePage() {
                     height: "100%",
                   }}
                 >
+                  {/* Gold overlay — sits on top of image, below content */}
+                  <div className="project-card-overlay" />
+
                   {/* Cover image */}
                   <div
                     className="project-card-img"
@@ -309,8 +312,10 @@ export default function ProiectePage() {
                           {project.images.length} fotografii
                         </span>
                       </div>
-                      <ArrowRight
-                        size={14}
+                      {/* Arrow icon — animated on hover via .card-arrow CSS */}
+                      <ArrowUpRight
+                        size={16}
+                        className="card-arrow"
                         style={{ color: "var(--color-gold)" }}
                       />
                     </div>
@@ -361,13 +366,14 @@ export default function ProiectePage() {
           </p>
           <Link href="/contact" className="btn btn-primary">
             Solicită o ofertă gratuită
-            <ArrowRight size={14} />
+            <ArrowUpRight size={14} />
           </Link>
         </div>
       </section>
 
-      {/* ── Responsive styles ─────────────────────────────────────── */}
+      {/* ── Styles ─────────────────────────────────────────────── */}
       <style>{`
+        /* ── Responsive grid ── */
         @media (max-width: 767px) {
           .projects-grid { grid-template-columns: 1fr !important; gap: 1rem !important; }
           .project-card { transform-style: flat !important; }
@@ -376,26 +382,86 @@ export default function ProiectePage() {
           .projects-grid { grid-template-columns: repeat(2, 1fr) !important; }
         }
 
-        /* Image zoom on hover */
+        /* ── Image zoom on card hover ── */
         .project-card:hover .project-card-img img {
           transform: scale(1.08);
         }
 
-        /* Mobile touch shimmer */
+        /* ── Gold overlay ── */
+        .project-card .project-card-overlay {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(
+            135deg,
+            rgba(201,169,132,0) 0%,
+            rgba(201,169,132,0.15) 50%,
+            rgba(201,169,132,0) 100%
+          );
+          border: 1px solid rgba(201,169,132,0);
+          transition: border-color 0.5s ease, background 0.5s ease;
+          z-index: 2;
+          pointer-events: none;
+        }
+        .project-card:hover .project-card-overlay {
+          border-color: rgba(201,169,132,0.6);
+          background: linear-gradient(
+            135deg,
+            rgba(201,169,132,0) 0%,
+            rgba(201,169,132,0.12) 50%,
+            rgba(201,169,132,0) 100%
+          );
+        }
+
+        /* ── Gold corner accents ── */
+        .project-card::before {
+          content: '';
+          position: absolute;
+          top: 0; left: 0;
+          width: 0; height: 0;
+          border-top: 2px solid var(--color-gold);
+          border-left: 2px solid var(--color-gold);
+          transition: width 0.4s ease 0.1s, height 0.4s ease;
+          z-index: 3;
+          pointer-events: none;
+        }
         .project-card::after {
           content: '';
           position: absolute;
-          inset: 0;
-          background: linear-gradient(135deg, transparent 40%, rgba(201,169,132,0.08) 50%, transparent 60%);
-          opacity: 0;
-          transition: opacity 0.3s;
+          bottom: 0; right: 0;
+          width: 0; height: 0;
+          border-bottom: 2px solid var(--color-gold);
+          border-right: 2px solid var(--color-gold);
+          transition: width 0.4s ease, height 0.4s ease 0.1s;
+          z-index: 3;
           pointer-events: none;
-          z-index: 1;
         }
-        .project-card:active::after { opacity: 1; }
+        .project-card:hover::before,
+        .project-card:hover::after {
+          width: 30px; height: 30px;
+        }
 
+        /* ── Arrow animate on hover ── */
+        .card-arrow {
+          transition: transform 0.3s ease, color 0.3s ease;
+        }
+        .project-card:hover .card-arrow {
+          transform: translate(3px, -3px);
+          color: var(--color-gold-light) !important;
+        }
+
+        /* ── Mobile touch active state ── */
         @media (max-width: 767px) {
           .project-card { touch-action: pan-y; }
+          .project-card:active .project-card-overlay {
+            border-color: rgba(201,169,132,0.5);
+            background: rgba(201,169,132,0.1);
+            transition: all 0.15s ease;
+          }
+          .project-card:active::before,
+          .project-card:active::after {
+            width: 20px; height: 20px;
+            transition: width 0.15s, height 0.15s;
+          }
         }
       `}</style>
     </>
