@@ -224,8 +224,8 @@ export default function HomePage() {
       <section className="section" style={{ paddingTop: "2rem" }}>
         <div className="container">
           <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
-            <p className="label" style={{ marginBottom: "1rem" }}>Portofoliu</p>
-            <h2>Proiecte realizate</h2>
+            <p className="label reveal" style={{ marginBottom: "1rem" }}>Portofoliu</p>
+            <h2 className="reveal reveal-delay-2">Proiecte realizate</h2>
           </div>
         </div>
 
@@ -254,19 +254,19 @@ export default function HomePage() {
       <section className="section" style={{ background: "var(--color-bg-alt)", padding: "var(--space-xl) 0" }}>
         <div className="container">
           <div style={{ textAlign: "center", marginBottom: "4rem" }}>
-            <p className="label" style={{ marginBottom: "1rem" }}>Ce oferim</p>
-            <h2>Servicii oferite</h2>
+            <p className="label reveal" style={{ marginBottom: "1rem" }}>Ce oferim</p>
+            <h2 className="reveal reveal-delay-2">Servicii oferite</h2>
           </div>
           <div className="services-grid">
             {services.map((service, i) => (
-              <div key={i} className="service-card reveal" style={{ transitionDelay: `${(i % 3) * 0.1}s` }}>
+              <div key={i} className={`service-card reveal reveal-delay-${(i % 3) + 1}`}>
                 <p className="service-number">{service.num}</p>
                 <h3 className="service-title">{service.title}</h3>
                 <p className="service-desc">{service.desc}</p>
               </div>
             ))}
           </div>
-          <div style={{ textAlign: "center", marginTop: "3rem" }}>
+          <div style={{ textAlign: "center", marginTop: "3rem" }} className="reveal reveal-delay-3">
             <Link href="/servicii" className="btn btn-outline">
               Toate serviciile noastre
               <ArrowRight size={14} />
@@ -279,8 +279,8 @@ export default function HomePage() {
       <section className="section" style={{ background: "var(--color-bg)", paddingTop: "2rem" }}>
         <div className="container">
           <div style={{ textAlign: "center", marginBottom: "4rem" }}>
-            <p className="label" style={{ marginBottom: "1rem" }}>Cum lucrăm</p>
-            <h2>Etapele unui proiect</h2>
+            <p className="label reveal" style={{ marginBottom: "1rem" }}>Cum lucrăm</p>
+            <h2 className="reveal reveal-delay-2">Etapele unui proiect</h2>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "2px", background: "var(--color-border)" }}>
             {[
@@ -292,8 +292,8 @@ export default function HomePage() {
             ].map((item, i) => (
               <div
                 key={i}
-                className="service-card reveal"
-                style={{ background: "var(--color-bg)", textAlign: "center", alignItems: "center", transitionDelay: `${i * 0.08}s` }}
+                className={`service-card reveal reveal-delay-${i + 1}`}
+                style={{ background: "var(--color-bg)", textAlign: "center", alignItems: "center" }}
               >
                 <div className="process-step-num">{item.step}</div>
                 <h4 style={{ color: "var(--color-fg)", fontSize: "1rem", fontWeight: 500 }}>{item.title}</h4>
@@ -325,8 +325,8 @@ export default function HomePage() {
       {/* ============== SUPPLIERS ============== */}
       <section style={{ padding: "5rem 0", borderBottom: "1px solid var(--color-border)" }}>
         <div className="container">
-          <p className="label" style={{ textAlign: "center", marginBottom: "2.5rem" }}>Furnizori parteneri</p>
-          <div className="supplier-logos">
+          <p className="label reveal" style={{ textAlign: "center", marginBottom: "2.5rem" }}>Furnizori parteneri</p>
+          <div className="supplier-logos reveal reveal-delay-2">
             {supplierLogos.map((logo, i) => (
               <div key={i} className="supplier-logo">
                 <Image
@@ -346,15 +346,15 @@ export default function HomePage() {
       {/* ============== CTA ============== */}
       <section className="cta-section">
         <div className="container" style={{ position: "relative", zIndex: 1, textAlign: "center" }}>
-          <p className="label" style={{ marginBottom: "1.5rem" }}>Hai să lucrăm împreună</p>
-          <h2 style={{ maxWidth: "600px", margin: "0 auto 1.5rem" }}>
+          <p className="label reveal" style={{ marginBottom: "1.5rem" }}>Hai să lucrăm împreună</p>
+          <h2 className="reveal reveal-delay-2" style={{ maxWidth: "600px", margin: "0 auto 1.5rem" }}>
             Transformăm viziunea ta în mobilier premium
           </h2>
-          <p style={{ maxWidth: "50ch", margin: "0 auto 2.5rem", textAlign: "center" }}>
+          <p className="reveal reveal-delay-3" style={{ maxWidth: "50ch", margin: "0 auto 2.5rem", textAlign: "center" }}>
             Moodilier înseamnă mobilier la comandă realizat cu precizie, rafinament și pasiune
             pentru design interior premium.
           </p>
-          <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
+          <div className="reveal reveal-delay-4" style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
             <Link href="/contact" className="btn btn-primary">
               Solicită o ofertă gratuită
               <ArrowRight size={14} />

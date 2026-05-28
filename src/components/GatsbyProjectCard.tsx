@@ -17,25 +17,66 @@ interface GatsbyProjectCardProps {
   style?: React.CSSProperties;
 }
 
-/* Sine wave path generator — horizontal sinusoid */
-function wavePath(y: number, amp: number, freq: number) {
-  const pts: string[] = [];
-  // spans -400 to 800 so the looping translate never shows a gap
-  for (let x = -400; x <= 900; x += 60) {
-    const wy = y + Math.sin((x / freq) * Math.PI) * amp;
-    pts.push(`${pts.length === 0 ? "M" : "L"}${x} ${wy}`);
+/**
+ * Smooth cubic Bézier wave path — much rounder than linear sine approximation.
+ * Uses cubic bezier control points at ±1/3 of wave period for smooth S-curves.
+ */
+function smoothWave(y: number, amp: number, waveW: number, count: number): string {
+  // waveW = full wavelength in px, count = number of full waves to draw
+  const totalW = waveW * count;
+  const start = -waveW; // start one wave left so loop is seamless
+  const cp = waveW / 2;  // control point x offset = half wavelength
+
+  let d = `M${start},${y}`;
+  for (let i = 0; i < count + 2; i++) {
+    const x0 = start + i * waveW;
+    const x1 = x0 + cp;
+    const x2 = x0 + cp;
+    const x3 = x0 + waveW;
+    const yPeak = y - amp;   // first control = up
+    const yTrough = y + amp; // second control = down
+    d += ` C${x1},${yPeak} ${x2},${yPeak} ${x3},${y}`;
+    // second half — trough
+    d += ` C${x3 + cp / 2},${yPeak} ${x3 + cp},${yTrough} ${x3 + waveW / 2},${yTrough}`;
   }
-  return pts.join(" ");
+  // Simpler: alternate peaks and troughs with C commands
+  return buildWave(y, amp, waveW, count);
 }
 
+/** Proper cubic Bézier sinusoid — C command for smooth curves */
+function buildWave(y: number, amp: number, wl: number, reps: number): string {
+  const startX = -wl * 1.5;
+  const total = reps + 3;
+  // Each full wave = 2 half-arcs (up then down)
+  // Control points at 1/2 wl horizontally, amp vertically
+  const hw = wl / 2; // half wavelength
+  const cp = hw * 0.55; // bezier control point distance (approx circle = 0.552)
+
+  let d = `M${startX},${y}`;
+  for (let i = 0; i < total; i++) {
+    const x = startX + i * wl;
+    // First half: rise to peak
+    d += ` C${x + cp},${y - amp} ${x + hw - cp},${y - amp} ${x + hw},${y}`;
+    // Second half: fall to trough
+    d += ` C${x + hw + cp},${y + amp} ${x + wl - cp},${y + amp} ${x + wl},${y}`;
+  }
+  return d;
+}
+
+/* ── Wave configuration: rounder, more prominent ── */
 const WAVES = [
-  { y: 30,  amp: 14, freq: 80,  dur: "5s",   dir: 1,  op: 0.18 },
-  { y: 80,  amp: 10, freq: 100, dur: "7s",   dir: -1, op: 0.12 },
-  { y: 130, amp: 18, freq: 70,  dur: "6s",   dir: 1,  op: 0.15 },
-  { y: 180, amp: 12, freq: 90,  dur: "8.5s", dir: -1, op: 0.11 },
-  { y: 230, amp: 16, freq: 75,  dur: "6.5s", dir: 1,  op: 0.14 },
-  { y: 280, amp: 9,  freq: 110, dur: "7.5s", dir: -1, op: 0.10 },
+  // y-center, amplitude, wavelength, duration, direction, strokeWidth, opacity
+  { y: 40,  amp: 22, wl: 200, dur: "6s",   dir:  1, sw: 2.0, op: 0.35 },
+  { y: 95,  amp: 16, wl: 260, dur: "9s",   dir: -1, sw: 1.4, op: 0.22 },
+  { y: 148, amp: 28, wl: 180, dur: "7s",   dir:  1, sw: 2.8, op: 0.45 }, // hero wave
+  { y: 200, amp: 18, wl: 240, dur: "8s",   dir: -1, sw: 1.6, op: 0.28 },
+  { y: 252, amp: 24, wl: 190, dur: "6.5s", dir:  1, sw: 2.2, op: 0.38 },
+  { y: 300, amp: 14, wl: 280, dur: "10s",  dir: -1, sw: 1.2, op: 0.20 },
+  { y: 345, amp: 20, wl: 210, dur: "7.5s", dir:  1, sw: 1.8, op: 0.30 },
 ];
+
+/* ── Shimmer: the brightest, fastest wave ── */
+const SHIMMER = { y: 148, amp: 28, wl: 180, dur: "3.8s", sw: 4.0 };
 
 export default function GatsbyProjectCard({
   title,
@@ -52,32 +93,25 @@ export default function GatsbyProjectCard({
   const [revealed, setRevealed] = useState(false);
   const [noAnim, setNoAnim] = useState(false);
 
-  /* Entrance reveal via IntersectionObserver */
+  /* ── Entrance reveal ── */
   useEffect(() => {
     const el = wrapRef.current;
     if (!el) return;
-
     const rect = el.getBoundingClientRect();
     if (rect.top < window.innerHeight) {
       setNoAnim(true);
       const t = setTimeout(() => setRevealed(true), 80);
       return () => clearTimeout(t);
     }
-
     const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setRevealed(true);
-          obs.disconnect();
-        }
-      },
+      ([entry]) => { if (entry.isIntersecting) { setRevealed(true); obs.disconnect(); } },
       { threshold: 0.06, rootMargin: "0px 0px -20px 0px" }
     );
     obs.observe(el);
     return () => obs.disconnect();
   }, []);
 
-  const delay = noAnim ? 0 : (index % 3) * 0.1;
+  const delay = noAnim ? 0 : (index % 3) * 0.12;
 
   return (
     <Link href={href} className={`gatsby-card-link ${className}`} style={style}>
@@ -90,10 +124,7 @@ export default function GatsbyProjectCard({
         <div className="gatsby-img-wrap">
           {image ? (
             <Image
-              src={image}
-              alt={title}
-              fill
-              unoptimized
+              src={image} alt={title} fill unoptimized
               loading={index < 4 ? "eager" : "lazy"}
               priority={index < 2}
               style={{ objectFit: "cover" }}
@@ -103,52 +134,77 @@ export default function GatsbyProjectCard({
             <div className="gatsby-no-img"><span>Fără imagine</span></div>
           )}
 
-          {/* ── Gold wave overlay ── */}
+          {/* ── Gold Bézier wave overlay ── */}
           <svg
             className="gatsby-waves"
-            viewBox="0 0 500 310"
+            viewBox="0 0 500 390"
             preserveAspectRatio="xMidYMid slice"
             aria-hidden="true"
           >
-            {WAVES.map((w, i) => (
+            <defs>
+              {/* Gradient that fades at edges — gives floating shimmer feel */}
+              <linearGradient id={`sg-${index}`} x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%"   stopColor="rgba(201,169,132,0)" />
+                <stop offset="20%"  stopColor="rgba(230,200,160,1)" />
+                <stop offset="50%"  stopColor="rgba(201,169,132,1)" />
+                <stop offset="80%"  stopColor="rgba(230,200,160,1)" />
+                <stop offset="100%" stopColor="rgba(201,169,132,0)" />
+              </linearGradient>
+              {/* Mask to clip waves inside the card */}
+              <clipPath id={`cp-${index}`}>
+                <rect x="0" y="0" width="500" height="390" />
+              </clipPath>
+            </defs>
+
+            <g clipPath={`url(#cp-${index})`}>
+              {/* Base waves — cubic Bézier, smooth S-curves */}
+              {WAVES.map((w, i) => (
+                <path
+                  key={i}
+                  d={buildWave(w.y, w.amp, w.wl, 4)}
+                  stroke={`rgba(201,169,132,${w.op})`}
+                  strokeWidth={w.sw}
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <animateTransform
+                    attributeName="transform"
+                    type="translate"
+                    from={w.dir > 0 ? "0 0" : `${w.wl} 0`}
+                    to={w.dir > 0 ? `${w.wl} 0` : "0 0"}
+                    dur={w.dur}
+                    repeatCount="indefinite"
+                  />
+                </path>
+              ))}
+
+              {/* Shimmer hero wave — gradient stroke, boldest */}
               <path
-                key={i}
-                d={wavePath(w.y, w.amp, w.freq)}
-                stroke={`rgba(201,169,132,${w.op})`}
-                strokeWidth="1"
+                d={buildWave(SHIMMER.y, SHIMMER.amp, SHIMMER.wl, 4)}
+                stroke={`url(#sg-${index})`}
+                strokeWidth={SHIMMER.sw}
                 fill="none"
                 strokeLinecap="round"
+                strokeLinejoin="round"
               >
                 <animateTransform
                   attributeName="transform"
                   type="translate"
-                  from={w.dir > 0 ? "0 0" : "400 0"}
-                  to={w.dir > 0 ? "400 0" : "0 0"}
-                  dur={w.dur}
+                  from="0 0"
+                  to={`${SHIMMER.wl} 0`}
+                  dur={SHIMMER.dur}
                   repeatCount="indefinite"
                 />
               </path>
-            ))}
+            </g>
           </svg>
         </div>
 
         {/* ── SVG laser border ── */}
-        <svg
-          className="gatsby-svg"
-          viewBox="0 0 1000 750"
-          preserveAspectRatio="none"
-          aria-hidden
-        >
-          <rect
-            className="gatsby-svg-border"
-            x="4" y="4" width="992" height="742"
-            vectorEffect="non-scaling-stroke"
-          />
-          <rect
-            className="gatsby-svg-inner"
-            x="14" y="14" width="972" height="722"
-            vectorEffect="non-scaling-stroke"
-          />
+        <svg className="gatsby-svg" viewBox="0 0 1000 750" preserveAspectRatio="none" aria-hidden>
+          <rect className="gatsby-svg-border" x="4" y="4" width="992" height="742" vectorEffect="non-scaling-stroke" />
+          <rect className="gatsby-svg-inner"  x="14" y="14" width="972" height="722" vectorEffect="non-scaling-stroke" />
         </svg>
 
         {/* ── Gold L-corners ── */}

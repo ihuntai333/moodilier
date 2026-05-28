@@ -523,11 +523,13 @@ img { display: block; max-width: 100%; }
 @keyframes revealUp {
   from {
     opacity: 0;
-    transform: translateY(18px);
+    transform: translateY(28px);
+    filter: blur(10px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
+    filter: blur(0px);
   }
 }
 
@@ -535,25 +537,27 @@ img { display: block; max-width: 100%; }
 .reveal {
   opacity: 1;
   transform: none;
+  filter: none;
 }
 
 /* When entering viewport: play animation once */
 .reveal.revealed:not(.no-anim) {
-  animation: revealUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  animation: revealUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* Elements already in viewport on load: no animation, instant */
 .reveal.no-anim {
   animation: none;
+  filter: none;
 }
 
 /* Staggered delays for groups */
-.reveal-delay-1 { animation-delay: 0.08s; }
-.reveal-delay-2 { animation-delay: 0.16s; }
-.reveal-delay-3 { animation-delay: 0.24s; }
-.reveal-delay-4 { animation-delay: 0.32s; }
-.reveal-delay-5 { animation-delay: 0.40s; }
-.reveal-delay-6 { animation-delay: 0.48s; }
+.reveal-delay-1 { animation-delay: 0.10s; }
+.reveal-delay-2 { animation-delay: 0.20s; }
+.reveal-delay-3 { animation-delay: 0.30s; }
+.reveal-delay-4 { animation-delay: 0.42s; }
+.reveal-delay-5 { animation-delay: 0.54s; }
+.reveal-delay-6 { animation-delay: 0.66s; }
 
 /* Accessibility: no animations for users who prefer reduced motion */
 @media (prefers-reduced-motion: reduce) {
@@ -571,11 +575,13 @@ img { display: block; max-width: 100%; }
 @keyframes gatsbyEnter {
   from {
     opacity: 0;
-    transform: translateY(32px) scale(0.94);
+    transform: translateY(40px) scale(0.95);
+    filter: blur(14px);
   }
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+    filter: blur(0px);
   }
 }
 
@@ -611,11 +617,12 @@ img { display: block; max-width: 100%; }
 
 /* Entrance animation */
 .gatsby-card.gatsby-revealed:not(.gatsby-no-anim) {
-  animation: gatsbyEnter 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  animation: gatsbyEnter 1s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 .gatsby-card.gatsby-no-anim {
   opacity: 1;
   filter: none;
+  transform: none;
 }
 
 /* ── Image container ────────────────────────────────────────────── */
@@ -645,7 +652,7 @@ img { display: block; max-width: 100%; }
   height: 100%;
   pointer-events: none;
   z-index: 3;
-  opacity: 0.55;
+  opacity: 0.85;
   transition: opacity 0.5s ease;
   overflow: hidden;
 }
