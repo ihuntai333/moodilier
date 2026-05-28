@@ -6,6 +6,7 @@ import Footer from "@/components/layout/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import CookieBanner from "@/components/CookieBanner";
 import ScrollReveal from "@/components/ScrollReveal";
+import FacebookPixel from "@/components/FacebookPixel";
 import { readDb } from "@/lib/db";
 
 function getSettings() {
@@ -46,6 +47,7 @@ export default async function RootLayout({
 }) {
   const settings = getSettings();
   const ga4Id = settings?.ga4Id?.trim();
+  const pixelId = settings?.pixelId?.trim();
 
   const headersList = await headers();
   const pathname = headersList.get("x-pathname") ?? "";
@@ -70,6 +72,13 @@ export default async function RootLayout({
             />
           </>
         )}
+        {pixelId && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${pixelId}');fbq('track','PageView');`,
+            }}
+          />
+        )}
       </head>
       <body>
         {!isAdmin && <Header />}
@@ -78,6 +87,7 @@ export default async function RootLayout({
         {!isAdmin && <WhatsAppButton phone="40729555431" />}
         {!isAdmin && <CookieBanner />}
         {!isAdmin && <ScrollReveal />}
+        {pixelId && <FacebookPixel pixelId={pixelId} />}
       </body>
     </html>
   );

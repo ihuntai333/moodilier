@@ -5,6 +5,7 @@ import { Save, CheckCircle, AlertCircle } from "lucide-react";
 
 interface Settings {
   ga4Id: string;
+  pixelId: string;
   phone: string;
   email: string;
   address: string;
@@ -58,6 +59,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<Settings>({
     ga4Id: "",
+    pixelId: "",
     phone: "",
     email: "",
     address: "",
@@ -198,38 +200,49 @@ export default function AdminSettingsPage() {
             marginBottom: "1.25rem",
           }}
         >
-          <SectionTitle>Google Analytics</SectionTitle>
-          <div>
-            <label style={labelStyle}>
-              GA4 Measurement ID
-              <span
-                style={{
-                  marginLeft: "0.5rem",
-                  color: "#4a4540",
-                  fontWeight: 400,
-                }}
-              >
-                (ex. G-XXXXXXXXXX)
-              </span>
-            </label>
-            <input
-              type="text"
-              value={settings.ga4Id}
-              onChange={(e) => setField("ga4Id", e.target.value)}
-              placeholder="G-XXXXXXXXXX"
-              style={inputStyle}
-              onFocus={focusInput}
-              onBlur={blurInput}
-            />
-            <p
-              style={{
-                fontSize: "0.75rem",
-                color: "#4a4540",
-                marginTop: "0.4rem",
-              }}
-            >
-              Lasă gol pentru a dezactiva Google Analytics.
-            </p>
+          <SectionTitle>Google Analytics &amp; Facebook Pixel</SectionTitle>
+          <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+            <div>
+              <label style={labelStyle}>
+                GA4 Measurement ID
+                <span style={{ marginLeft: "0.5rem", color: "#4a4540", fontWeight: 400 }}>
+                  (ex. G-XXXXXXXXXX)
+                </span>
+              </label>
+              <input
+                type="text"
+                value={settings.ga4Id}
+                onChange={(e) => setField("ga4Id", e.target.value)}
+                placeholder="G-XXXXXXXXXX"
+                style={inputStyle}
+                onFocus={focusInput}
+                onBlur={blurInput}
+              />
+              <p style={{ fontSize: "0.75rem", color: "#4a4540", marginTop: "0.4rem" }}>
+                Lasă gol pentru a dezactiva Google Analytics.
+              </p>
+            </div>
+            <div>
+              <label style={labelStyle}>
+                Facebook Pixel ID
+                <span style={{ marginLeft: "0.5rem", color: "#4a4540", fontWeight: 400 }}>
+                  (ex. 1234567890123456)
+                </span>
+              </label>
+              <input
+                type="text"
+                value={settings.pixelId}
+                onChange={(e) => setField("pixelId", e.target.value)}
+                placeholder="1234567890123456"
+                style={inputStyle}
+                onFocus={focusInput}
+                onBlur={blurInput}
+              />
+              <p style={{ fontSize: "0.75rem", color: "#4a4540", marginTop: "0.4rem" }}>
+                Găsești ID-ul în Meta Business → Events Manager → Pixel → Settings.
+                Lasă gol pentru a dezactiva.
+              </p>
+            </div>
           </div>
         </div>
 
