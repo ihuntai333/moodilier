@@ -634,19 +634,23 @@ img { display: block; max-width: 100%; }
   transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), filter 0.8s ease !important;
 }
 .gatsby-card:hover .gatsby-img {
-  transform: scale(1.06) !important;
-  filter: brightness(1.05) !important;
+  transform: scale(1.06);
 }
 
-/* ── Gold mouse spotlight ───────────────────────────────────────── */
-.gatsby-spotlight {
+/* ── Gold animated wave overlay ─────────────────────────────────── */
+.gatsby-waves {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
-  opacity: 0;
   z-index: 3;
-  transition: opacity 0.4s ease;
-  mix-blend-mode: screen;
+  opacity: 0.55;
+  transition: opacity 0.5s ease;
+  overflow: hidden;
+}
+.gatsby-card:hover .gatsby-waves {
+  opacity: 1;
 }
 
 /* ── SVG laser-trace border ─────────────────────────────────────── */

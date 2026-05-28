@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useCallback, useEffect, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -17,6 +17,26 @@ interface GatsbyProjectCardProps {
   style?: React.CSSProperties;
 }
 
+/* Sine wave path generator — horizontal sinusoid */
+function wavePath(y: number, amp: number, freq: number) {
+  const pts: string[] = [];
+  // spans -400 to 800 so the looping translate never shows a gap
+  for (let x = -400; x <= 900; x += 60) {
+    const wy = y + Math.sin((x / freq) * Math.PI) * amp;
+    pts.push(`${pts.length === 0 ? "M" : "L"}${x} ${wy}`);
+  }
+  return pts.join(" ");
+}
+
+const WAVES = [
+  { y: 30,  amp: 14, freq: 80,  dur: "5s",   dir: 1,  op: 0.18 },
+  { y: 80,  amp: 10, freq: 100, dur: "7s",   dir: -1, op: 0.12 },
+  { y: 130, amp: 18, freq: 70,  dur: "6s",   dir: 1,  op: 0.15 },
+  { y: 180, amp: 12, freq: 90,  dur: "8.5s", dir: -1, op: 0.11 },
+  { y: 230, amp: 16, freq: 75,  dur: "6.5s", dir: 1,  op: 0.14 },
+  { y: 280, amp: 9,  freq: 110, dur: "7.5s", dir: -1, op: 0.10 },
+];
+
 export default function GatsbyProjectCard({
   title,
   category,
@@ -25,34 +45,21 @@ export default function GatsbyProjectCard({
   index = 0,
   imageCount,
   description,
-  featured = false,
   className = "",
   style,
 }: GatsbyProjectCardProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
-  const spotRef = useRef<HTMLDivElement>(null);
   const [revealed, setRevealed] = useState(false);
   const [noAnim, setNoAnim] = useState(false);
-  const [isTouch, setIsTouch] = useState(false);
 
-  // ── Detect touch device ────────────────────────────────────────────
-  useEffect(() => {
-    setIsTouch(
-      window.matchMedia("(hover: none)").matches ||
-        navigator.maxTouchPoints > 0
-    );
-  }, []);
-
-  // ── Entrance via IntersectionObserver ──────────────────────────────
+  /* Entrance reveal via IntersectionObserver */
   useEffect(() => {
     const el = wrapRef.current;
     if (!el) return;
 
     const rect = el.getBoundingClientRect();
     if (rect.top < window.innerHeight) {
-      // Already in viewport: skip blur/scale entrance but still play SVG draw
       setNoAnim(true);
-      // Small delay so browser paints initial dashoffset:5000 before animating
       const t = setTimeout(() => setRevealed(true), 80);
       return () => clearTimeout(t);
     }
@@ -64,83 +71,22 @@ export default function GatsbyProjectCard({
           obs.disconnect();
         }
       },
-      { threshold: 0.08, rootMargin: "0px 0px -30px 0px" }
+      { threshold: 0.06, rootMargin: "0px 0px -20px 0px" }
     );
     obs.observe(el);
     return () => obs.disconnect();
   }, []);
 
-  // ── 3D magnetic tilt + gold spotlight (desktop only) ──────────────
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (isTouch) return;
-      const el = wrapRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width - 0.5;
-      const y = (e.clientY - rect.top) / rect.height - 0.5;
-
-      // 3D tilt
-      el.style.transform = `perspective(900px) rotateX(${-y * 9}deg) rotateY(${x * 9}deg) scale(1.025) translateZ(0)`;
-      el.style.boxShadow = `${-x * 24}px ${y * 24 + 16}px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(201,169,132,0.15)`;
-
-      // Gold spotlight follows cursor
-      if (spotRef.current) {
-        const px = (x + 0.5) * 100;
-        const py = (y + 0.5) * 100;
-        spotRef.current.style.background = `radial-gradient(ellipse 50% 45% at ${px}% ${py}%, rgba(201,169,132,0.22) 0%, rgba(201,169,132,0.06) 55%, transparent 80%)`;
-        spotRef.current.style.opacity = "1";
-      }
-    },
-    [isTouch]
-  );
-
-  const handleMouseLeave = useCallback(() => {
-    if (isTouch) return;
-    const el = wrapRef.current;
-    if (!el) return;
-    el.style.transform = "";
-    el.style.boxShadow = "";
-    if (spotRef.current) spotRef.current.style.opacity = "0";
-  }, [isTouch]);
-
-  // ── Touch press feedback (mobile) ─────────────────────────────────
-  const handleTouchStart = useCallback(() => {
-    const el = wrapRef.current;
-    if (!el) return;
-    el.style.transform = "scale(0.97)";
-    el.style.transition = "transform 0.15s ease";
-  }, []);
-
-  const handleTouchEnd = useCallback(() => {
-    const el = wrapRef.current;
-    if (!el) return;
-    el.style.transform = "";
-    el.style.transition = "transform 0.3s ease";
-    setTimeout(() => {
-      if (wrapRef.current) wrapRef.current.style.transition = "";
-    }, 300);
-  }, []);
-
-  // Stagger: column-aware (0, 0.1, 0.2s per row on 3-col grid)
-  const entranceDelay = noAnim ? 0 : (index % 3) * 0.1;
+  const delay = noAnim ? 0 : (index % 3) * 0.1;
 
   return (
     <Link href={href} className={`gatsby-card-link ${className}`} style={style}>
       <div
         ref={wrapRef}
-        className={`gatsby-card${revealed ? " gatsby-revealed" : ""}${noAnim ? " gatsby-no-anim" : ""}${isTouch ? " gatsby-touch" : ""}`}
-        style={{
-          animationDelay: `${entranceDelay}s`,
-          transformStyle: "preserve-3d",
-          willChange: "transform",
-        }}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
+        className={`gatsby-card${revealed ? " gatsby-revealed" : ""}${noAnim ? " gatsby-no-anim" : ""}`}
+        style={{ animationDelay: `${delay}s` }}
       >
-        {/* ── Image ───────────────────────────────────────────── */}
+        {/* ── Image ── */}
         <div className="gatsby-img-wrap">
           {image ? (
             <Image
@@ -154,16 +100,39 @@ export default function GatsbyProjectCard({
               className="gatsby-img"
             />
           ) : (
-            <div className="gatsby-no-img">
-              <span>Fără imagine</span>
-            </div>
+            <div className="gatsby-no-img"><span>Fără imagine</span></div>
           )}
 
-          {/* Gold mouse spotlight (desktop only) */}
-          {!isTouch && <div ref={spotRef} className="gatsby-spotlight" />}
+          {/* ── Gold wave overlay ── */}
+          <svg
+            className="gatsby-waves"
+            viewBox="0 0 500 310"
+            preserveAspectRatio="xMidYMid slice"
+            aria-hidden="true"
+          >
+            {WAVES.map((w, i) => (
+              <path
+                key={i}
+                d={wavePath(w.y, w.amp, w.freq)}
+                stroke={`rgba(201,169,132,${w.op})`}
+                strokeWidth="1"
+                fill="none"
+                strokeLinecap="round"
+              >
+                <animateTransform
+                  attributeName="transform"
+                  type="translate"
+                  from={w.dir > 0 ? "0 0" : "400 0"}
+                  to={w.dir > 0 ? "400 0" : "0 0"}
+                  dur={w.dur}
+                  repeatCount="indefinite"
+                />
+              </path>
+            ))}
+          </svg>
         </div>
 
-        {/* ── SVG laser-trace border ───────────────────────────── */}
+        {/* ── SVG laser border ── */}
         <svg
           className="gatsby-svg"
           viewBox="0 0 1000 750"
@@ -182,17 +151,15 @@ export default function GatsbyProjectCard({
           />
         </svg>
 
-        {/* ── Gold L-corners ─────────────────────────────────── */}
+        {/* ── Gold L-corners ── */}
         <div className="gatsby-corners" aria-hidden />
 
-        {/* ── Content overlay ─────────────────────────────────── */}
+        {/* ── Content overlay ── */}
         <div className="gatsby-overlay">
           <div className="gatsby-overlay-inner">
             <span className="gatsby-cat">{category}</span>
             <h3 className="gatsby-title">{title}</h3>
-            {description && (
-              <p className="gatsby-desc">{description}</p>
-            )}
+            {description && <p className="gatsby-desc">{description}</p>}
             <div className="gatsby-meta">
               {imageCount != null && imageCount > 0 && (
                 <span className="gatsby-count">⬡ {imageCount} fotografii</span>
