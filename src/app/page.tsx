@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { ArrowRight } from "lucide-react";
 import GatsbyProjectCard from "@/components/GatsbyProjectCard";
+import JsonLd from "@/components/JsonLd";
 
 export const metadata: Metadata = {
   title: "Moodilier — Mobilier La Comandă Premium | București",
@@ -110,6 +111,7 @@ const marqueeItems = [
 export default function HomePage() {
   return (
     <>
+      <JsonLd type="home" />
       {/* ============== HERO ============== */}
       <section className="hero" style={{ minHeight: "100vh" }}>
         <div className="hero-bg">

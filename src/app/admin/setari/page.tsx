@@ -6,6 +6,8 @@ import { Save, CheckCircle, AlertCircle } from "lucide-react";
 interface Settings {
   ga4Id: string;
   pixelId: string;
+  googleSiteVerification: string;
+  facebookDomainVerification: string;
   phone: string;
   email: string;
   address: string;
@@ -60,6 +62,8 @@ export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<Settings>({
     ga4Id: "",
     pixelId: "",
+    googleSiteVerification: "",
+    facebookDomainVerification: "",
     phone: "",
     email: "",
     address: "",
@@ -241,6 +245,43 @@ export default function AdminSettingsPage() {
               <p style={{ fontSize: "0.75rem", color: "#4a4540", marginTop: "0.4rem" }}>
                 Găsești ID-ul în Meta Business → Events Manager → Pixel → Settings.
                 Lasă gol pentru a dezactiva.
+              </p>
+            </div>
+            <div>
+              <label style={labelStyle}>
+                Google Search Console Verificare
+                <span style={{ marginLeft: "0.5rem", color: "#4a4540", fontWeight: 400 }}>
+                  (codul din meta tag google-site-verification)
+                </span>
+              </label>
+              <input
+                type="text"
+                value={settings.googleSiteVerification}
+                onChange={(e) => setField("googleSiteVerification", e.target.value)}
+                placeholder="abc123xyz..."
+                style={inputStyle}
+                onFocus={focusInput}
+                onBlur={blurInput}
+              />
+              <p style={{ fontSize: "0.75rem", color: "#4a4540", marginTop: "0.4rem" }}>
+                Din Google Search Console → Add property → HTML tag → copiază doar valoarea content="..."
+              </p>
+            </div>
+            <div>
+              <label style={labelStyle}>
+                Facebook Domain Verification
+              </label>
+              <input
+                type="text"
+                value={settings.facebookDomainVerification}
+                onChange={(e) => setField("facebookDomainVerification", e.target.value)}
+                placeholder="abc123..."
+                style={inputStyle}
+                onFocus={focusInput}
+                onBlur={blurInput}
+              />
+              <p style={{ fontSize: "0.75rem", color: "#4a4540", marginTop: "0.4rem" }}>
+                Din Meta Business → Brand Safety → Domains → copiază codul de verificare.
               </p>
             </div>
           </div>

@@ -32,6 +32,8 @@ export interface Project {
 export interface Settings {
   ga4Id: string;
   pixelId: string;
+  googleSiteVerification: string;
+  facebookDomainVerification: string;
   phone: string;
   email: string;
   address: string;
@@ -61,6 +63,8 @@ export function readDb(): Database {
       settings: {
         ga4Id: "",
         pixelId: "",
+        googleSiteVerification: "",
+        facebookDomainVerification: "",
         phone: "(+40) 729 555 431",
         email: "ofertare@moodilier.com",
         address: "Blv. Basarabia 256, incinta FAUR, Sector 3, București",

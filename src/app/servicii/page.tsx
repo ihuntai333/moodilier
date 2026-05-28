@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { ArrowRight } from "lucide-react";
 import PageHero from "@/components/PageHero";
+import JsonLd from "@/components/JsonLd";
 
 export const metadata: Metadata = {
   title: "Servicii | Moodilier",
@@ -126,6 +127,7 @@ const processSteps = [
 export default function ServiciiPage() {
   return (
     <>
+      <JsonLd type="service" />
       {/* ============== PAGE HERO ============== */}
       <PageHero
         label="Ce oferim"

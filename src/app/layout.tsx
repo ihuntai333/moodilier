@@ -48,6 +48,8 @@ export default async function RootLayout({
   const settings = getSettings();
   const ga4Id = settings?.ga4Id?.trim();
   const pixelId = settings?.pixelId?.trim();
+  const googleVerify = settings?.googleSiteVerification?.trim();
+  const fbDomainVerify = settings?.facebookDomainVerification?.trim();
 
   const headersList = await headers();
   const pathname = headersList.get("x-pathname") ?? "";
@@ -62,6 +64,9 @@ export default async function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Inter:wght@300;400;500;600;700&display=swap"
           rel="stylesheet"
         />
+        {/* Verification meta tags */}
+        {googleVerify && <meta name="google-site-verification" content={googleVerify} />}
+        {fbDomainVerify && <meta name="facebook-domain-verification" content={fbDomainVerify} />}
         {ga4Id && (
           <>
             <script async src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`} />
