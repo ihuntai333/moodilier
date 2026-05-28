@@ -66,17 +66,17 @@ function buildWave(y: number, amp: number, wl: number, reps: number): string {
 /* ── Wave configuration: rounder, more prominent ── */
 const WAVES = [
   // y-center, amplitude, wavelength, duration, direction, strokeWidth, opacity
-  { y: 40,  amp: 22, wl: 200, dur: "11s",  dir:  1, sw: 1.2, op: 0.28 },
-  { y: 95,  amp: 16, wl: 260, dur: "16s",  dir: -1, sw: 0.9, op: 0.18 },
-  { y: 148, amp: 28, wl: 180, dur: "13s",  dir:  1, sw: 1.6, op: 0.35 }, // hero wave
-  { y: 200, amp: 18, wl: 240, dur: "15s",  dir: -1, sw: 1.0, op: 0.22 },
-  { y: 252, amp: 24, wl: 190, dur: "12s",  dir:  1, sw: 1.4, op: 0.30 },
-  { y: 300, amp: 14, wl: 280, dur: "18s",  dir: -1, sw: 0.8, op: 0.16 },
-  { y: 345, amp: 20, wl: 210, dur: "14s",  dir:  1, sw: 1.1, op: 0.24 },
+  { y: 40,  amp: 22, wl: 200, dur: "11s",  dir:  1, sw: 0.6, op: 0.28 },
+  { y: 95,  amp: 16, wl: 260, dur: "16s",  dir: -1, sw: 0.4, op: 0.18 },
+  { y: 148, amp: 28, wl: 180, dur: "13s",  dir:  1, sw: 0.8, op: 0.35 }, // hero wave
+  { y: 200, amp: 18, wl: 240, dur: "15s",  dir: -1, sw: 0.5, op: 0.22 },
+  { y: 252, amp: 24, wl: 190, dur: "12s",  dir:  1, sw: 0.7, op: 0.30 },
+  { y: 300, amp: 14, wl: 280, dur: "18s",  dir: -1, sw: 0.4, op: 0.16 },
+  { y: 345, amp: 20, wl: 210, dur: "14s",  dir:  1, sw: 0.5, op: 0.24 },
 ];
 
 /* ── Shimmer: the brightest, fastest wave ── */
-const SHIMMER = { y: 148, amp: 28, wl: 180, dur: "7s", sw: 2.2 };
+const SHIMMER = { y: 148, amp: 28, wl: 180, dur: "7s", sw: 0.8 };
 
 export default function GatsbyProjectCard({
   title,
