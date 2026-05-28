@@ -60,7 +60,8 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   images: {
-    unoptimized: true,
+    // Optimization enabled: Vercel auto-converts to WebP/AVIF
+    // Reduces image sizes by 25-50% automatically
     remotePatterns: [
       { protocol: "https", hostname: "moodilier.ro" },
       { protocol: "http",  hostname: "localhost" },

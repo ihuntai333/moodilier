@@ -1,7 +1,5 @@
-"use client";
-
-// JSON-LD Structured Data component
-// Helps Google, Bing and AI models understand the site's semantic meaning
+// JSON-LD Structured Data — server component (no "use client" needed)
+// Renders Schema.org structured data for Google rich results and LLM understanding
 // Schema types: Organization, LocalBusiness, WebSite, BreadcrumbList
 
 interface JsonLdProps {

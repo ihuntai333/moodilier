@@ -119,9 +119,10 @@ export default function HomePage() {
             src="/images-scraped/Olimp_03.jpg"
             alt="Moodilier — Mobilier Premium"
             fill
+            sizes="100vw"
             style={{ objectFit: "cover", objectPosition: "center" }}
             priority
-            unoptimized
+            quality={85}
           />
         </div>
         <div className="hero-overlay" />

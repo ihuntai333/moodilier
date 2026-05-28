@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import { Cormorant_Garamond, Inter } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -8,6 +10,24 @@ import CookieBanner from "@/components/CookieBanner";
 import ScrollReveal from "@/components/ScrollReveal";
 import FacebookPixel from "@/components/FacebookPixel";
 import { readDb } from "@/lib/db";
+
+// ── next/font: fonts served from same domain, zero render blocking ──
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+  style: ["normal", "italic"],
+  display: "swap",
+  variable: "--font-display",
+  preload: true,
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-body",
+  preload: true,
+});
 
 function getSettings() {
   try {
@@ -56,34 +76,22 @@ export default async function RootLayout({
   const isAdmin = pathname.startsWith("/admin");
 
   return (
-    <html lang="ro" suppressHydrationWarning>
+    <html
+      lang="ro"
+      suppressHydrationWarning
+      className={`${cormorant.variable} ${inter.variable}`}
+    >
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Inter:wght@300;400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
+        {/* Resource hints for external services */}
+        <link rel="preconnect" href="https://connect.facebook.net" />
+        <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+
         {/* Verification meta tags */}
         {googleVerify && <meta name="google-site-verification" content={googleVerify} />}
         {fbDomainVerify && <meta name="facebook-domain-verification" content={fbDomainVerify} />}
-        {ga4Id && (
-          <>
-            <script async src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`} />
-            <script
-              dangerouslySetInnerHTML={{
-                __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${ga4Id}');`,
-              }}
-            />
-          </>
-        )}
-        {pixelId && (
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${pixelId}');fbq('track','PageView');`,
-            }}
-          />
-        )}
+
+        {/* Viewport & color scheme */}
+        <meta name="theme-color" content="#1f1d1a" />
       </head>
       <body>
         {!isAdmin && <Header />}
@@ -93,6 +101,24 @@ export default async function RootLayout({
         {!isAdmin && <CookieBanner />}
         {!isAdmin && <ScrollReveal />}
         {pixelId && <FacebookPixel pixelId={pixelId} />}
+
+        {/* ── Analytics: deferred until page is interactive ── */}
+        {ga4Id && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`}
+              strategy="afterInteractive"
+            />
+            <Script id="ga4-init" strategy="afterInteractive">
+              {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${ga4Id}');`}
+            </Script>
+          </>
+        )}
+        {pixelId && (
+          <Script id="fb-pixel" strategy="afterInteractive">
+            {`!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${pixelId}');fbq('track','PageView');`}
+          </Script>
+        )}
       </body>
     </html>
   );
