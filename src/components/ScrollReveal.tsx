@@ -3,29 +3,29 @@ import { useEffect } from "react";
 
 export default function ScrollReveal() {
   useEffect(() => {
-    // Strategy: elements are ALWAYS visible by default.
-    // We only ADD an animation class when they enter the viewport.
-    // This means no element can ever be "stuck invisible".
-
+    // Trigger when element enters 80px from bottom of viewport
+    // so the animation plays AS the element scrolls into view, not after.
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            // Add animation class — element plays the reveal animation
             entry.target.classList.add("revealed");
-            // Stop observing once revealed
             observer.unobserve(entry.target);
           }
         });
       },
-      { threshold: 0, rootMargin: "0px 0px -20px 0px" }
+      {
+        threshold: 0.08,
+        rootMargin: "0px 0px -60px 0px",
+      }
     );
 
     const observeAll = () => {
       document.querySelectorAll(".reveal:not(.revealed)").forEach((el) => {
-        // If already in viewport on load, reveal immediately without animation
         const rect = el.getBoundingClientRect();
-        if (rect.top < window.innerHeight) {
+        // Only skip animation for elements fully visible on initial load
+        // (top AND bottom both inside viewport)
+        if (rect.top >= 0 && rect.bottom <= window.innerHeight) {
           el.classList.add("revealed", "no-anim");
         } else {
           observer.observe(el);
@@ -34,10 +34,8 @@ export default function ScrollReveal() {
     };
 
     observeAll();
-
-    // Re-check after hydration completes (for client-rendered content)
     const t1 = setTimeout(observeAll, 300);
-    const t2 = setTimeout(observeAll, 800);
+    const t2 = setTimeout(observeAll, 900);
 
     return () => {
       clearTimeout(t1);
