@@ -27,7 +27,8 @@ const STYLES = `
   --fg: #ede5da; --fg2: #7a6e62; --border: rgba(201,169,132,.1);
   --sans: 'Inter', sans-serif; --serif: 'Cormorant Garamond', serif;
   background: var(--bg); color: var(--fg);
-  font-family: var(--sans); overflow-x: hidden;
+  /* overflow-x: clip instead of hidden — clip doesn't break position:sticky */
+  font-family: var(--sans); overflow-x: clip;
 }
 .fp3 * { box-sizing: border-box; }
 .fp3 a { text-decoration: none; color: inherit; }
