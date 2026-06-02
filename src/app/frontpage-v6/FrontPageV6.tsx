@@ -429,16 +429,14 @@ export default function FrontPageV6() {
 
       gsap.registerPlugin(ScrollTrigger);
 
-      /* Skip Lenis on touch — native scroll is smoother on mobile */
+      /* Lenis smooth scroll — desktop only; mobile uses native scroll */
       const isTouch = window.matchMedia("(hover: none)").matches;
-      if (isTouch) {
-        ScrollTrigger.refresh();
-        return;
+      if (!isTouch) {
+        lenis = new Lenis({ duration: 1.35, easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
+        lenis.on("scroll", () => ScrollTrigger.update());
+        gsap.ticker.add((t: number) => lenis?.raf(t * 1000));
+        gsap.ticker.lagSmoothing(0);
       }
-      lenis = new Lenis({ duration: 1.35, easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
-      lenis.on("scroll", () => ScrollTrigger.update());
-      gsap.ticker.add((t: number) => lenis?.raf(t * 1000));
-      gsap.ticker.lagSmoothing(0);
 
       /* ── Hero text curtain ── */
       gsap.to(".v6-mask-inner", {
