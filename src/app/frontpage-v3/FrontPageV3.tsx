@@ -108,17 +108,6 @@ const STYLES = `
   overflow: hidden; background: var(--bg);
 }
 
-/* Room wireframe SVG background */
-.fp3-room-bg {
-  position: absolute; inset: 0; width: 100%; height: 100%;
-  pointer-events: none;
-}
-.fp3-room-line {
-  stroke: var(--gold); stroke-width: .4; fill: none; opacity: .18;
-}
-.fp3-room-floor {
-  fill: url(#fp3FloorGrad); opacity: .08;
-}
 
 /* 3-D perspective viewport */
 .fp3-room-3d {
@@ -445,35 +434,12 @@ function RoomScene() {
   const activePhase = PHASE_TEXTS.reduce((acc, pt) => progress >= pt.t ? pt : acc, PHASE_TEXTS[0]);
   const textOp = 1 - phase(progress, 0.84, 0.92); // hides as CTA comes in
 
-  /* ── Room line coords (one-point perspective) ── */
-  // Vanishing point at 50%, 45%
-  const vx = 50, vy = 45;
+  /* ── Room line coords unused now ── */
 
   return (
     <div ref={wrapRef} className="fp3-room-wrap" style={{ height: "600vh" }}>
       <div className="fp3-room-sticky">
 
-        {/* Room wireframe SVG */}
-        <svg className="fp3-room-bg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" aria-hidden>
-          <defs>
-            <linearGradient id="fp3FloorGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#c9a984" stopOpacity=".12" />
-              <stop offset="100%" stopColor="#c9a984" stopOpacity="0" />
-            </linearGradient>
-          </defs>
-          {/* Floor polygon */}
-          <polygon points={`0,100 ${vx},${vy} 100,100`} className="fp3-room-floor" />
-          {/* Converging floor lines */}
-          <line x1="0"   y1="100" x2={vx} y2={vy} className="fp3-room-line" />
-          <line x1="100" y1="100" x2={vx} y2={vy} className="fp3-room-line" />
-          <line x1="0"   y1="72"  x2={vx} y2={vy} className="fp3-room-line" opacity=".08" />
-          <line x1="100" y1="72"  x2={vx} y2={vy} className="fp3-room-line" opacity=".08" />
-          {/* Ceiling lines */}
-          <line x1="0"   y1="0"   x2={vx} y2={vy} className="fp3-room-line" opacity=".06" />
-          <line x1="100" y1="0"   x2={vx} y2={vy} className="fp3-room-line" opacity=".06" />
-          {/* Horizontal guide */}
-          <line x1="0" y1={vy} x2="100" y2={vy} className="fp3-room-line" opacity=".06" />
-        </svg>
 
         {/* 3D scene */}
         <div className="fp3-room-3d">
