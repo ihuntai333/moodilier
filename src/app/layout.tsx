@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { Cormorant_Garamond, Inter } from "next/font/google";
+import { Cormorant_Garamond, Inter, Geist } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import Header from "@/components/layout/Header";
@@ -10,6 +10,10 @@ import CookieBanner from "@/components/CookieBanner";
 import ScrollReveal from "@/components/ScrollReveal";
 import FacebookPixel from "@/components/FacebookPixel";
 import { readDb } from "@/lib/db";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+
 
 // ── next/font: fonts served from same domain, zero render blocking ──
 const cormorant = Cormorant_Garamond({
@@ -79,7 +83,7 @@ export default async function RootLayout({
     <html
       lang="ro"
       suppressHydrationWarning
-      className={`${cormorant.variable} ${inter.variable}`}
+      className={cn(cormorant.variable, inter.variable, "font-sans", geist.variable)}
     >
       <head>
         {/* Resource hints for external services */}
