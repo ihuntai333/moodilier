@@ -3,8 +3,8 @@ import { useEffect } from "react";
 
 export default function ScrollReveal() {
   useEffect(() => {
-    // Trigger when element enters 80px from bottom of viewport
-    // so the animation plays AS the element scrolls into view, not after.
+    // Trigger early (when element is barely visible) so the 0.15s base delay
+    // + animation play while element is actively scrolling into view.
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -15,16 +15,15 @@ export default function ScrollReveal() {
         });
       },
       {
-        threshold: 0.08,
-        rootMargin: "0px 0px -60px 0px",
+        threshold: 0.05,           // fire when 5% visible
+        rootMargin: "0px 0px -30px 0px", // 30px into viewport
       }
     );
 
     const observeAll = () => {
       document.querySelectorAll(".reveal:not(.revealed)").forEach((el) => {
         const rect = el.getBoundingClientRect();
-        // Only skip animation for elements fully visible on initial load
-        // (top AND bottom both inside viewport)
+        // Only skip animation for elements fully inside viewport on load
         if (rect.top >= 0 && rect.bottom <= window.innerHeight) {
           el.classList.add("revealed", "no-anim");
         } else {

@@ -523,16 +523,17 @@ img { display: block; max-width: 100%; }
    No element can ever be stuck invisible. No js-loaded dependency.
 --- */
 
-@keyframes revealUp {
-  from {
+@keyframes revealCinematic {
+  0% {
     opacity: 0;
-    transform: translateY(55px);
-    filter: blur(14px);
+    transform: perspective(700px) translateY(90px) scale(0.9) rotateX(10deg);
   }
-  to {
+  60% {
     opacity: 1;
-    transform: translateY(0);
-    filter: blur(0px);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(700px) translateY(0) scale(1) rotateX(0deg);
   }
 }
 
@@ -543,24 +544,25 @@ img { display: block; max-width: 100%; }
   filter: none;
 }
 
-/* When entering viewport: play animation once */
+/* When entering viewport: play animation once, with base delay */
 .reveal.revealed:not(.no-anim) {
-  animation: revealUp 1.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: revealCinematic 1.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.15s;
 }
 
-/* Elements already in viewport on load: no animation, instant */
+/* Elements already in viewport on load: instant */
 .reveal.no-anim {
   animation: none;
   filter: none;
 }
 
-/* Staggered delays for groups */
-.reveal-delay-1 { animation-delay: 0.12s; }
-.reveal-delay-2 { animation-delay: 0.26s; }
-.reveal-delay-3 { animation-delay: 0.40s; }
-.reveal-delay-4 { animation-delay: 0.55s; }
-.reveal-delay-5 { animation-delay: 0.70s; }
-.reveal-delay-6 { animation-delay: 0.85s; }
+/* Staggered delays — added ON TOP of base 0.15s */
+.reveal-delay-1 { animation-delay: 0.22s; }
+.reveal-delay-2 { animation-delay: 0.38s; }
+.reveal-delay-3 { animation-delay: 0.54s; }
+.reveal-delay-4 { animation-delay: 0.72s; }
+.reveal-delay-5 { animation-delay: 0.90s; }
+.reveal-delay-6 { animation-delay: 1.08s; }
 
 /* Accessibility: no animations for users who prefer reduced motion */
 @media (prefers-reduced-motion: reduce) {
@@ -576,15 +578,16 @@ img { display: block; max-width: 100%; }
 
 /* ── Entrance: blur + scale + fade ─────────────────────────────── */
 @keyframes gatsbyEnter {
-  from {
+  0% {
     opacity: 0;
-    transform: translateY(60px) scale(0.93);
-    filter: blur(16px);
+    transform: perspective(800px) translateY(80px) scale(0.91) rotateX(8deg);
   }
-  to {
+  65% {
     opacity: 1;
-    transform: translateY(0) scale(1);
-    filter: blur(0px);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(800px) translateY(0) scale(1) rotateX(0deg);
   }
 }
 
@@ -620,7 +623,8 @@ img { display: block; max-width: 100%; }
 
 /* Entrance animation */
 .gatsby-card.gatsby-revealed:not(.gatsby-no-anim) {
-  animation: gatsbyEnter 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: gatsbyEnter 1.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: 0.1s;
 }
 .gatsby-card.gatsby-no-anim {
   opacity: 1;
