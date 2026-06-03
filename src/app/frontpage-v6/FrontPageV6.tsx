@@ -321,7 +321,7 @@ const PROJECTS = [
   { idx:"01", cat:"Rezidențial", loc:"Ilfov · 2024",      name:"Vila",       em:"Cosmopolis",  img:"/images-scraped/Cosmopolis_Vila_Andrei_Tudoran_02-scaled.jpg", href:"/proiecte/executie_vila-cosmopolis" },
   { idx:"02", cat:"Rezidențial", loc:"Constanța · 2023",  name:"Apartament", em:"Olimp",       img:"/images-scraped/Olimp_03.jpg",                               href:"/proiecte/executie_apt-olimp" },
   { idx:"03", cat:"Rezidențial", loc:"Mamaia Nord · 2023",name:"Black",      em:"Pearl",       img:"/images-scraped/Black_Pearl_01.jpg",                         href:"/proiecte/executie_apt-mamaia-nord" },
-  { idx:"04", cat:"Comercial",   loc:"București · 2024",  name:"Sediu",      em:"Corporate",   img:"/images-scraped/carusel_office.jpg",                         href:"/proiecte/executie_sediu-office" },
+  { idx:"04", cat:"Rezidențial", loc:"București · 2023",  name:"Apartament", em:"Dristor",      img:"/images-scraped/executie_apt-dristor_living_03.jpg",                  href:"/proiecte" },
   { idx:"05", cat:"Rezidențial", loc:"Ilfov · 2023",      name:"Casa",       em:"Mogoșoaia",   img:"/images-scraped/Mogosoaia_01.jpg",                           href:"/proiecte/executie_casa-mogosoaia" },
   { idx:"06", cat:"Rezidențial", loc:"Ilfov · 2024",      name:"Vila",       em:"Corbeanca",   img:"/images-scraped/vila_corbeanca_exec_living_4.jpg",           href:"/proiecte" },
 ];

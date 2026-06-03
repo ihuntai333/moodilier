@@ -43,10 +43,10 @@ const featuredProjects = [
     href: "/proiecte/executie_apptown-north",
   },
   {
-    title: "Sediu de Birouri",
-    category: "Comercial",
-    image: "/images-scraped/carusel_office.jpg",
-    href: "/proiecte/executie_sediu-office",
+    title: "Apt. Dristor",
+    category: "Rezidențial",
+    image: "/images-scraped/executie_apt-dristor_living_03.jpg",
+    href: "/proiecte",
   },
 ];
 
