@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import ScrollVideoSection from "@/components/ScrollVideoSection";
 
 /* ══════════════════════════════════════════════════════════════
    STYLES
@@ -523,6 +524,9 @@ export default function FrontPageV6() {
             ))}
           </div>
         </div>
+
+        {/* ══ SCROLL VIDEO ══ */}
+        <ScrollVideoSection />
 
         {/* ══ PROJECTS — desktop alternating ══ */}
         {PROJECTS.map((p,i)=>(
