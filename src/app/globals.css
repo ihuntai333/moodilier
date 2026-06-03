@@ -78,6 +78,51 @@
   --sidebar-ring:        oklch(0.708 0 0);
 }
 
+/* ─── LIGHT THEME ─────────────────────────────────────── */
+[data-theme="light"] {
+  --color-bg:        #f7f4ef;
+  --color-bg-alt:    #f0ece4;
+  --color-surface:   #e8e3da;
+  --color-border:    #d4cdc4;
+  --color-border-alt:#c0b8ae;
+  --color-fg:        #1f1d1a;
+  --color-fg-muted:  #4a4540;
+  --color-fg-subtle: #8a8276;
+  --color-gold:      #c9a984;
+  --color-gold-light:#d9c09a;
+  --color-gold-dark: #a88a68;
+}
+
+/* Smooth theme transition */
+body, .nav, footer, .section, .card, .gatsby-card, .page-hero {
+  transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease;
+}
+
+/* ─── MOBILE LOGO: bigger + centered ────────────────────── */
+@media (max-width: 768px) {
+  .nav .container { position: relative; }
+  /* Logo link is the first child of the container flex */
+  .nav-logo-mobile {
+    position: absolute !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+  }
+}
+
+/* ─── PROJECT CARD BORDER: desktop = 1px gold line ──────── */
+@media (min-width: 769px) {
+  .gatsby-svg, .gatsby-corners { display: none !important; }
+  .gatsby-card {
+    border-bottom: 1px solid rgba(201,169,132,0.3);
+    border-left:   1px solid rgba(201,169,132,0.12);
+    transition: border-color 0.3s ease;
+  }
+  .gatsby-card:hover {
+    border-bottom-color: rgba(201,169,132,0.7);
+    border-left-color:   rgba(201,169,132,0.4);
+  }
+}
+
 /* --- Reset & Base --- */
 *, *::before, *::after {
   box-sizing: border-box;

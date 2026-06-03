@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Menu, X, ArrowRight } from "lucide-react";
 import Logo from "@/components/Logo";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const navLinks = [
   { href: "/", label: "Acasă" },
@@ -190,11 +191,12 @@ export default function Header() {
             justifyContent: "space-between",
           }}
         >
-          {/* Logo */}
+          {/* Logo — centred on mobile via CSS */}
           <Logo
             variant="light"
             href="/"
             onClick={closeMobile}
+            className="nav-logo-mobile"
           />
 
           {/* Desktop Nav */}
@@ -211,6 +213,7 @@ export default function Header() {
                 {link.label}
               </Link>
             ))}
+            <ThemeToggle />
             <Link
               href="/contact"
               className="btn btn-primary"
@@ -220,25 +223,30 @@ export default function Header() {
             </Link>
           </div>
 
-          {/* Hamburger — mobile only via CSS */}
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            style={{
-              display: "none", // overridden by .mobile-toggle CSS
-              background: "none",
-              border: "none",
-              color: "var(--color-fg)",
-              cursor: "pointer",
-              padding: "0.5rem",
-              zIndex: 202,
-              position: "relative",
-            }}
-            className="mobile-toggle"
-            aria-label={mobileOpen ? "Închide meniu" : "Deschide meniu"}
-            aria-expanded={mobileOpen}
-          >
-            {mobileOpen ? <X size={26} /> : <Menu size={26} />}
-          </button>
+          {/* Hamburger + theme toggle — mobile only */}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <div className="mobile-toggle" style={{ display: "none" }}>
+              <ThemeToggle />
+            </div>
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              style={{
+                display: "none",
+                background: "none",
+                border: "none",
+                color: "var(--color-fg)",
+                cursor: "pointer",
+                padding: "0.5rem",
+                zIndex: 202,
+                position: "relative",
+              }}
+              className="mobile-toggle"
+              aria-label={mobileOpen ? "Închide meniu" : "Deschide meniu"}
+              aria-expanded={mobileOpen}
+            >
+              {mobileOpen ? <X size={26} /> : <Menu size={26} />}
+            </button>
+          </div>
         </div>
       </nav>
 

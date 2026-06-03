@@ -16,8 +16,6 @@ export default function Logo({
   href = "/",
   onClick,
 }: LogoProps) {
-  const color = variant === "light" ? "#ffffff" : "#1a1814";
-
   return (
     <>
       <style>{`
@@ -29,6 +27,7 @@ export default function Logo({
           gap: 0;
           line-height: 1;
           user-select: none;
+          color: var(--color-fg);
         }
         .moodilier-logo-name {
           font-family: 'Cormorant Garamond', Georgia, serif;
@@ -37,6 +36,7 @@ export default function Logo({
           letter-spacing: 0.22em;
           line-height: 1;
           text-transform: uppercase;
+          font-size: clamp(1.1rem, 2.8vw, 1.5rem);
         }
         .moodilier-logo-tag {
           font-family: 'Cormorant Garamond', Georgia, serif;
@@ -46,6 +46,13 @@ export default function Logo({
           text-transform: uppercase;
           line-height: 1;
           opacity: 0.72;
+          font-size: clamp(0.42rem, 1vw, 0.55rem);
+          margin-top: 0.28em;
+        }
+        /* Mobile: bigger logo */
+        @media (max-width: 768px) {
+          .moodilier-logo-name { font-size: 1.4rem; }
+          .moodilier-logo-tag  { font-size: 0.52rem; }
         }
       `}</style>
       <Link
@@ -53,27 +60,9 @@ export default function Logo({
         onClick={onClick}
         className={`moodilier-logo ${className}`}
         aria-label="Moodilier — Mobilier premium la comandă"
-        style={{ color }}
       >
-        <span
-          className="moodilier-logo-name"
-          style={{
-            fontSize: "clamp(1.1rem, 2.8vw, 1.5rem)",
-            color,
-          }}
-        >
-          Moodilier
-        </span>
-        <span
-          className="moodilier-logo-tag"
-          style={{
-            fontSize: "clamp(0.42rem, 1vw, 0.55rem)",
-            marginTop: "0.28em",
-            color,
-          }}
-        >
-          ✦ Signature ✦
-        </span>
+        <span className="moodilier-logo-name">Moodilier</span>
+        <span className="moodilier-logo-tag">✦ Signature ✦</span>
       </Link>
     </>
   );

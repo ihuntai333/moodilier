@@ -9,6 +9,7 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 import CookieBanner from "@/components/CookieBanner";
 import ScrollReveal from "@/components/ScrollReveal";
 import FacebookPixel from "@/components/FacebookPixel";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import { readDb } from "@/lib/db";
 import { cn } from "@/lib/utils";
 
@@ -96,15 +97,24 @@ export default async function RootLayout({
 
         {/* Viewport & color scheme */}
         <meta name="theme-color" content="#1f1d1a" />
+        {/* Prevent flash of wrong theme */}
+        <script dangerouslySetInnerHTML={{ __html: `
+          (function(){
+            var t=localStorage.getItem('moodilier-theme');
+            if(!t){t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';}
+            document.documentElement.setAttribute('data-theme',t);
+          })();
+        `}} />
       </head>
       <body>
-        {!isAdmin && <Header />}
-        <main>{children}</main>
-        {!isAdmin && <Footer />}
-        {!isAdmin && <WhatsAppButton phone="40729555431" />}
-        {!isAdmin && <CookieBanner />}
-        {!isAdmin && <ScrollReveal />}
-        {pixelId && <FacebookPixel pixelId={pixelId} />}
+        <ThemeProvider>
+          {!isAdmin && <Header />}
+          <main>{children}</main>
+          {!isAdmin && <Footer />}
+          {!isAdmin && <WhatsAppButton phone="40729555431" />}
+          {!isAdmin && <CookieBanner />}
+          {!isAdmin && <ScrollReveal />}
+          {pixelId && <FacebookPixel pixelId={pixelId} />}
 
         {/* ── Analytics: deferred until page is interactive ── */}
         {ga4Id && (
@@ -123,6 +133,7 @@ export default async function RootLayout({
             {`!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${pixelId}');fbq('track','PageView');`}
           </Script>
         )}
+        </ThemeProvider>
       </body>
     </html>
   );
