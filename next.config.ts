@@ -36,6 +36,7 @@ const securityHeaders = [
       "img-src 'self' data: blob: *.facebook.com *.facebook.net",
       "  *.google-analytics.com *.googletagmanager.com",
       "  *.moodilier.ro moodilier.ro",
+      "  *.supabase.co",
       ";",
       // XHR/fetch: self + analytics endpoints
       "connect-src 'self'",
@@ -60,11 +61,10 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   images: {
-    // Optimization enabled: Vercel auto-converts to WebP/AVIF
-    // Reduces image sizes by 25-50% automatically
     remotePatterns: [
       { protocol: "https", hostname: "moodilier.ro" },
       { protocol: "http",  hostname: "localhost" },
+      { protocol: "https", hostname: "*.supabase.co" }, // Supabase Storage CDN
     ],
   },
 

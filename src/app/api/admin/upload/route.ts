@@ -1,7 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
+import { supabaseAdmin } from "@/lib/supabase";
 import { randomUUID } from "crypto";
+
+/**
+ * POST /api/admin/upload
+ * Uploads images to Supabase Storage (bucket: "project-images").
+ * Returns public URLs that work anywhere — not tied to Vercel filesystem.
+ *
+ * Setup: in Supabase dashboard → Storage → New bucket:
+ *   Name: project-images
+ *   Public: ✅ YES
+ */
+
+const BUCKET = "project-images";
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,40 +21,51 @@ export async function POST(request: NextRequest) {
     const files = formData.getAll("images") as File[];
 
     if (!files || files.length === 0) {
-      return NextResponse.json(
-        { error: "Niciun fișier primit." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Niciun fișier primit." }, { status: 400 });
     }
 
-    const uploadDir = path.join(process.cwd(), "public", "uploads", slug);
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
     const savedPaths: string[] = [];
 
     for (const file of files) {
+      if (!allowedTypes.includes(file.type)) continue;
+
       const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-      const allowedExts = ["jpg", "jpeg", "png", "webp", "gif"];
-      if (!allowedExts.includes(ext)) {
+      const fileName = `${slug}/${randomUUID()}.${ext}`;
+      const buffer = Buffer.from(await file.arrayBuffer());
+
+      const { error: uploadError } = await supabaseAdmin.storage
+        .from(BUCKET)
+        .upload(fileName, buffer, {
+          contentType: file.type,
+          upsert: false,
+        });
+
+      if (uploadError) {
+        console.error("Supabase Storage upload error:", uploadError);
+        // Continue with other files even if one fails
         continue;
       }
 
-      const fileName = `${randomUUID()}.${ext}`;
-      const filePath = path.join(uploadDir, fileName);
-      const buffer = Buffer.from(await file.arrayBuffer());
-      fs.writeFileSync(filePath, buffer);
+      const { data: urlData } = supabaseAdmin.storage
+        .from(BUCKET)
+        .getPublicUrl(fileName);
 
-      savedPaths.push(`/uploads/${slug}/${fileName}`);
+      if (urlData?.publicUrl) {
+        savedPaths.push(urlData.publicUrl);
+      }
+    }
+
+    if (savedPaths.length === 0) {
+      return NextResponse.json(
+        { error: "Niciun fișier nu a putut fi încărcat. Verificați că bucket-ul 'project-images' există și este public în Supabase Storage." },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({ paths: savedPaths });
   } catch (error) {
     console.error("Upload error:", error);
-    return NextResponse.json(
-      { error: "Eroare la încărcare." },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Eroare la încărcare." }, { status: 500 });
   }
 }
