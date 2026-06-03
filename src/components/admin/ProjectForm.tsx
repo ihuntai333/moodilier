@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Upload, X, GripVertical, AlertCircle, CheckCircle } from "lucide-react";
+import { Upload, X, GripVertical, AlertCircle, CheckCircle, Eye, Star } from "lucide-react";
 
 interface ProjectImage {
   url: string;
@@ -29,6 +29,7 @@ interface ProjectFormData {
 interface ProjectFormProps {
   initialData?: Partial<ProjectFormData & { id: string; slug: string }>;
   mode: "create" | "edit";
+  projectSlug?: string;
 }
 
 const categories = ["Rezidențial", "Comercial", "Bucătărie", "Vizualizare 3D"] as const;
@@ -76,6 +77,7 @@ function blurGray(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | H
 
 export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
   const router = useRouter();
+  const slug = initialData?.slug || "";
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -164,12 +166,8 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
     });
   }
 
-  function handleDragStart(index: number) {
-    setDragIndex(index);
-  }
-  function handleDragEnter(index: number) {
-    setDragOverIndex(index);
-  }
+  function handleDragStart(index: number) { setDragIndex(index); }
+  function handleDragEnter(index: number) { setDragOverIndex(index); }
   function handleDragEnd() {
     if (dragIndex !== null && dragOverIndex !== null && dragIndex !== dragOverIndex) {
       const imgs = [...form.images];
@@ -179,6 +177,15 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
     }
     setDragIndex(null);
     setDragOverIndex(null);
+  }
+
+  function setAsCover(index: number) {
+    if (index === 0) return;
+    setForm((prev) => {
+      const imgs = [...prev.images];
+      const [cover] = imgs.splice(index, 1);
+      return { ...prev, images: [cover, ...imgs] };
+    });
   }
 
   async function uploadPendingImages(slug: string): Promise<ProjectImage[]> {
@@ -615,113 +622,188 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
 
         {/* Image previews grid */}
         {form.images.length > 0 && (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
-              gap: "0.75rem",
-            }}
-          >
-            {form.images.map((img, i) => (
-              <div
-                key={i}
-                draggable
-                onDragStart={() => handleDragStart(i)}
-                onDragEnter={() => handleDragEnter(i)}
-                onDragEnd={handleDragEnd}
-                style={{
-                  position: "relative",
-                  background: "#141312",
-                  borderRadius: "6px",
-                  overflow: "hidden",
-                  border: `2px solid ${
-                    dragOverIndex === i && dragIndex !== i ? "#c9a984" : "#2a2724"
-                  }`,
-                  opacity: dragIndex === i ? 0.5 : 1,
-                  cursor: "grab",
-                }}
-              >
-                <img
-                  src={img.preview || img.url}
-                  alt={img.alt || `Imagine ${i + 1}`}
-                  style={{
-                    width: "100%",
-                    aspectRatio: "4/3",
-                    objectFit: "cover",
-                    display: "block",
-                  }}
-                />
-                {/* Cover badge */}
-                {i === 0 && (
+          <>
+            <div style={{ fontSize: "0.7rem", color: "#5a5450", marginBottom: "0.6rem", letterSpacing: "0.04em" }}>
+              ✦ Trage pentru a reordona • Click pe ★ pentru a seta coperta
+            </div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
+                gap: "0.75rem",
+              }}
+            >
+              {form.images.map((img, i) => {
+                const src = img.preview || img.url;
+                return (
                   <div
+                    key={i}
+                    draggable
+                    onDragStart={() => handleDragStart(i)}
+                    onDragEnter={() => handleDragEnter(i)}
+                    onDragEnd={handleDragEnd}
                     style={{
-                      position: "absolute",
-                      bottom: "0.4rem",
-                      left: "0.4rem",
-                      background: "rgba(201,169,132,0.9)",
-                      color: "#0f0e0d",
-                      fontSize: "0.55rem",
-                      fontWeight: 700,
-                      letterSpacing: "0.1em",
-                      textTransform: "uppercase",
-                      padding: "0.2rem 0.4rem",
-                      borderRadius: "2px",
+                      position: "relative",
+                      background: "#141312",
+                      borderRadius: "6px",
+                      overflow: "hidden",
+                      border: `2px solid ${
+                        i === 0
+                          ? "#c9a984"
+                          : dragOverIndex === i && dragIndex !== i
+                          ? "#c9a984"
+                          : "#2a2724"
+                      }`,
+                      opacity: dragIndex === i ? 0.4 : 1,
+                      cursor: "grab",
+                      transition: "border-color 150ms, opacity 150ms",
                     }}
                   >
-                    Copertă
+                    {/* Image */}
+                    {src ? (
+                      <img
+                        src={src}
+                        alt={img.alt || `Imagine ${i + 1}`}
+                        onError={(e) => {
+                          const t = e.currentTarget;
+                          t.style.display = "none";
+                          const next = t.nextElementSibling as HTMLElement;
+                          if (next) next.style.display = "flex";
+                        }}
+                        style={{
+                          width: "100%",
+                          aspectRatio: "4/3",
+                          objectFit: "cover",
+                          display: "block",
+                        }}
+                      />
+                    ) : null}
+                    {/* Error fallback */}
+                    <div
+                      style={{
+                        display: src ? "none" : "flex",
+                        width: "100%",
+                        aspectRatio: "4/3",
+                        background: "#1a1814",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "0.3rem",
+                        padding: "0.5rem",
+                      }}
+                    >
+                      <span style={{ fontSize: "1.2rem" }}>🖼</span>
+                      <span style={{ fontSize: "0.5rem", color: "#4a4540", textAlign: "center", wordBreak: "break-all" }}>
+                        {src || "fără URL"}
+                      </span>
+                    </div>
+
+                    {/* Cover badge */}
+                    {i === 0 && (
+                      <div
+                        style={{
+                          position: "absolute",
+                          bottom: "0.4rem",
+                          left: "0.4rem",
+                          background: "rgba(201,169,132,0.92)",
+                          color: "#0f0e0d",
+                          fontSize: "0.52rem",
+                          fontWeight: 700,
+                          letterSpacing: "0.1em",
+                          textTransform: "uppercase",
+                          padding: "0.2rem 0.4rem",
+                          borderRadius: "2px",
+                        }}
+                      >
+                        ★ Copertă
+                      </div>
+                    )}
+
+                    {/* Set as cover button (non-cover images) */}
+                    {i !== 0 && (
+                      <button
+                        type="button"
+                        title="Setează ca imagine de copertă"
+                        onClick={() => setAsCover(i)}
+                        style={{
+                          position: "absolute",
+                          bottom: "0.4rem",
+                          left: "0.4rem",
+                          background: "rgba(0,0,0,0.65)",
+                          border: "none",
+                          borderRadius: "3px",
+                          color: "#c9a984",
+                          cursor: "pointer",
+                          padding: "0.2rem 0.35rem",
+                          fontSize: "0.5rem",
+                          fontWeight: 600,
+                          letterSpacing: "0.08em",
+                          textTransform: "uppercase",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.2rem",
+                        }}
+                      >
+                        <Star size={8} /> Copertă
+                      </button>
+                    )}
+
+                    {/* Drag handle */}
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "0.4rem",
+                        left: "0.4rem",
+                        color: "rgba(255,255,255,0.5)",
+                        pointerEvents: "none",
+                      }}
+                    >
+                      <GripVertical size={14} />
+                    </div>
+
+                    {/* Remove button */}
+                    <button
+                      type="button"
+                      onClick={() => removeImage(i)}
+                      style={{
+                        position: "absolute",
+                        top: "0.4rem",
+                        right: "0.4rem",
+                        width: "22px",
+                        height: "22px",
+                        background: "rgba(0,0,0,0.6)",
+                        border: "none",
+                        borderRadius: "50%",
+                        color: "#fff",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <X size={12} />
+                    </button>
+
+                    {/* Index badge */}
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "0.4rem",
+                        right: i === 0 ? "0.4rem" : "2rem",
+                        background: "rgba(0,0,0,0.5)",
+                        color: "rgba(255,255,255,0.55)",
+                        fontSize: "0.58rem",
+                        padding: "0.15rem 0.35rem",
+                        borderRadius: "2px",
+                      }}
+                    >
+                      {i + 1}
+                    </div>
                   </div>
-                )}
-                {/* Drag handle */}
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "0.4rem",
-                    left: "0.4rem",
-                    color: "rgba(255,255,255,0.6)",
-                  }}
-                >
-                  <GripVertical size={14} />
-                </div>
-                {/* Remove button */}
-                <button
-                  type="button"
-                  onClick={() => removeImage(i)}
-                  style={{
-                    position: "absolute",
-                    top: "0.4rem",
-                    right: "0.4rem",
-                    width: "22px",
-                    height: "22px",
-                    background: "rgba(0,0,0,0.6)",
-                    border: "none",
-                    borderRadius: "50%",
-                    color: "#fff",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <X size={12} />
-                </button>
-                {/* Index badge */}
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: "0.4rem",
-                    right: "0.4rem",
-                    background: "rgba(0,0,0,0.5)",
-                    color: "rgba(255,255,255,0.6)",
-                    fontSize: "0.6rem",
-                    padding: "0.15rem 0.4rem",
-                    borderRadius: "2px",
-                  }}
-                >
-                  {i + 1}
-                </div>
-              </div>
-            ))}
-          </div>
+                );
+              })}
+            </div>
+          </>
         )}
       </div>
 
@@ -733,6 +815,8 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
           marginTop: "2rem",
           paddingTop: "1.5rem",
           borderTop: "1px solid #2a2724",
+          flexWrap: "wrap",
+          alignItems: "center",
         }}
       >
         <button
@@ -759,6 +843,34 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
             ? "Creează Proiect"
             : "Salvează Modificările"}
         </button>
+
+        {/* Preview button — edit mode only */}
+        {mode === "edit" && slug && (
+          <a
+            href={`/proiecte/${slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              padding: "0.875rem 1.5rem",
+              background: "transparent",
+              color: "#c9a984",
+              border: "1px solid #c9a984",
+              borderRadius: "4px",
+              fontSize: "0.75rem",
+              fontWeight: 600,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              cursor: "pointer",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.4rem",
+              textDecoration: "none",
+            }}
+          >
+            <Eye size={14} /> Preview
+          </a>
+        )}
+
         <button
           type="button"
           onClick={() => router.push("/admin/proiecte")}
