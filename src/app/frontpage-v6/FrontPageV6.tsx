@@ -355,28 +355,9 @@ const TESTIMONIALS = [
    COMPONENT
 ══════════════════════════════════════════════════════════════ */
 export default function FrontPageV6() {
-  const cursorRef = useRef<HTMLDivElement>(null);
   const stepRefs  = useRef<(HTMLDivElement|null)[]>([]);
   const svcRefs   = useRef<(HTMLDivElement|null)[]>([]);
 
-  /* ── Cursor (desktop only) ── */
-  useEffect(() => {
-    const cursor = cursorRef.current;
-    if (!cursor || window.matchMedia("(hover: none)").matches) return;
-    let cx=0,cy=0,tx=0,ty=0,raf=0;
-    const mv = (e: MouseEvent) => { tx=e.clientX; ty=e.clientY; };
-    const on = () => cursor.classList.add("x");
-    const off = () => cursor.classList.remove("x");
-    const tick = () => {
-      cx+=(tx-cx)*.13; cy+=(ty-cy)*.13;
-      cursor.style.transform=`translate(calc(${cx}px - 50%),calc(${cy}px - 50%))`;
-      raf=requestAnimationFrame(tick);
-    };
-    document.querySelectorAll("a,button").forEach(el=>{el.addEventListener("mouseenter",on);el.addEventListener("mouseleave",off);});
-    window.addEventListener("mousemove",mv,{passive:true});
-    raf=requestAnimationFrame(tick);
-    return ()=>{window.removeEventListener("mousemove",mv);cancelAnimationFrame(raf);};
-  },[]);
 
   /* ── GSAP + Lenis ── */
   useEffect(()=>{
@@ -488,7 +469,6 @@ export default function FrontPageV6() {
       <style dangerouslySetInnerHTML={{__html:STYLES}} />
       <div className="v6">
         <div className="v6-loader" aria-hidden />
-        <div ref={cursorRef} className="v6-cursor" aria-hidden />
 
         {/* ══ HERO ══ */}
         <section className="v6-hero">

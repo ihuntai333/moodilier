@@ -590,24 +590,24 @@ img { display: block; max-width: 100%; }
 
 /* Apply to hero parts */
 .hero-bg img {
-  animation: heroImgReveal 1.8s cubic-bezier(.4, 0, .2, 1) .05s both;
+  animation: heroImgReveal 1.1s cubic-bezier(.4, 0, .2, 1) .05s both;
   will-change: filter, transform;
 }
 .hero-tagline {
-  animation: heroElemIn 1s cubic-bezier(.16,1,.3,1) .45s both;
+  animation: heroElemIn .8s cubic-bezier(.16,1,.3,1) .25s both;
 }
 .hero-title {
-  animation: heroElemIn 1.1s cubic-bezier(.16,1,.3,1) .65s both;
+  animation: heroElemIn .9s cubic-bezier(.16,1,.3,1) .4s both;
 }
 .hero-subtitle {
-  animation: heroElemIn 1s cubic-bezier(.16,1,.3,1) .82s both;
+  animation: heroElemIn .8s cubic-bezier(.16,1,.3,1) .52s both;
 }
 .hero-content > div:last-child,
 .hero-content > a:last-child {
-  animation: heroElemIn 1s cubic-bezier(.16,1,.3,1) .96s both;
+  animation: heroElemIn .8s cubic-bezier(.16,1,.3,1) .62s both;
 }
 .scroll-indicator {
-  animation: heroElemIn .9s cubic-bezier(.16,1,.3,1) 1.15s both;
+  animation: heroElemIn .7s cubic-bezier(.16,1,.3,1) .78s both;
 }
 
 /* Base: always visible, no hiding */
