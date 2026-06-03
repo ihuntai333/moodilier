@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 import GatsbyProjectCard from "@/components/GatsbyProjectCard";
 import JsonLd from "@/components/JsonLd";
 import PageLoader from "@/components/PageLoader";
+import HeroAnimations from "@/components/HeroAnimations";
 
 export const metadata: Metadata = {
   title: "Moodilier — Mobilier La Comandă Premium | București",
@@ -113,6 +114,7 @@ export default function HomePage() {
   return (
     <>
       <PageLoader />
+      <HeroAnimations />
       <JsonLd type="home" />
       {/* ============== HERO ============== */}
       <section className="hero" style={{ minHeight: "100vh" }}>
