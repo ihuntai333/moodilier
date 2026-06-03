@@ -4,8 +4,10 @@ import { useEffect, useRef } from "react";
 
 /**
  * ScrollVideoSection — Apple-style scroll scrubbing
- * Desktop: fullscreen canvas (100vh)
- * Mobile: 16:9 aspect ratio box — shows full frame, no cropping
+ * Desktop: canvas fills full viewport (cover-fit)
+ * Mobile:  canvas is 16:9 centered inside full-height sticky wrapper
+ *          Wrapper always stays 100svh — fixes iOS sticky bug
+ *          touchmove listener for real-time iOS scrubbing
  */
 
 const FRAME_COUNT = 70;
@@ -34,6 +36,7 @@ export default function ScrollVideoSection() {
 
   const isMobile = () => window.innerWidth < 900;
 
+  /* ── Draw ── */
   const drawFrame = (index: number) => {
     const canvas = canvasRef.current;
     const img = framesRef.current[index];
@@ -41,11 +44,9 @@ export default function ScrollVideoSection() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     if (isMobileRef.current) {
-      // 16:9 box — draw full frame, no cropping
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     } else {
-      // Desktop: cover-fit (fill viewport)
       const vw = canvas.width, vh = canvas.height;
       const iw = img.naturalWidth || 1920, ih = img.naturalHeight || 1080;
       const scale = Math.max(vw / iw, vh / ih);
@@ -56,6 +57,7 @@ export default function ScrollVideoSection() {
     currentRef.current = index;
   };
 
+  /* ── Load ── */
   const loadFrame = (i: number) => {
     if (loadedRef.current[i] || framesRef.current[i]) return;
     const img = new Image();
@@ -67,13 +69,13 @@ export default function ScrollVideoSection() {
     framesRef.current[i] = img;
   };
 
-  /* Phase 1: first 15 frames immediately */
+  /* Phase 1 */
   useEffect(() => {
     isMobileRef.current = isMobile();
     for (let i = 0; i < Math.min(15, FRAME_COUNT); i++) loadFrame(i);
   }, []);
 
-  /* Phase 2: rest via IntersectionObserver */
+  /* Phase 2 */
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -83,8 +85,7 @@ export default function ScrollVideoSection() {
         let i = 15;
         const next = () => {
           if (i >= FRAME_COUNT) return;
-          const end = Math.min(i + 10, FRAME_COUNT);
-          for (; i < end; i++) loadFrame(i);
+          for (let end = Math.min(i + 10, FRAME_COUNT); i < end; i++) loadFrame(i);
           setTimeout(next, 100);
         };
         next();
@@ -94,7 +95,7 @@ export default function ScrollVideoSection() {
     return () => obs.disconnect();
   }, []);
 
-  /* Resize + scroll */
+  /* ── Core: resize + scroll + touchmove ── */
   useEffect(() => {
     const canvas = canvasRef.current;
     const wrap   = wrapRef.current;
@@ -102,29 +103,31 @@ export default function ScrollVideoSection() {
 
     const resize = () => {
       isMobileRef.current = isMobile();
+      // Wrapper is ALWAYS full viewport height (100svh) — fixes iOS sticky
+      wrap.style.height = "100svh";
+
       if (isMobileRef.current) {
-        // 16:9 box: full width
+        // Canvas = 16:9, centered vertically inside wrapper
         const w = window.innerWidth;
         const h = Math.round(w * 9 / 16);
         canvas.width  = w;
         canvas.height = h;
         canvas.style.width  = "100%";
         canvas.style.height = `${h}px`;
-        wrap.style.height   = `${h}px`;
-        wrap.style.alignItems = "center";
       } else {
+        // Canvas = full viewport
         canvas.width  = window.innerWidth;
         canvas.height = window.innerHeight;
         canvas.style.width  = "100%";
         canvas.style.height = "100%";
-        wrap.style.height   = "100vh";
       }
       drawFrame(currentRef.current);
     };
     resize();
     window.addEventListener("resize", resize, { passive: true });
 
-    const onScroll = () => {
+    /* ── Progress calc (shared by scroll + touchmove) ── */
+    const updateProgress = () => {
       const container = containerRef.current;
       if (!container) return;
       const rect     = container.getBoundingClientRect();
@@ -151,32 +154,49 @@ export default function ScrollVideoSection() {
       }
     };
 
-    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("scroll",     updateProgress, { passive: true });
+    window.addEventListener("touchmove",  updateProgress, { passive: true }); // iOS real-time
     return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", resize);
+      window.removeEventListener("scroll",    updateProgress);
+      window.removeEventListener("touchmove", updateProgress);
+      window.removeEventListener("resize",    resize);
     };
   }, []);
 
   return (
-    <div ref={containerRef} style={{ position: "relative", height: "480vh", background: "#0b0907" }}>
+    /* Mobile: 300vh (less scrolling); Desktop: 480vh */
+    <div
+      ref={containerRef}
+      style={{
+        position: "relative",
+        background: "#0b0907",
+      }}
+      className="svs-container"
+    >
+      <style>{`
+        .svs-container { height: 480vh; }
+        @media (max-width: 899px) { .svs-container { height: 300vh; } }
+      `}</style>
 
-      {/* Sticky wrapper */}
+      {/* Sticky wrapper — always 100svh */}
       <div
         ref={wrapRef}
         style={{
           position: "sticky", top: 0,
-          width: "100%", height: "100vh",
+          width: "100%", height: "100svh",
           background: "#0b0907",
-          display: "flex", flexDirection: "column",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
           justifyContent: "center",
           overflow: "hidden",
         }}
       >
-        <div style={{ position: "relative" }}>
+        {/* Canvas wrapper — relative for overlays */}
+        <div style={{ position: "relative", width: "100%" }}>
           <canvas ref={canvasRef} style={{ display: "block", width: "100%" }} />
 
-          {/* Vignette — desktop only visual */}
+          {/* Vignette */}
           <div style={{
             position: "absolute", inset: 0, pointerEvents: "none",
             background: "radial-gradient(ellipse at center, transparent 50%, rgba(11,9,7,.4) 100%)",
@@ -185,10 +205,10 @@ export default function ScrollVideoSection() {
           {/* Bottom gradient + text */}
           <div style={{
             position: "absolute", inset: 0, pointerEvents: "none",
-            background: "linear-gradient(to top, rgba(11,9,7,.75) 0%, transparent 50%)",
+            background: "linear-gradient(to top, rgba(11,9,7,.8) 0%, transparent 55%)",
             display: "flex", flexDirection: "column",
             justifyContent: "flex-end",
-            padding: "0 6vw clamp(1.2rem,4vh,3.5rem)",
+            padding: "0 6vw clamp(1rem, 3vh, 3rem)",
           }}>
             <p
               ref={overlayRef}
@@ -196,19 +216,20 @@ export default function ScrollVideoSection() {
               style={{
                 fontFamily: "'Cormorant Garamond', serif",
                 fontStyle: "italic", fontWeight: 300,
-                fontSize: "clamp(1.4rem, 4vw, 5rem)",
+                fontSize: "clamp(1.3rem, 4vw, 5rem)",
                 color: "#ede5da", lineHeight: 1,
                 letterSpacing: "-.02em",
                 transition: "opacity .2s ease",
-                marginBottom: ".5rem",
+                marginBottom: ".4rem",
               }}
             >
               Un spațiu gol…
             </p>
             <p style={{
               fontFamily: "'Inter', sans-serif",
-              fontSize: "clamp(.38rem,.7vw,.52rem)",
-              letterSpacing: ".36em", textTransform: "uppercase",
+              fontSize: "clamp(.5rem, 1.2vw, .52rem)", // fixed: was .7vw = 2.6px on mobile
+              letterSpacing: ".32em",
+              textTransform: "uppercase",
               color: "#c9a984", opacity: .6,
             }}>
               Scroll pentru a vedea transformarea
