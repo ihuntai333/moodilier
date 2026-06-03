@@ -10,7 +10,7 @@ const CSS = `
   position: fixed; inset: 0; z-index: 9000;
   background: #0b0907;
   pointer-events: none;
-  animation: pgFadeOut 1.1s cubic-bezier(.6, 0, .3, 1) .3s both;
+  animation: pgFadeOut 1s cubic-bezier(.6, 0, .3, 1) .1s both;
 }
 @keyframes pgFadeOut {
   0%   { opacity: 1; }
