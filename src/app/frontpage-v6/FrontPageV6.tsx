@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import ScrollVideoSection from "@/components/ScrollVideoSection";
 import StatsSection from "@/components/StatsSection";
+import HeroSlider from "@/components/HeroSlider";
 
 /* ══════════════════════════════════════════════════════════════
    STYLES
@@ -59,8 +60,8 @@ const STYLES = `
   margin-top: auto;
   padding: 0 5vw 1.5rem;
   font-family: var(--serif); font-weight: 300;
-  font-size: clamp(3.5rem, 16vw, 18rem);
-  line-height: .82; letter-spacing: -.03em;
+  font-size: clamp(2rem, 7.5vw, 8.5rem);
+  line-height: .88; letter-spacing: -.025em;
 }
 .v6-mask { overflow: hidden; display: block; }
 .v6-mi { display: block; transform: translateY(110%); }
@@ -253,6 +254,34 @@ const STYLES = `
 .v6-fcopy { font-size: .48rem; color: rgba(237,229,218,.15); letter-spacing: .1em; }
 .v6-fnav { display: flex; gap: 1.8rem; font-size: .48rem; letter-spacing: .18em; text-transform: uppercase; color: var(--fg2); }
 .v6-fnav a:hover { color: var(--gold); }
+
+/* ─── SERVICES CARDS ─────────────────────────────────────── */
+.v6-svc-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 2px; background: var(--border);
+  margin-bottom: 2.5rem;
+}
+.v6-svc-card {
+  position: relative; overflow: hidden;
+  background: var(--bg3); aspect-ratio: 4/3; cursor: default;
+}
+.v6-svc-card-bg {
+  position: absolute; inset: 0; overflow: hidden;
+  opacity: .22; transition: opacity .6s ease;
+}
+.v6-svc-card-bg img { width:100%; height:100%; object-fit:cover; transition: transform .6s ease; }
+.v6-svc-card:hover .v6-svc-card-bg { opacity: .4; }
+.v6-svc-card:hover .v6-svc-card-bg img { transform: scale(1.05); }
+.v6-svc-card-body {
+  position: absolute; inset: 0; padding: 1.4rem 1.5rem;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  background: linear-gradient(to top, rgba(11,9,7,.9) 0%, rgba(11,9,7,.05) 55%);
+}
+.v6-svc-card-n { font-family: var(--serif); font-size: .65rem; color: rgba(201,169,132,.28); margin-bottom:.5rem; }
+.v6-svc-card-name { font-family: var(--serif); font-size: clamp(.95rem, 1.5vw, 1.35rem); font-weight: 300; color: var(--fg); line-height:1.1; margin-bottom:.3rem; }
+.v6-svc-card-desc { font-size: .58rem; color: rgba(201,169,132,.6); letter-spacing:.04em; line-height:1.5; }
+@media (max-width: 900px) { .v6-svc-grid { grid-template-columns: repeat(2, 1fr); } .v6-svc-card { aspect-ratio: 1; } }
+@media (max-width: 540px) { .v6-svc-card-desc { display: none; } }
 
 /* ─── SCROLLBAR ───────────────────────────────────────────── */
 @media (min-width: 901px) {
@@ -474,10 +503,13 @@ export default function FrontPageV6() {
         {/* ══ HERO ══ */}
         <section className="v6-hero">
           <div className="v6-hbg">
-            <Image src="/images-scraped/vila_corbeanca_exec_living_4.jpg"
-              alt="Moodilier — Mobilier Premium la Comandă"
-              fill sizes="100vw" priority quality={88}
-              style={{objectFit:"cover",objectPosition:"center 40%"}} />
+            <HeroSlider slides={[
+              { src:"/images-scraped/vila_corbeanca_exec_living_4.jpg",  pos:"center 40%" },
+              { src:"/images-scraped/Cosmopolis_Vila_Andrei_Tudoran_02-scaled.jpg", pos:"center 30%" },
+              { src:"/images-scraped/Black_Pearl_01.jpg",                pos:"center center" },
+              { src:"/images-scraped/apptown_exec_28.jpg",               pos:"center 20%" },
+              { src:"/images-scraped/Mogosoaia_01.jpg",                  pos:"center 35%" },
+            ]} intervalMs={5500} />
           </div>
           <div className="v6-hov" />
           <div className="v6-htitle">
@@ -638,14 +670,31 @@ export default function FrontPageV6() {
             <h2 className="v6-svcs-h">Servicii <em>oferite</em></h2>
             <span className="v6-svcs-t">Ce facem pentru tine</span>
           </div>
-          {SERVICES.map((s,i)=>(
-            <div key={i} className="v6-svc" ref={el=>{svcRefs.current[i]=el;}} style={{transitionDelay:`${i*.05}s`}}>
-              <span className="v6-svn">{s.n}</span>
-              <span className="v6-svname">{s.name}</span>
-              <span className="v6-svdesc">{s.desc}</span>
-            </div>
-          ))}
-          <div style={{textAlign:"center",marginTop:"3rem"}}>
+          <div className="v6-svc-grid">
+            {([
+              { n:"01", name:"Proiectare",        desc:"Concept, 3D, proiect tehnic",       img:"/images-scraped/proiectare.jpg" },
+              { n:"02", name:"Mobilier La Comandă", desc:"Bucătării, dressinguri, livinguri",  img:"/images-scraped/buc_giurgiu_1.jpg" },
+              { n:"03", name:"Spații Comerciale",   desc:"Office, recepții, showroom-uri",   img:"/images-scraped/executie_sediu-office15.jpg" },
+              { n:"04", name:"Moodilier Store",     desc:"Import premium Italia & Danemarca", img:"/images-scraped/moodilier_store.jpg" },
+              { n:"05", name:"Montaj",              desc:"Montaj profesionist la cheie",     img:"/images-scraped/montaj.jpg" },
+              { n:"06", name:"Design Interior",     desc:"Consiliere rezidențial & comercial",img:"/images-scraped/living_01_.jpg" },
+            ] as {n:string;name:string;desc:string;img:string}[]).map((s,i)=>(
+              <div key={i} className="v6-svc-card"
+                ref={el=>{svcRefs.current[i]=el;}}
+                style={{opacity:0,transform:"translateY(16px)",transition:`opacity .6s ease ${i*.08}s,transform .6s cubic-bezier(.16,1,.3,1) ${i*.08}s`}}
+              >
+                <div className="v6-svc-card-bg">
+                  <Image src={s.img} alt="" fill sizes="33vw" style={{objectFit:"cover"}} unoptimized />
+                </div>
+                <div className="v6-svc-card-body">
+                  <span className="v6-svc-card-n">{s.n}</span>
+                  <div className="v6-svc-card-name">{s.name}</div>
+                  <div className="v6-svc-card-desc">{s.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{textAlign:"center"}}>
             <Link href="/servicii" className="v6-btn-o">Toate serviciile →</Link>
           </div>
         </section>

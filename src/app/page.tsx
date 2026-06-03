@@ -7,6 +7,7 @@ import JsonLd from "@/components/JsonLd";
 import PageLoader from "@/components/PageLoader";
 import HeroAnimations from "@/components/HeroAnimations";
 import StatsSection from "@/components/StatsSection";
+import HeroSlider from "@/components/HeroSlider";
 
 export const metadata: Metadata = {
   title: "Moodilier — Mobilier La Comandă Premium | București",
@@ -119,16 +120,14 @@ export default function HomePage() {
       <JsonLd type="home" />
       {/* ============== HERO ============== */}
       <section className="hero" style={{ minHeight: "100vh" }}>
-        <div className="hero-bg">
-          <Image
-            src="/images-scraped/Olimp_03.jpg"
-            alt="Moodilier — Mobilier Premium"
-            fill
-            sizes="100vw"
-            style={{ objectFit: "cover", objectPosition: "center" }}
-            priority
-            quality={85}
-          />
+        <div className="hero-bg" style={{position:"absolute",inset:0}}>
+          <HeroSlider slides={[
+            { src:"/images-scraped/Olimp_03.jpg",                               pos:"center center" },
+            { src:"/images-scraped/vila_corbeanca_exec_living_4.jpg",           pos:"center 40%" },
+            { src:"/images-scraped/Cosmopolis_Vila_Andrei_Tudoran_02-scaled.jpg",pos:"center 30%" },
+            { src:"/images-scraped/apptown_exec_28.jpg",                        pos:"center 20%" },
+            { src:"/images-scraped/Black_Pearl_01.jpg",                         pos:"center center" },
+          ]} intervalMs={6000} />
         </div>
         <div className="hero-overlay" />
         <div className="hero-content">
