@@ -34,10 +34,10 @@ const STYLES = `
   position: fixed; z-index: 8999; pointer-events: none;
   top: 0; left: 0; width: 8px; height: 8px;
   background: var(--gold); border-radius: 50%;
-  transform: translate(-50%,-50%); will-change: transform;
-  transition: width .28s, height .28s;
+  transform: translate(-50%,-50%); will-change: left,top;
+  transition: width .28s, height .28s, background .28s;
 }
-.v6-cursor.x { width: 50px; height: 50px; background: rgba(201,169,132,.12); }
+.v6-cursor.x { width: 44px; height: 44px; background: rgba(201,169,132,.15); }
 
 /* ─── HERO ────────────────────────────────────────────────── */
 .v6-hero {
@@ -51,7 +51,9 @@ const STYLES = `
 .v6-hbg img { width: 100%; height: 100%; object-fit: cover; object-position: center 40%; }
 .v6-hov {
   position: absolute; inset: 0;
-  background: linear-gradient(175deg, rgba(11,9,7,.5) 0%, rgba(11,9,7,.05) 38%, rgba(11,9,7,.92) 100%);
+  background:
+    linear-gradient(to top, rgba(11,9,7,.88) 0%, rgba(11,9,7,.1) 45%, rgba(11,9,7,0) 70%),
+    linear-gradient(175deg, rgba(11,9,7,.55) 0%, rgba(11,9,7,0) 50%);
 }
 
 /* Title block */
@@ -387,7 +389,7 @@ const TESTIMONIALS = [
 export default function FrontPageV6() {
   const stepRefs  = useRef<(HTMLDivElement|null)[]>([]);
   const svcRefs   = useRef<(HTMLDivElement|null)[]>([]);
-
+  const cursorRef = useRef<HTMLDivElement|null>(null);
 
   /* ── GSAP + Lenis ── */
   useEffect(()=>{
@@ -494,11 +496,35 @@ export default function FrontPageV6() {
     return ()=>obs.disconnect();
   },[]);
 
+  /* ── Custom cursor tracking ── */
+  useEffect(()=>{
+    const el=cursorRef.current;
+    if(!el||window.matchMedia("(hover: none),(pointer: coarse)").matches) return;
+    let raf=0, mx=window.innerWidth/2, my=window.innerHeight/2, cx=mx, cy=my;
+    const lerp=0.13;
+    const tick=()=>{
+      cx+=(mx-cx)*lerp; cy+=(my-cy)*lerp;
+      el.style.left=cx+"px"; el.style.top=cy+"px";
+      raf=requestAnimationFrame(tick);
+    };
+    const onMove=(e:MouseEvent)=>{mx=e.clientX;my=e.clientY;};
+    const big=()=>el.classList.add("x");
+    const small=()=>el.classList.remove("x");
+    document.querySelectorAll<HTMLElement>(".v6-pcta,.v6-btn-p,.v6-btn-o,.v6-svc-card,.v6-pcard").forEach(t=>{
+      t.addEventListener("mouseenter",big);
+      t.addEventListener("mouseleave",small);
+    });
+    window.addEventListener("mousemove",onMove);
+    raf=requestAnimationFrame(tick);
+    return ()=>{window.removeEventListener("mousemove",onMove);cancelAnimationFrame(raf);};
+  },[]);
+
   return (
     <>
       <style dangerouslySetInnerHTML={{__html:STYLES}} />
       <div className="v6">
         <div className="v6-loader" aria-hidden />
+        <div className="v6-cursor" ref={cursorRef} aria-hidden />
 
         {/* ══ HERO ══ */}
         <section className="v6-hero">
