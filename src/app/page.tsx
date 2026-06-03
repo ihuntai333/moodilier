@@ -6,6 +6,7 @@ import GatsbyProjectCard from "@/components/GatsbyProjectCard";
 import JsonLd from "@/components/JsonLd";
 import PageLoader from "@/components/PageLoader";
 import HeroAnimations from "@/components/HeroAnimations";
+import StatsSection from "@/components/StatsSection";
 
 export const metadata: Metadata = {
   title: "Moodilier — Mobilier La Comandă Premium | București",
@@ -168,6 +169,9 @@ export default function HomePage() {
           ))}
         </div>
       </div>
+
+      {/* ============== STATS ============== */}
+      <StatsSection />
 
       {/* ============== ABOUT ============== */}
       <section className="section">
