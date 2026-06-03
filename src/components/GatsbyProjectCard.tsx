@@ -214,7 +214,9 @@ export default function GatsbyProjectCard({
         <div className="gatsby-overlay">
           <div className="gatsby-overlay-inner">
             <span className="gatsby-cat">{category}</span>
-            <h3 className="gatsby-title">{title}</h3>
+            <h3 className="gatsby-title">
+              {title.replace(/\s*[–—-]\s*Moodilier\s*$/i, "").trim()}
+            </h3>
             {description && <p className="gatsby-desc">{description}</p>}
             <div className="gatsby-meta">
               {imageCount != null && imageCount > 0 && (

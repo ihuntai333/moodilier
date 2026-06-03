@@ -340,9 +340,9 @@ export default function HomePage() {
                 <Image
                   src={logo}
                   alt={`Furnizor partener ${i + 1}`}
-                  width={120}
-                  height={50}
-                  style={{ height: "32px", width: "auto", objectFit: "contain" }}
+                  width={180}
+                  height={70}
+                  style={{ height: "50px", width: "auto", objectFit: "contain" }}
                   unoptimized
                 />
               </div>
