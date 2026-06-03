@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { ArrowRight, Target, Award, Zap, Heart } from "lucide-react";
 import PageHero from "@/components/PageHero";
+import PageRevealAnimations from "@/components/PageRevealAnimations";
 
 export const metadata: Metadata = {
   title: "Despre noi | Moodilier",
@@ -92,6 +93,7 @@ const serviceTeasers = [
 export default function DespreNoiPage() {
   return (
     <>
+      <PageRevealAnimations />
       {/* ============== PAGE HERO ============== */}
       <PageHero
         label="Despre noi"

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowUpRight, Images } from "lucide-react";
 import PageHero from "@/components/PageHero";
 import GatsbyProjectCard from "@/components/GatsbyProjectCard";
+import PageRevealAnimations from "@/components/PageRevealAnimations";
 import { projects } from "@/data/projects-clean";
 
 const CATEGORIES = [
@@ -53,6 +54,7 @@ export default function ProiectePage() {
 
   return (
     <>
+      <PageRevealAnimations />
       <PageHero
         label="Portofoliu"
         title="Proiecte"

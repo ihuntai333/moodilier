@@ -215,7 +215,7 @@ export default function GatsbyProjectCard({
           <div className="gatsby-overlay-inner">
             <span className="gatsby-cat">{category}</span>
             <h3 className="gatsby-title">
-              {title.replace(/\s*[–—-]\s*Moodilier\s*$/i, "").trim()}
+              {title.replace(/\W+moodilier\s*$/i, "").trim()}
             </h3>
             {description && <p className="gatsby-desc">{description}</p>}
             <div className="gatsby-meta">

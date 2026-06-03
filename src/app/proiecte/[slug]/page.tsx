@@ -5,6 +5,7 @@ import { ArrowRight, ArrowLeft, ChevronRight, Images, MapPin, Tag } from "lucide
 import PageHero from "@/components/PageHero";
 import GalleryClient from "@/components/GalleryClient";
 import { projects } from "@/data/projects-clean";
+import PageRevealAnimations from "@/components/PageRevealAnimations";
 
 // ── Static params ────────────────────────────────────────────
 export function generateStaticParams() {
@@ -54,6 +55,7 @@ export default async function ProjectPage({
 
   return (
     <>
+      <PageRevealAnimations />
       {/* ── Hero ─────────────────────────────────────────────── */}
       <PageHero
         label={project.category}

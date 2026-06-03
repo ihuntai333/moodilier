@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { ArrowRight } from "lucide-react";
 import PageHero from "@/components/PageHero";
 import JsonLd from "@/components/JsonLd";
+import PageRevealAnimations from "@/components/PageRevealAnimations";
 
 export const metadata: Metadata = {
   title: "Servicii | Moodilier",
@@ -127,6 +128,7 @@ const processSteps = [
 export default function ServiciiPage() {
   return (
     <>
+      <PageRevealAnimations />
       <JsonLd type="service" />
       {/* ============== PAGE HERO ============== */}
       <PageHero
