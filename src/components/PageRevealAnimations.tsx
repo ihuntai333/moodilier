@@ -8,6 +8,9 @@ import { useEffect } from "react";
  */
 export default function PageRevealAnimations() {
   useEffect(() => {
+    // Scroll to top instantly on page mount (fixes prev/next project navigation)
+    window.scrollTo({ top: 0, behavior: "instant" });
+
     let dead = false;
     const boot = async () => {
       const [{ gsap }, { ScrollTrigger }] = await Promise.all([
