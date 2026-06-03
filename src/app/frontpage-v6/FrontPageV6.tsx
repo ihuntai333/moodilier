@@ -441,14 +441,20 @@ export default function FrontPageV6() {
       /* Human section */
       const hImg=document.querySelector<HTMLElement>(".v6-human-img");
       if(hImg){
-        gsap.to(hImg,{clipPath:"inset(0 0 0% 0)",duration:1.4,ease:"power3.inOut",
-          scrollTrigger:{trigger:hImg,start:"top 85%",toggleActions:"play none none none"}});
+        gsap.to(hImg,{clipPath:"inset(0 0 0% 0)",duration:1.5,ease:"power3.inOut",
+          scrollTrigger:{trigger:hImg,start:"top 88%",toggleActions:"play none none none"}});
         const inn=hImg.querySelector<HTMLElement>(".v6-human-img-in");
-        if(inn) gsap.fromTo(inn,{yPercent:-9},{yPercent:9,ease:"none",
-          scrollTrigger:{trigger:hImg,start:"top bottom",end:"bottom top",scrub:true}});
+        if(inn) {
+          /* Scale-in on reveal */
+          gsap.fromTo(inn,{scale:1.08},{scale:1,duration:1.6,ease:"power3.out",
+            scrollTrigger:{trigger:hImg,start:"top 88%",toggleActions:"play none none none"}});
+          /* Parallax on scroll */
+          gsap.fromTo(inn,{yPercent:-9},{yPercent:9,ease:"none",
+            scrollTrigger:{trigger:hImg,start:"top bottom",end:"bottom top",scrub:true}});
+        }
       }
-      gsap.from(".v6-human-text > *",{opacity:0,y:24,duration:.85,stagger:.07,ease:"power2.out",
-        scrollTrigger:{trigger:".v6-human-text",start:"top 80%"}});
+      gsap.from(".v6-human-text > *",{opacity:0,y:28,duration:.9,stagger:.1,ease:"power2.out",
+        scrollTrigger:{trigger:".v6-human-text",start:"top 82%"}});
 
       /* About section */
       const aImg=document.querySelector<HTMLElement>(".v6-about-img");
@@ -614,9 +620,10 @@ export default function FrontPageV6() {
         <section className="v6-human">
           <div className="v6-human-img" style={{clipPath:"inset(0 0 100% 0)"}}>
             <div className="v6-human-img-in">
-              <Image src="/images-scraped/mobilier-premium-01.webp"
-                alt="Atelier Moodilier" fill sizes="50vw"
-                style={{objectFit:"cover"}} unoptimized />
+              <Image src="/images-scraped/vila_cosmopolis_exec_living_4.jpg"
+                alt="Spații trăite — Moodilier" fill sizes="50vw"
+                style={{objectFit:"cover",objectPosition:"center 30%"}}
+                quality={90} />
             </div>
           </div>
           <div className="v6-human-text">
