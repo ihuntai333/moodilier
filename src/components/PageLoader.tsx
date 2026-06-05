@@ -1,114 +1,93 @@
 "use client";
 
 /**
- * CinematicLoader — Intro animat la prima vizită:
- * 1. Logo Moodilier apare (fade + slide)
- * 2. Grid de imagini mici apare cu stagger (clip-path reveal)
- * 3. Imaginile derivă ușor (drift float)
- * 4. Imaginea hero face zoom la full-screen
- * 5. Tot fade-out → pagina se dezvăluie
- *
- * Rulează O SINGURĂ DATĂ per sesiune (sessionStorage).
+ * CinematicLoader v2
+ * • Row 1 (sus)   → se mișcă spre STÂNGA
+ * • Row 2 (mijloc)→ se mișcă spre DREAPTA
+ * • Row 3 (jos)   → se mișcă spre STÂNGA
+ * • Hero (centrul rândului 2) → zoom cu blur → full screen → hero
+ * O singură dată per sesiune.
  */
 
 import { useEffect, useState } from "react";
 
-/* ── Imaginile din galerie (11 miniaturi + 1 hero ce face zoom) ── */
-const THUMB_IMAGES = [
+/* ── Imagini per rând ─────────────────────────────────── */
+const ROW1 = [
   "/images-scraped/apptown_exec_28.jpg",
   "/images-scraped/Black_Pearl_01.jpg",
-  "/images-scraped/buc_giurgiu_1.jpg",
-  "/images-scraped/cameraA_03_.jpg",
-  "/images-scraped/Mogosoaia_01.jpg",
-  "/images-scraped/Cosmopolis_Vila_Andrei_Tudoran_02-scaled.jpg",
   "/images-scraped/living_01_.jpg",
-  "/images-scraped/Olimp_03.jpg",
+  "/images-scraped/cameraA_03_.jpg",
+];
+const ROW2_LEFT  = ["/images-scraped/Mogosoaia_01.jpg",     "/images-scraped/Black_Pearl_03.jpg"];
+const HERO_IMG   = "/images-scraped/vila_corbeanca_exec_living_4.jpg"; // ← face zoom
+const ROW2_RIGHT = ["/images-scraped/living_06_.jpg",        "/images-scraped/Olimp_03.jpg"];
+const ROW3 = [
   "/images-scraped/executie_sediu-office15.jpg",
-  "/images-scraped/Black_Pearl_03.jpg",
-  "/images-scraped/living_06_.jpg",
+  "/images-scraped/Cosmopolis_Vila_Andrei_Tudoran_02-scaled.jpg",
+  "/images-scraped/buc_giurgiu_1.jpg",
+  "/images-scraped/montaj.jpg",
 ];
 
-/* Imaginea care face zoom → este prima din hero slideshow */
-const HERO_IMG = "/images-scraped/vila_corbeanca_exec_living_4.jpg";
-
-/* ── CSS ── */
+/* ── CSS ──────────────────────────────────────────────── */
 const CSS = `
-.cl-root {
-  position: fixed; inset: 0; z-index: 9999;
-  background: #080706;
-  overflow: hidden;
+.cl-root{position:fixed;inset:0;z-index:9999;background:#080706;overflow:hidden;}
+
+/* Logo */
+.cl-logo{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  z-index:10;text-align:center;pointer-events:none;
+}
+.cl-logo-name{
+  font-family:'Cormorant Garamond',Georgia,serif;
+  font-size:clamp(2rem,5vw,3.8rem);font-weight:300;
+  letter-spacing:.38em;text-transform:uppercase;
+  color:#e8e0d5;padding-right:.38em;display:block;
+  opacity:0;transform:translateY(14px);
+}
+.cl-logo-line{
+  width:0;height:1px;margin:.85rem auto .7rem;display:block;
+  background:linear-gradient(to right,transparent,#c9a984,transparent);
+}
+.cl-logo-sub{
+  font-family:'Inter',sans-serif;font-size:clamp(.3rem,.75vw,.42rem);
+  letter-spacing:.52em;text-transform:uppercase;
+  color:#c9a984;padding-right:.52em;display:block;opacity:0;
 }
 
-/* Logo centrat absolut pe overlay */
-.cl-logo {
-  position: absolute; top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 10; text-align: center;
-  pointer-events: none;
-}
-.cl-logo-name {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: clamp(2rem, 5vw, 3.8rem);
-  font-weight: 300; letter-spacing: .38em;
-  text-transform: uppercase; color: #e8e0d5;
-  padding-right: .38em; display: block;
-  opacity: 0; transform: translateY(14px);
-}
-.cl-logo-line {
-  width: 0; height: 1px; margin: .9rem auto .7rem;
-  background: linear-gradient(to right, transparent, #c9a984, transparent);
-  display: block;
-}
-.cl-logo-sub {
-  font-family: 'Inter', sans-serif;
-  font-size: clamp(.3rem, .75vw, .42rem);
-  letter-spacing: .52em; text-transform: uppercase;
-  color: #c9a984; padding-right: .52em;
-  opacity: 0; display: block;
+/* Wrapper pe toată înălțimea */
+.cl-rows{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  z-index:1;
 }
 
-/* Grid 4×3 care acoperă ecranul */
-.cl-grid {
-  position: absolute; inset: 0;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(3, 1fr);
-  gap: 3px;
-  z-index: 1;
+/* Fiecare rând = 33.33% din înălțime, width > 100% pt mișcare */
+.cl-row{
+  flex:1;display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:3px;overflow:hidden;
+  will-change:transform;
 }
 
-.cl-cell {
-  overflow: hidden; position: relative;
-  clip-path: inset(0 0 100% 0); /* ascunse inițial */
-  will-change: clip-path, transform;
+/* Celulă imagine */
+.cl-cell{
+  overflow:hidden;position:relative;
+  clip-path:inset(0 0 100% 0);
+  will-change:clip-path;
 }
-.cl-cell img {
-  width: 100%; height: 100%;
-  object-fit: cover; object-position: center;
-  display: block;
-  transform: scale(1.08); /* ușor oversized */
-  transition: transform 0s;
-}
-
-/* Hero cell — pe rândul 2, coloana 2 */
-.cl-hero {
-  grid-column: 2; grid-row: 2;
-  z-index: 3;
-  transform-origin: center center;
+.cl-cell img{
+  width:100%;height:100%;object-fit:cover;
+  object-position:center;display:block;
+  transform:scale(1.06);
 }
 
-/* Overlay negru peste grid care apare înainte de zoom */
-.cl-ov {
-  position: absolute; inset: 0; z-index: 2;
-  background: #080706; opacity: 0;
-  pointer-events: none;
+/* Hero cell — coloana 2 din rândul 2 */
+.cl-hero{
+  z-index:3;overflow:visible;
+  will-change:transform,filter;
+  transform-origin:center center;
 }
-
-/* Fade-out final al întregului loader */
-.cl-root.cl-exit {
-  opacity: 0;
-  transition: opacity 0.65s cubic-bezier(.4,0,.2,1);
-}
+.cl-hero img{transform:scale(1.06);}
 `;
 
 export default function CinematicLoader() {
@@ -117,80 +96,85 @@ export default function CinematicLoader() {
 
   useEffect(() => {
     setMounted(true);
-    /* Arată doar o dată per sesiune */
-    if (sessionStorage.getItem("cl-shown")) {
-      setVisible(false);
-      return;
-    }
+    if (sessionStorage.getItem("cl-shown")) { setVisible(false); return; }
 
     let tl: any;
 
     const run = async () => {
       const { gsap } = await import("gsap");
-      tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+      tl = gsap.timeline();
 
-      /* ── Faza 1: Logo apare ── */
+      /* ── Faza 1: Logo ── */
       tl
-        .to(".cl-logo-name", { opacity: 1, y: 0, duration: 0.85 }, 0.15)
-        .to(".cl-logo-line", { width: "clamp(70px, 10vw, 120px)", duration: 0.65, ease: "power2.inOut" }, 0.75)
-        .to(".cl-logo-sub",  { opacity: 0.7, duration: 0.55 }, 1.05);
+        .to(".cl-logo-name",  { opacity:1, y:0,    duration:.85, ease:"power3.out" }, 0.15)
+        .to(".cl-logo-line",  { width:"clamp(70px,10vw,120px)", duration:.65, ease:"power2.inOut" }, 0.75)
+        .to(".cl-logo-sub",   { opacity:.7, duration:.55, ease:"power2.out" }, 1.05);
 
-      /* ── Faza 2: Imaginile mici apar cu stagger ── */
+      /* ── Faza 2: Rânduri intră din direcții opuse ── */
+      // Row 1: vine din dreapta → merge spre stânga
+      tl.fromTo(".cl-row-1",
+        { x: "8%", opacity:0 },
+        { x: "0%", opacity:1, duration:.7, ease:"power2.out" }, 1.35);
+
+      // Row 2: vine din stânga → merge spre dreapta
+      tl.fromTo(".cl-row-2",
+        { x: "-8%", opacity:0 },
+        { x: "0%", opacity:1, duration:.7, ease:"power2.out" }, 1.45);
+
+      // Row 3: vine din dreapta → merge spre stânga
+      tl.fromTo(".cl-row-3",
+        { x: "8%", opacity:0 },
+        { x: "0%", opacity:1, duration:.7, ease:"power2.out" }, 1.55);
+
+      /* Imagini din celule apar cu clip-path stagger */
       tl.to(".cl-cell", {
-        clipPath: "inset(0 0 0% 0)",
-        duration: 0.45,
-        ease: "power2.out",
-        stagger: { amount: 0.6, from: "random" },
+        clipPath:"inset(0 0 0% 0)", duration:.45, ease:"power2.out",
+        stagger:{ amount:.5, from:"random" },
       }, 1.4);
 
-      /* ── Faza 3: Imagini derivă ușor (float) ── */
-      tl.to(".cl-cell:not(.cl-hero)", {
-        y: (i: number) => (i % 2 === 0 ? -10 : 10),
-        x: (i: number) => (i % 3 === 0 ? -6 : 6),
-        duration: 1.0,
-        ease: "power1.inOut",
-        stagger: 0.03,
-      }, 2.0);
+      /* ── Faza 3: Mișcare continuă (conveyor) ── */
+      // Row 1 → stânga
+      tl.to(".cl-row-1", { x:"-4%", duration:1.4, ease:"none" }, 2.1);
+      // Row 2 → dreapta
+      tl.to(".cl-row-2", { x:"4%",  duration:1.4, ease:"none" }, 2.1);
+      // Row 3 → stânga
+      tl.to(".cl-row-3", { x:"-4%", duration:1.4, ease:"none" }, 2.1);
 
-      /* ── Faza 4: Logo dispare, celelalte imagini dispar ── */
-      tl
-        .to(".cl-logo",           { opacity: 0, duration: 0.4, ease: "power2.in" }, 2.7)
-        .to(".cl-cell:not(.cl-hero)", { opacity: 0, duration: 0.5, stagger: 0.02 }, 2.75);
+      /* ── Faza 4: Logo + celelalte imagini dispar ── */
+      tl.to(".cl-logo",              { opacity:0, duration:.4, ease:"power2.in" }, 2.8);
+      tl.to(".cl-cell:not(.cl-hero)",{ opacity:0, duration:.5, stagger:.02 }, 2.85);
 
-      /* ── Faza 5: Hero face zoom la full-screen ── */
+      /* ── Faza 5: Hero — zoom cu blur in miscare → full screen ── */
+      // Etapa A: pornește zoom + apare blur (motion blur)
       tl.to(".cl-hero", {
-        scale: 5,
-        duration: 1.0,
-        ease: "power2.inOut",
-      }, 3.0);
+        scale:3,
+        filter:"blur(14px)",
+        duration:.55,
+        ease:"power2.in",
+      }, 3.1);
+      // Etapa B: termină zoom fără blur (imagine clară → hero)
+      tl.to(".cl-hero", {
+        scale:7,
+        filter:"blur(0px)",
+        duration:.65,
+        ease:"power2.out",
+      });
 
-      /* ── Faza 6: Fade-out complet ── */
+      /* ── Faza 6: Fade-out loader ── */
       tl.to(".cl-root", {
-        opacity: 0,
-        duration: 0.65,
-        ease: "power2.in",
+        opacity:0, duration:.6, ease:"power2.in",
         onComplete: () => {
-          sessionStorage.setItem("cl-shown", "1");
+          sessionStorage.setItem("cl-shown","1");
           setVisible(false);
         },
-      }, 3.7);
+      }, "+=0.05");
     };
 
     run();
-
     return () => { tl?.kill(); };
   }, []);
 
-  /* Redă skeleton în SSR, nu afișa nimic dacă sesiunea e veche */
   if (!mounted || !visible) return null;
-
-  /* Build grid: 11 thumbs + hero la poziția 5 (row2/col2) */
-  const cells: { src: string; isHero: boolean }[] = [];
-  let t = 0;
-  for (let i = 0; i < 12; i++) {
-    const isHero = i === 5; // a 6-a celulă = row2/col2
-    cells.push({ src: isHero ? HERO_IMG : THUMB_IMAGES[t++], isHero });
-  }
 
   return (
     <>
@@ -204,17 +188,46 @@ export default function CinematicLoader() {
           <span className="cl-logo-sub">✦ Signature ✦</span>
         </div>
 
-        {/* Grid imagini */}
-        <div className="cl-grid">
-          {cells.map((c, i) => (
-            <div
-              key={i}
-              className={`cl-cell${c.isHero ? " cl-hero" : ""}`}
-            >
+        {/* Rândul 1 → stânga */}
+        <div className="cl-rows">
+          <div className="cl-row cl-row-1">
+            {ROW1.map((src,i) => (
+              <div key={i} className="cl-cell">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={src} alt="" loading="eager" />
+              </div>
+            ))}
+          </div>
+
+          {/* Rândul 2 → dreapta | Hero în coloana 2 */}
+          <div className="cl-row cl-row-2">
+            {ROW2_LEFT.map((src,i) => (
+              <div key={i} className="cl-cell">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={src} alt="" loading="eager" />
+              </div>
+            ))}
+            <div className="cl-cell cl-hero">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={c.src} alt="" loading="eager" />
+              <img src={HERO_IMG} alt="" loading="eager" />
             </div>
-          ))}
+            {ROW2_RIGHT.map((src,i) => (
+              <div key={i} className="cl-cell">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={src} alt="" loading="eager" />
+              </div>
+            ))}
+          </div>
+
+          {/* Rândul 3 → stânga */}
+          <div className="cl-row cl-row-3">
+            {ROW3.map((src,i) => (
+              <div key={i} className="cl-cell">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={src} alt="" loading="eager" />
+              </div>
+            ))}
+          </div>
         </div>
 
       </div>
