@@ -98,6 +98,19 @@ export default async function RootLayout({
 
         {/* Viewport & color scheme */}
         <meta name="theme-color" content="#1f1d1a" />
+        {/* ── CRITICAL CSS INLINE: aplicat înainte de orice pixel ── */}
+        {/* globals.css poate fi asincron în Next.js → FOUC posibil.  */}
+        {/* Inline <style> e garantat sincron cu HTML-ul.              */}
+        <style dangerouslySetInnerHTML={{ __html: `
+          html, body { background: #080706 !important; }
+          .cl-root {
+            position: fixed !important;
+            inset: 0 !important;
+            z-index: 9999 !important;
+            background: #080706 !important;
+            overflow: hidden !important;
+          }
+        `}} />
         {/* Prevent flash of wrong theme */}
         <script dangerouslySetInnerHTML={{ __html: `
           (function(){
@@ -106,7 +119,6 @@ export default async function RootLayout({
             document.documentElement.setAttribute('data-theme',t);
           })();
         `}} />
-        {/* Anti-flash: .cl-root position:fixed în globals.css acoperă pagina de la primul paint */}
       </head>
       <body>
         <ThemeProvider>
