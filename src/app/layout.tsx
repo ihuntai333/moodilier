@@ -106,12 +106,12 @@ export default async function RootLayout({
             document.documentElement.setAttribute('data-theme',t);
           })();
         `}} />
-        {/* Prevent page flash before loader: if loader not yet shown, cover with black immediately */}
+        {/* Prevent page flash: hide body content immediately if loader will show */}
         <script dangerouslySetInnerHTML={{ __html: `
           (function(){
             try{
               if(!sessionStorage.getItem('cl-shown')){
-                document.documentElement.style.background='#080706';
+                document.documentElement.setAttribute('data-cl','loading');
               }
             }catch(e){}
           })();

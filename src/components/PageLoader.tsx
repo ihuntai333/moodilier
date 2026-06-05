@@ -121,8 +121,9 @@ export default function CinematicLoader() {
   const tlRef = useRef<any>(null);
 
   useEffect(() => {
-    // După hydration: verifică sessionStorage
+    // Elimină data-cl imediat dacă loaderul a fost deja arătat
     if (sessionStorage.getItem("cl-shown")) {
+      document.documentElement.removeAttribute("data-cl");
       setPhase("done");
       return;
     }
@@ -198,6 +199,7 @@ export default function CinematicLoader() {
         duration: .4, ease: "power2.in",
         onComplete: () => {
           sessionStorage.setItem("cl-shown", "1");
+          document.documentElement.removeAttribute("data-cl");
           setPhase("done");
         },
       }, 4.85);
