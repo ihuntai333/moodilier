@@ -1,54 +1,53 @@
 "use client";
 
 /**
- * CinematicLoader v4 — inspirat din referinta
- * 1. Grid masonry de imagini (colțuri rotunjite, scale+opacity stagger)
- * 2. Toate imaginile dispar simultan
- * 3. Imaginea hero se dezvăluie (aceeași ca prima din slideshow)
- * 4. Bare negre sus/jos se deschid în afară (letterbox reveal)
- * 5. Loader fade-out → pagina apare
+ * CinematicLoader v5
+ * • Start curat din negru
+ * • Logo ține mai mult (2s cu logo înainte de imagini)
+ * • Imagini se mișcă (drift vertical lent)
+ * • Fără glitch — gsap.set() explicit pentru initial state
  */
 
 import { useEffect, useState } from "react";
 
-/* ─── Imagini grid masonry ─────────────────────────────── */
 const GRID_IMGS = [
-  { src:"/images-scraped/apptown_exec_28.jpg",           tall: true  },
-  { src:"/images-scraped/Black_Pearl_01.jpg",            tall: false },
-  { src:"/images-scraped/Cosmopolis_Vila_Andrei_Tudoran_02-scaled.jpg", tall: true },
-  { src:"/images-scraped/cameraA_03_.jpg",               tall: false },
-  { src:"/images-scraped/Mogosoaia_01.jpg",              tall: false },
-  { src:"/images-scraped/living_01_.jpg",                tall: true  },
-  { src:"/images-scraped/Olimp_03.jpg",                  tall: false },
-  { src:"/images-scraped/Black_Pearl_03.jpg",            tall: false },
-  { src:"/images-scraped/executie_sediu-office15.jpg",   tall: true  },
-  { src:"/images-scraped/buc_giurgiu_1.jpg",             tall: false },
-  { src:"/images-scraped/living_06_.jpg",                tall: false },
-  { src:"/images-scraped/montaj.jpg",                    tall: false },
+  { src: "/images-scraped/apptown_exec_28.jpg",                          tall: true  },
+  { src: "/images-scraped/Black_Pearl_01.jpg",                           tall: false },
+  { src: "/images-scraped/Cosmopolis_Vila_Andrei_Tudoran_02-scaled.jpg", tall: true  },
+  { src: "/images-scraped/cameraA_03_.jpg",                              tall: false },
+  { src: "/images-scraped/Mogosoaia_01.jpg",                             tall: false },
+  { src: "/images-scraped/living_01_.jpg",                               tall: true  },
+  { src: "/images-scraped/Olimp_03.jpg",                                 tall: false },
+  { src: "/images-scraped/Black_Pearl_03.jpg",                           tall: false },
+  { src: "/images-scraped/executie_sediu-office15.jpg",                  tall: true  },
+  { src: "/images-scraped/buc_giurgiu_1.jpg",                            tall: false },
+  { src: "/images-scraped/living_06_.jpg",                               tall: false },
+  { src: "/images-scraped/montaj.jpg",                                   tall: false },
 ];
 
-/* Aceeași imagine ca prima din HeroSlider în FrontPageV6 */
 const HERO_IMG = "/images-scraped/vila_corbeanca_exec_living_4.jpg";
 
-/* ─── CSS ──────────────────────────────────────────────── */
 const CSS = `
+/* ── Root ── */
 .cl-root {
   position: fixed; inset: 0; z-index: 9999;
-  background: #080706; overflow: hidden;
+  background: #080706;
+  overflow: hidden;
 }
 
-/* Hero image ascunsă inițial în spatele grilei */
+/* ── Hero image în spate ── */
 .cl-hero-bg {
   position: absolute; inset: 0; z-index: 1;
   opacity: 0;
 }
 .cl-hero-bg img {
-  width: 100%; height: 100%; object-fit: cover;
-  object-position: center 40%;
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center 40%;
   filter: brightness(.72);
+  display: block;
 }
 
-/* Grid masonry 4 coloane */
+/* ── Grid ── */
 .cl-grid {
   position: absolute; inset: 6px;
   display: grid;
@@ -57,53 +56,68 @@ const CSS = `
   gap: 6px;
   z-index: 2;
 }
+
+/* ── Celule ── */
 .cl-cell {
-  border-radius: 10px; overflow: hidden;
+  border-radius: 10px;
+  overflow: hidden;
   position: relative;
-  opacity: 0; transform: scale(.88);
-  will-change: opacity, transform;
-  filter: saturate(.25) brightness(.85);
+  /* initial state setat prin gsap.set — nu prin CSS */
+  filter: saturate(.2) brightness(.8);
 }
 .cl-cell.tall { grid-row: span 2; }
 .cl-cell img {
   width: 100%; height: 100%;
   object-fit: cover; object-position: center;
   display: block;
+  /* Mișcarea imagine = pe img, nu pe container */
+  transform: scale(1.15) translateY(0px);
+  will-change: transform;
 }
 
-/* Logo centrat */
+/* ── Logo ── */
 .cl-logo {
   position: absolute; top: 50%; left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 10; text-align: center; pointer-events: none;
-  mix-blend-mode: difference;
+  z-index: 10;
+  text-align: center;
+  pointer-events: none;
 }
 .cl-logo-name {
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: clamp(2rem, 5vw, 3.8rem); font-weight: 300;
-  letter-spacing: .38em; text-transform: uppercase;
-  color: #ffffff; padding-right: .38em; display: block;
-  opacity: 0; transform: translateY(14px);
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  font-weight: 300;
+  letter-spacing: .38em;
+  text-transform: uppercase;
+  color: #e8e0d5;
+  padding-right: .38em;
+  display: block;
 }
 .cl-logo-line {
-  width: 0; height: 1px; margin: .85rem auto .7rem; display: block;
+  height: 1px;
+  margin: .85rem auto .7rem;
+  display: block;
   background: linear-gradient(to right, transparent, #c9a984, transparent);
 }
 .cl-logo-sub {
   font-family: 'Inter', sans-serif;
   font-size: clamp(.3rem, .75vw, .42rem);
-  letter-spacing: .52em; text-transform: uppercase;
-  color: #c9a984; padding-right: .52em; display: block; opacity: 0;
+  letter-spacing: .52em;
+  text-transform: uppercase;
+  color: #c9a984;
+  padding-right: .52em;
+  display: block;
 }
 
-/* Bare negre letterbox */
+/* ── Bare letterbox ── */
 .cl-bar {
   position: absolute; left: 0; right: 0;
-  background: #080706; z-index: 5;
+  background: #080706;
+  z-index: 6;
   will-change: transform;
 }
-.cl-bar-top    { top: 0;    height: 18%; transform-origin: top; }
-.cl-bar-bottom { bottom: 0; height: 18%; transform-origin: bottom; }
+.cl-bar-top    { top: 0;    height: 18%; }
+.cl-bar-bottom { bottom: 0; height: 18%; }
 `;
 
 export default function CinematicLoader() {
@@ -117,44 +131,91 @@ export default function CinematicLoader() {
     let tl: any;
     const run = async () => {
       const { gsap } = await import("gsap");
+
+      /* ── Set stări inițiale explicit (fără CSS) → zero glitch ── */
+      gsap.set(".cl-logo-name", { opacity: 0, y: 18 });
+      gsap.set(".cl-logo-line", { width: 0 });
+      gsap.set(".cl-logo-sub",  { opacity: 0 });
+      gsap.set(".cl-cell",      { opacity: 0, y: 30 });
+      gsap.set(".cl-hero-bg",   { opacity: 0 });
+      gsap.set(".cl-bar-top",   { y: "0%" });
+      gsap.set(".cl-bar-bottom",{ y: "0%" });
+
       tl = gsap.timeline();
 
-      /* ── 1. Logo apare ── */
+      /* ── Faza 1: LOGO apare (0 – 2s) ── */
       tl
-        .to(".cl-logo-name", { opacity: 1, y: 0, duration: .8, ease: "power3.out" }, 0.1)
-        .to(".cl-logo-line", { width: "clamp(70px,10vw,120px)", duration: .6, ease: "power2.inOut" }, 0.65)
-        .to(".cl-logo-sub",  { opacity: .7, duration: .5 }, 0.95);
+        .to(".cl-logo-name", {
+          opacity: 1, y: 0,
+          duration: 1.0, ease: "power3.out",
+        }, 0.2)
+        .to(".cl-logo-line", {
+          width: "clamp(80px,11vw,130px)",
+          duration: .75, ease: "power2.inOut",
+        }, 0.85)
+        .to(".cl-logo-sub", {
+          opacity: .7,
+          duration: .6,
+        }, 1.15);
 
-      /* ── 2. Grid imagini apar cu stagger ── */
+      /* ── Pauză cu logo ── */
+      // Logo rămâne vizibil 1s extra înainte de a apărea imaginile
+
+      /* ── Faza 2: Imagini apar cu stagger + mișcare ── */
       tl.to(".cl-cell", {
         opacity: 1,
-        scale: 1,
-        duration: .55,
-        ease: "power2.out",
-        stagger: { amount: .65, from: "random" },
-      }, 1.1);
+        y: 0,
+        duration: .65,
+        ease: "power3.out",
+        stagger: { amount: .7, from: "random" },
+      }, 2.3);
 
-      /* ── 3. Logo dispare, grid dispare ── */
+      /* Mișcare continuă a imaginilor (drift vertical pe img interior) */
+      tl.to(".cl-cell img", {
+        translateY: "-8px",
+        scale: 1.15,          // menține scale existent
+        duration: 2.5,
+        ease: "sine.inOut",
+        stagger: { amount: .4, from: "random" },
+        repeat: -1,
+        yoyo: true,
+      }, 2.5);
+
+      /* ── Faza 3: Logo dispare ── */
+      tl.to(".cl-logo", {
+        opacity: 0, y: -10,
+        duration: .45, ease: "power2.in",
+      }, 3.8);
+
+      /* ── Faza 4: Imagini dispar cu stagger ── */
+      tl.to(".cl-cell", {
+        opacity: 0,
+        y: -20,
+        duration: .5,
+        ease: "power2.in",
+        stagger: { amount: .35, from: "random" },
+      }, 3.9);
+
+      /* ── Faza 5: Hero image apare ── */
+      tl.to(".cl-hero-bg", {
+        opacity: 1,
+        duration: .55, ease: "power2.out",
+      }, 4.4);
+
+      /* ── Faza 6: Bare se deschid ── */
       tl
-        .to(".cl-logo",  { opacity: 0, duration: .4, ease: "power2.in" }, 2.6)
-        .to(".cl-cell",  { opacity: 0, scale: .92, duration: .55, stagger: { amount: .3, from: "random" }, ease: "power2.in" }, 2.65);
+        .to(".cl-bar-top",    { y: "-100%", duration: .8, ease: "power2.inOut" }, 4.75)
+        .to(".cl-bar-bottom", { y:  "100%", duration: .8, ease: "power2.inOut" }, 4.75);
 
-      /* ── 4. Hero image apare în spatele ── */
-      tl.to(".cl-hero-bg", { opacity: 1, duration: .5, ease: "power2.out" }, 3.0);
-
-      /* ── 5. Bare se deschid în afară (letterbox reveal) ── */
-      tl
-        .to(".cl-bar-top",    { y: "-100%", duration: .75, ease: "power2.inOut" }, 3.35)
-        .to(".cl-bar-bottom", { y: "100%",  duration: .75, ease: "power2.inOut" }, 3.35);
-
-      /* ── 6. Fade-out → pagina ── */
+      /* ── Faza 7: Fade-out ── */
       tl.to(".cl-root", {
-        opacity: 0, duration: .55, ease: "power2.in",
+        opacity: 0,
+        duration: .6, ease: "power2.in",
         onComplete: () => {
           sessionStorage.setItem("cl-shown", "1");
           setVisible(false);
         },
-      }, 4.0);
+      }, 5.45);
     };
 
     run();
@@ -168,13 +229,13 @@ export default function CinematicLoader() {
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <div className="cl-root" aria-hidden="true">
 
-        {/* Hero image în fundal (se dezvăluie după ce grila dispare) */}
+        {/* Hero image în fundal */}
         <div className="cl-hero-bg">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={HERO_IMG} alt="" loading="eager" />
         </div>
 
-        {/* Bare negre letterbox */}
+        {/* Bare letterbox */}
         <div className="cl-bar cl-bar-top"    aria-hidden />
         <div className="cl-bar cl-bar-bottom" aria-hidden />
 
