@@ -106,16 +106,7 @@ export default async function RootLayout({
             document.documentElement.setAttribute('data-theme',t);
           })();
         `}} />
-        {/* Prevent page flash: hide body content immediately if loader will show */}
-        <script dangerouslySetInnerHTML={{ __html: `
-          (function(){
-            try{
-              if(!sessionStorage.getItem('cl-shown')){
-                document.documentElement.setAttribute('data-cl','loading');
-              }
-            }catch(e){}
-          })();
-        `}} />
+        {/* Anti-flash: .cl-root position:fixed în globals.css acoperă pagina de la primul paint */}
       </head>
       <body>
         <ThemeProvider>

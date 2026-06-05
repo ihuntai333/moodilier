@@ -78,16 +78,9 @@
   --sidebar-ring:        oklch(0.708 0 0);
 }
 
-/* ─── CINEMATIC LOADER: anti-flash (render-blocking) ─────── */
-/* Când html are data-cl="loading": ascunde tot conținutul,    */
-/* arată doar loader-ul. Atribut setat de scriptul din <head>  */
-/* înainte de orice render, eliminat de PageLoader când gata.  */
-[data-cl="loading"] body       { overflow: hidden; }
-[data-cl="loading"] body *     { visibility: hidden; }
-[data-cl="loading"] .cl-root,
-[data-cl="loading"] .cl-root * { visibility: visible !important; }
-
-/* Critical CSS pentru .cl-root — trebuie să fie aici, nu inline */
+/* ─── CINEMATIC LOADER: critical CSS (render-blocking) ──────────────
+   .cl-root acoperă pagina de la primul paint — fără flash.
+   Nu se mai folosește visibility:hidden (cauzează snap nefluid). */
 .cl-root {
   position: fixed; inset: 0; z-index: 9999;
   background: #080706; overflow: hidden;

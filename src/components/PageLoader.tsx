@@ -121,9 +121,8 @@ export default function CinematicLoader() {
   const tlRef = useRef<any>(null);
 
   useEffect(() => {
-    // Elimină data-cl imediat dacă loaderul a fost deja arătat
+    // Dacă loaderul a fost deja arătat — elimin imediat
     if (sessionStorage.getItem("cl-shown")) {
-      document.documentElement.removeAttribute("data-cl");
       setPhase("done");
       return;
     }
@@ -144,65 +143,61 @@ export default function CinematicLoader() {
       const tl = gsap.timeline();
       tlRef.current = tl;
 
-      /* ── 1. Logo (0 – 2.2s) ── */
+      /* ── 1. Logo (0 – 2s) ── */
       tl
-        .to(".cl-logo-name", { opacity: 1, y: 0, duration: 1.0, ease: "power3.out" }, 0.2)
-        .to(".cl-logo-line", { width: "clamp(80px,11vw,130px)", duration: .7, ease: "power2.inOut" }, 0.9)
-        .to(".cl-logo-sub",  { opacity: .7, duration: .55 }, 1.2);
+        .to(".cl-logo-name", { opacity: 1, y: 0, duration: 1.1, ease: "power3.out" }, 0.2)
+        .to(".cl-logo-line", { width: "clamp(80px,11vw,130px)", duration: .75, ease: "power2.inOut" }, 0.9)
+        .to(".cl-logo-sub",  { opacity: .7, duration: .6 }, 1.2);
 
-      /* ── 2. Grid apare cu stagger (2.2s – 3.5s) ── */
+      /* ── 2. Grid apare cu stagger (2.1s+) ── */
       tl.to(".cl-cell", {
         opacity: 1, y: 0,
-        duration: .6,
-        ease: "power3.out",
-        stagger: { amount: .7, from: "random" },
-      }, 2.2);
+        duration: .65, ease: "power3.out",
+        stagger: { amount: .75, from: "random" },
+      }, 2.1);
 
-      /* Drift continuu pe fiecare imagine */
+      /* Drift continuu pe fiecare imagine — mișcare vie */
       tl.to(".cl-cell img", {
         y: "-10px",
-        duration: 2.2,
-        ease: "sine.inOut",
-        stagger: { amount: .5, from: "random" },
-        repeat: -1,
-        yoyo: true,
-      }, 2.4);
+        duration: 2.4, ease: "sine.inOut",
+        stagger: { amount: .6, from: "random" },
+        repeat: -1, yoyo: true,
+      }, 2.3);
 
-      /* ── 3. Logo dispare (3.6s) ── */
+      /* ── 3. Logo dispare (3.5s) ── */
       tl.to(".cl-logo", {
-        opacity: 0, y: -12,
-        duration: .4, ease: "power2.in",
+        opacity: 0, y: -10,
+        duration: .5, ease: "power2.inOut",
+      }, 3.5);
+
+      /* ── 4. Grid dispare fluid (3.6s) — opacity fără y pentru smoothness ── */
+      tl.to(".cl-cell", {
+        opacity: 0,
+        duration: .65, ease: "power2.inOut",
+        stagger: { amount: .25, from: "random" },
       }, 3.6);
 
-      /* ── 4. Grid dispare (3.7s) ── */
-      tl.to(".cl-cell", {
-        opacity: 0, y: -18,
-        duration: .5, ease: "power2.in",
-        stagger: { amount: .3, from: "random" },
-      }, 3.7);
-
-      /* ── 5. Background loader → transparent (pagina reală apare) ── */
+      /* ── 5. Loader bg → transparent (4.1s) — pagina din spate devine vizibilă ── */
       tl.to(".cl-root", {
         backgroundColor: "rgba(8,7,6,0)",
-        duration: .35,
-        ease: "none",
-      }, 4.15);
+        duration: .8, ease: "power1.inOut",
+      }, 4.1);
 
-      /* ── 6. Bare se deschid în afară ── */
+      /* ── 6. Bare se deschid simultan cu reveal-ul (4.2s) ── */
       tl
-        .to(".cl-bar-top",    { y: "-100%", duration: .75, ease: "power2.inOut" }, 4.2)
-        .to(".cl-bar-bottom", { y:  "100%", duration: .75, ease: "power2.inOut" }, 4.2);
+        .to(".cl-bar-top",    { y: "-100%", duration: .9, ease: "expo.inOut" }, 4.2)
+        .to(".cl-bar-bottom", { y:  "100%", duration: .9, ease: "expo.inOut" }, 4.2);
 
-      /* ── 7. Fade-out complet ── */
+      /* ── 7. Fade-out final (5.0s) ── */
       tl.to(".cl-root", {
         opacity: 0,
-        duration: .4, ease: "power2.in",
+        duration: .5, ease: "power2.in",
         onComplete: () => {
           sessionStorage.setItem("cl-shown", "1");
-          document.documentElement.removeAttribute("data-cl");
           setPhase("done");
         },
-      }, 4.85);
+      }, 5.0);
+
     };
 
     run();
