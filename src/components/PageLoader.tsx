@@ -123,6 +123,8 @@ export default function CinematicLoader() {
       setPhase("done");
       return;
     }
+    // Blochează scroll pe mobil în timp ce loaderul rulează
+    document.body.style.overflow = "hidden";
     setPhase("animating");
 
     const run = async () => {
@@ -183,6 +185,8 @@ export default function CinematicLoader() {
       tl.to(".cl-root", {
         opacity: 0, duration: .55, ease: "power2.in",
         onComplete: () => {
+          document.body.style.overflow = "";
+          window.scrollTo({ top: 0, behavior: "instant" });
           sessionStorage.setItem("cl-shown", "1");
           setPhase("done");
         },
