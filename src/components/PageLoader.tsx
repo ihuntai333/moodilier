@@ -1,14 +1,27 @@
 "use client";
 
 /**
- * CinematicLoader v5
- * • Start curat din negru
- * • Logo ține mai mult (2s cu logo înainte de imagini)
- * • Imagini se mișcă (drift vertical lent)
- * • Fără glitch — gsap.set() explicit pentru initial state
+ * CinematicLoader v6 — fără glitch
+ *
+ * FIX flash la start:
+ *   • Renderează un div negru opac imediat la SSR (înainte de mount)
+ *   • Dacă 'cl-shown' e în sessionStorage: dispare instant după hydration
+ *
+ * FIX glitch la reveal:
+ *   • Nu mai există imagine fake (cl-hero-bg eliminat)
+ *   • Când grila dispare → background-ul loader-ului devine transparent
+ *   • Pagina reală se vede din spate — fără mismatch
+ *   • Bare negre se deschid pe marginile paginii reale
+ *
+ * Animație:
+ *   1. Negru curat → logo Moodilier (2s hold)
+ *   2. Grid masonry apare cu stagger (drift vertical pe imagini)
+ *   3. Toate imaginile dispar → background loader → transparent
+ *   4. Bare negre (sus/jos) se expandează în afară
+ *   5. Loader fade-out → pagina 100% vizibilă
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const GRID_IMGS = [
   { src: "/images-scraped/apptown_exec_28.jpg",                          tall: true  },
@@ -25,29 +38,15 @@ const GRID_IMGS = [
   { src: "/images-scraped/montaj.jpg",                                   tall: false },
 ];
 
-const HERO_IMG = "/images-scraped/vila_corbeanca_exec_living_4.jpg";
-
 const CSS = `
-/* ── Root ── */
 .cl-root {
   position: fixed; inset: 0; z-index: 9999;
   background: #080706;
   overflow: hidden;
+  /* pointer-events none lasă scroll-ul să funcționeze după fade */
 }
 
-/* ── Hero image în spate ── */
-.cl-hero-bg {
-  position: absolute; inset: 0; z-index: 1;
-  opacity: 0;
-}
-.cl-hero-bg img {
-  width: 100%; height: 100%;
-  object-fit: cover; object-position: center 40%;
-  filter: brightness(.72);
-  display: block;
-}
-
-/* ── Grid ── */
+/* ── Grid masonry ── */
 .cl-grid {
   position: absolute; inset: 6px;
   display: grid;
@@ -56,22 +55,18 @@ const CSS = `
   gap: 6px;
   z-index: 2;
 }
-
-/* ── Celule ── */
 .cl-cell {
   border-radius: 10px;
   overflow: hidden;
   position: relative;
-  /* initial state setat prin gsap.set — nu prin CSS */
   filter: saturate(.2) brightness(.8);
+  will-change: opacity, transform;
 }
 .cl-cell.tall { grid-row: span 2; }
 .cl-cell img {
   width: 100%; height: 100%;
   object-fit: cover; object-position: center;
   display: block;
-  /* Mișcarea imagine = pe img, nu pe container */
-  transform: scale(1.15) translateY(0px);
   will-change: transform;
 }
 
@@ -109,133 +104,129 @@ const CSS = `
   display: block;
 }
 
-/* ── Bare letterbox ── */
+/* ── Bare negre letterbox ── */
 .cl-bar {
   position: absolute; left: 0; right: 0;
-  background: #080706;
-  z-index: 6;
+  z-index: 8;
   will-change: transform;
 }
-.cl-bar-top    { top: 0;    height: 18%; }
-.cl-bar-bottom { bottom: 0; height: 18%; }
+.cl-bar-top    { top: 0;    height: 18%; background: #080706; }
+.cl-bar-bottom { bottom: 0; height: 18%; background: #080706; }
 `;
 
+type Phase = "ssr" | "animating" | "done";
+
 export default function CinematicLoader() {
-  const [visible, setVisible] = useState(true);
-  const [mounted, setMounted] = useState(false);
+  const [phase, setPhase] = useState<Phase>("ssr");
+  const tlRef = useRef<any>(null);
 
   useEffect(() => {
-    setMounted(true);
-    if (sessionStorage.getItem("cl-shown")) { setVisible(false); return; }
+    // După hydration: verifică sessionStorage
+    if (sessionStorage.getItem("cl-shown")) {
+      setPhase("done");
+      return;
+    }
 
-    let tl: any;
+    setPhase("animating");
+
     const run = async () => {
       const { gsap } = await import("gsap");
 
-      /* ── Set stări inițiale explicit (fără CSS) → zero glitch ── */
+      /* Set explicit initial state — fără CSS implicit → zero glitch */
       gsap.set(".cl-logo-name", { opacity: 0, y: 18 });
       gsap.set(".cl-logo-line", { width: 0 });
       gsap.set(".cl-logo-sub",  { opacity: 0 });
-      gsap.set(".cl-cell",      { opacity: 0, y: 30 });
-      gsap.set(".cl-hero-bg",   { opacity: 0 });
+      gsap.set(".cl-cell",      { opacity: 0, y: 28 });
       gsap.set(".cl-bar-top",   { y: "0%" });
       gsap.set(".cl-bar-bottom",{ y: "0%" });
 
-      tl = gsap.timeline();
+      const tl = gsap.timeline();
+      tlRef.current = tl;
 
-      /* ── Faza 1: LOGO apare (0 – 2s) ── */
+      /* ── 1. Logo (0 – 2.2s) ── */
       tl
-        .to(".cl-logo-name", {
-          opacity: 1, y: 0,
-          duration: 1.0, ease: "power3.out",
-        }, 0.2)
-        .to(".cl-logo-line", {
-          width: "clamp(80px,11vw,130px)",
-          duration: .75, ease: "power2.inOut",
-        }, 0.85)
-        .to(".cl-logo-sub", {
-          opacity: .7,
-          duration: .6,
-        }, 1.15);
+        .to(".cl-logo-name", { opacity: 1, y: 0, duration: 1.0, ease: "power3.out" }, 0.2)
+        .to(".cl-logo-line", { width: "clamp(80px,11vw,130px)", duration: .7, ease: "power2.inOut" }, 0.9)
+        .to(".cl-logo-sub",  { opacity: .7, duration: .55 }, 1.2);
 
-      /* ── Pauză cu logo ── */
-      // Logo rămâne vizibil 1s extra înainte de a apărea imaginile
-
-      /* ── Faza 2: Imagini apar cu stagger + mișcare ── */
+      /* ── 2. Grid apare cu stagger (2.2s – 3.5s) ── */
       tl.to(".cl-cell", {
-        opacity: 1,
-        y: 0,
-        duration: .65,
+        opacity: 1, y: 0,
+        duration: .6,
         ease: "power3.out",
         stagger: { amount: .7, from: "random" },
-      }, 2.3);
+      }, 2.2);
 
-      /* Mișcare continuă a imaginilor (drift vertical pe img interior) */
+      /* Drift continuu pe fiecare imagine */
       tl.to(".cl-cell img", {
-        translateY: "-8px",
-        scale: 1.15,          // menține scale existent
-        duration: 2.5,
+        y: "-10px",
+        duration: 2.2,
         ease: "sine.inOut",
-        stagger: { amount: .4, from: "random" },
+        stagger: { amount: .5, from: "random" },
         repeat: -1,
         yoyo: true,
-      }, 2.5);
+      }, 2.4);
 
-      /* ── Faza 3: Logo dispare ── */
+      /* ── 3. Logo dispare (3.6s) ── */
       tl.to(".cl-logo", {
-        opacity: 0, y: -10,
-        duration: .45, ease: "power2.in",
-      }, 3.8);
+        opacity: 0, y: -12,
+        duration: .4, ease: "power2.in",
+      }, 3.6);
 
-      /* ── Faza 4: Imagini dispar cu stagger ── */
+      /* ── 4. Grid dispare (3.7s) ── */
       tl.to(".cl-cell", {
-        opacity: 0,
-        y: -20,
-        duration: .5,
-        ease: "power2.in",
-        stagger: { amount: .35, from: "random" },
-      }, 3.9);
+        opacity: 0, y: -18,
+        duration: .5, ease: "power2.in",
+        stagger: { amount: .3, from: "random" },
+      }, 3.7);
 
-      /* ── Faza 5: Hero image apare ── */
-      tl.to(".cl-hero-bg", {
-        opacity: 1,
-        duration: .55, ease: "power2.out",
-      }, 4.4);
+      /* ── 5. Background loader → transparent (pagina reală apare) ── */
+      tl.to(".cl-root", {
+        backgroundColor: "rgba(8,7,6,0)",
+        duration: .35,
+        ease: "none",
+      }, 4.15);
 
-      /* ── Faza 6: Bare se deschid ── */
+      /* ── 6. Bare se deschid în afară ── */
       tl
-        .to(".cl-bar-top",    { y: "-100%", duration: .8, ease: "power2.inOut" }, 4.75)
-        .to(".cl-bar-bottom", { y:  "100%", duration: .8, ease: "power2.inOut" }, 4.75);
+        .to(".cl-bar-top",    { y: "-100%", duration: .75, ease: "power2.inOut" }, 4.2)
+        .to(".cl-bar-bottom", { y:  "100%", duration: .75, ease: "power2.inOut" }, 4.2);
 
-      /* ── Faza 7: Fade-out ── */
+      /* ── 7. Fade-out complet ── */
       tl.to(".cl-root", {
         opacity: 0,
-        duration: .6, ease: "power2.in",
+        duration: .4, ease: "power2.in",
         onComplete: () => {
           sessionStorage.setItem("cl-shown", "1");
-          setVisible(false);
+          setPhase("done");
         },
-      }, 5.45);
+      }, 4.85);
     };
 
     run();
-    return () => { tl?.kill(); };
+
+    return () => { tlRef.current?.kill(); };
   }, []);
 
-  if (!mounted || !visible) return null;
+  /* SSR & hydration: div negru opac care previne flash-ul paginii */
+  if (phase === "ssr") {
+    return (
+      <>
+        <style dangerouslySetInnerHTML={{ __html: CSS }} />
+        <div className="cl-root" aria-hidden="true" />
+      </>
+    );
+  }
 
+  if (phase === "done") return null;
+
+  /* Animating: loader complet */
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <div className="cl-root" aria-hidden="true">
 
-        {/* Hero image în fundal */}
-        <div className="cl-hero-bg">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={HERO_IMG} alt="" loading="eager" />
-        </div>
-
-        {/* Bare letterbox */}
+        {/* Bare negre sus/jos — rămân chiar și după ce background devine transparent */}
         <div className="cl-bar cl-bar-top"    aria-hidden />
         <div className="cl-bar cl-bar-bottom" aria-hidden />
 
@@ -249,7 +240,7 @@ export default function CinematicLoader() {
           ))}
         </div>
 
-        {/* Logo */}
+        {/* Logo centrat */}
         <div className="cl-logo">
           <span className="cl-logo-name">Moodilier</span>
           <span className="cl-logo-line" />

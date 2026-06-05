@@ -106,6 +106,16 @@ export default async function RootLayout({
             document.documentElement.setAttribute('data-theme',t);
           })();
         `}} />
+        {/* Prevent page flash before loader: if loader not yet shown, cover with black immediately */}
+        <script dangerouslySetInnerHTML={{ __html: `
+          (function(){
+            try{
+              if(!sessionStorage.getItem('cl-shown')){
+                document.documentElement.style.background='#080706';
+              }
+            }catch(e){}
+          })();
+        `}} />
       </head>
       <body>
         <ThemeProvider>
