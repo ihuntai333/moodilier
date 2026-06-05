@@ -10,6 +10,7 @@ import CookieBanner from "@/components/CookieBanner";
 import ScrollReveal from "@/components/ScrollReveal";
 import FacebookPixel from "@/components/FacebookPixel";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import PageLoader from "@/components/PageLoader";
 import { readDb } from "@/lib/db";
 import { cn } from "@/lib/utils";
 
@@ -108,6 +109,7 @@ export default async function RootLayout({
       </head>
       <body>
         <ThemeProvider>
+          {!isAdmin && <PageLoader />}
           {!isAdmin && <Header />}
           <main>{children}</main>
           {!isAdmin && <Footer />}
