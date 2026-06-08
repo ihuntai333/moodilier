@@ -1,15 +1,27 @@
 "use client";
 
 /**
- * CinematicLoader v9.1 — Grid imagini + Split Exit (fixed)
+ * CinematicLoader v10 — Grid + Hero Reveal
  *
- * BUG FIX v9: panelele de split aveau z-index:20 → acopereau grila.
- * Acum: panelele stau la z-index:1 (în spatele grilei z-index:2).
- * Când grila dispare → panelele negre se văd seamless (același fundal).
- * Când split e declanșat → panelele se despică → hero apare.
+ * Z-index layering (în cl-root z-index:9999):
+ *   z:0  → cl-hero-bg   (imaginea hero, aceeași ca slide[0] din homepage)
+ *   z:1  → cl-split-top / cl-split-bottom (panele negre)
+ *   z:2  → cl-grid      (grila de imagini)
+ *   z:10 → cl-logo
+ *
+ * Sequence:
+ *   1. Logo apare → grid apare cu drift
+ *   2. Grid + logo dispar
+ *   3. Hero image (z:0) fade in → panele (z:1) se deschid pe ea
+ *   4. Hero bg face zoom-out subtil cât panelele se mișcă
+ *   5. cl-root fade-out → hero real identic dedesubt
  */
 
 import { useEffect, useRef, useState } from "react";
+
+/* Aceeași imagine ca slide[0] din HeroSlider pe homepage */
+const HERO_SRC = "/images-scraped/Olimp_03.jpg";
+const HERO_POS = "center center";
 
 const GRID_IMGS = [
   { src: "/images-scraped/apptown_exec_28.jpg",                          tall: true  },
@@ -27,32 +39,42 @@ const GRID_IMGS = [
 ];
 
 const CSS = `
-/* ── Root — background transparent: panelele fac ecranul negru ── */
+/* ── Root ── */
 .cl-root {
   position: fixed; inset: 0; z-index: 9999;
   overflow: hidden; background: transparent;
 }
 
-/* ── Panele split — z-index:1, în spatele grilei (z-index:2) ── */
-/* Seamless: aceeași culoare ca și backgrounds-ul paginii loader   */
+/* ── Hero background z:0 — în spatele panelelor ── */
+.cl-hero-bg {
+  position: absolute; inset: 0; z-index: 0; opacity: 0;
+  will-change: opacity;
+}
+.cl-hero-bg img {
+  width: 100%; height: 100%; display: block;
+  object-fit: cover; object-position: ${HERO_POS};
+  filter: brightness(.72);
+  transform: scale(1.06);
+  will-change: transform;
+  transition: transform 1.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+/* Zoom-out lin cât panelele se mișcă */
+.cl-root.splitting .cl-hero-bg img { transform: scale(1); }
+
+/* ── Panele split z:1 — în fața hero-ului, în spatele grilei ── */
 .cl-split-top, .cl-split-bottom {
   position: absolute; left: 0; right: 0;
-  background: #080706;
-  z-index: 1;
+  background: #080706; z-index: 1;
   will-change: transform;
   transition: transform 1.1s cubic-bezier(0.76, 0, 0.24, 1);
 }
 .cl-split-top    { top: 0;    height: 51%; }
 .cl-split-bottom { bottom: 0; height: 51%; }
 
-/* Când se despică — panelele se mișcă în afară */
 .cl-root.splitting .cl-split-top    { transform: translateY(-100%); }
 .cl-root.splitting .cl-split-bottom { transform: translateY(100%); }
 
-/* Logo dispare la split */
-.cl-root.splitting .cl-logo { opacity: 0 !important; transition: opacity 0.3s ease; }
-
-/* ── Grid masonry — z-index:2 (peste panele) ── */
+/* ── Grid masonry z:2 ── */
 .cl-grid {
   position: absolute; inset: 6px; z-index: 2;
   display: grid;
@@ -61,29 +83,25 @@ const CSS = `
   gap: 6px;
 }
 
-/* STARE INIȚIALĂ VIA CSS — zero flash înainte de GSAP */
+/* STARE INIȚIALĂ VIA CSS */
 .cl-cell {
   border-radius: 10px; overflow: hidden; position: relative;
   filter: saturate(.18) brightness(.8);
-  opacity: 0;
-  transform: translateY(24px);
+  opacity: 0; transform: translateY(24px);
   will-change: opacity, transform;
 }
 .cl-cell.tall { grid-row: span 2; }
 .cl-cell img {
   width: 100%; height: 100%; object-fit: cover;
-  object-position: center; display: block;
-  will-change: transform;
+  object-position: center; display: block; will-change: transform;
 }
 
-/* ── Logo — z-index:10 (peste totul) ── */
+/* ── Logo z:10 ── */
 .cl-logo {
   position: absolute; top: 50%; left: 50%;
   transform: translate(-50%, -50%);
   z-index: 10; text-align: center; pointer-events: none;
-  transition: opacity 0.3s ease;
 }
-
 /* STARE INIȚIALĂ VIA CSS */
 .cl-logo-eyebrow {
   font-family: 'Inter', sans-serif;
@@ -133,52 +151,56 @@ export default function CinematicLoader() {
       const tl = gsap.timeline();
       tlRef.current = tl;
 
-      /* ── 1. Logo apare (0.15 → 1.8s) ── */
+      /* ── 1. Logo (0.15s) ── */
       tl
         .to(".cl-logo-eyebrow", { opacity: .7, y: 0, duration: .6, ease: "power2.out" }, 0.15)
         .to(".cl-logo-name",    { opacity: 1,  y: 0, duration: 1.0, ease: "power3.out" }, 0.25)
         .to(".cl-logo-line",    { width: "clamp(70px,9vw,115px)", duration: .7, ease: "power2.inOut" }, 0.9)
         .to(".cl-logo-tagline", { opacity: .35, duration: .5 }, 1.2);
 
-      /* ── 2. Grid imagini apar (2.0 → 3.2s) ── */
+      /* ── 2. Grid (2.0s) ── */
       tl.to(".cl-cell", {
-        opacity: 1, y: 0,
-        duration: .55, ease: "power2.out",
+        opacity: 1, y: 0, duration: .55, ease: "power2.out",
         stagger: { amount: .8, from: "edges" },
       }, 2.0);
 
-      /* Drift continuu pe imagini */
       tl.to(".cl-cell img", {
         y: "-8px", duration: 2.2, ease: "sine.inOut",
         stagger: { amount: .5, from: "random" },
         repeat: -1, yoyo: true,
       }, 2.2);
 
-      /* ── 3. Logo + grid dispar (3.8 → 4.5s) ── */
-      tl.to(".cl-logo", { opacity: 0, duration: .4, ease: "power2.in" }, 3.8);
-      tl.to(".cl-cell", {
-        opacity: 0,
-        duration: .55, ease: "power2.in",
+      /* ── 3. Logo + grid dispar (3.8s) ── */
+      tl.to(".cl-logo",  { opacity: 0, duration: .4, ease: "power2.in" }, 3.8);
+      tl.to(".cl-cell",  {
+        opacity: 0, duration: .55, ease: "power2.in",
         stagger: { amount: .25, from: "center" },
       }, 3.85);
 
-      /* ── 4. Split (4.4s) — CSS transition, fără GSAP ── */
-      tl.call(() => { setSplit(true); }, [], 4.4);
+      /* ── 4. Hero image fade in (4.2s) ── */
+      tl.to(".cl-hero-bg", { opacity: 1, duration: .5, ease: "power2.out" }, 4.2);
 
-      /* ── 5. Cleanup (1.1s după split = 5.5s) ── */
+      /* ── 5. Split + hero zoom-out (4.55s) ── */
+      tl.call(() => { setSplit(true); }, [], 4.55);
+
+      /* ── 6. Fade-out cl-root (5.2s → 5.65s) ── */
+      tl.to(".cl-root", {
+        opacity: 0, duration: .45, ease: "power2.in",
+      }, 5.2);
+
+      /* ── 7. Cleanup (5.65s) ── */
       tl.call(() => {
         document.body.style.overflow = "";
         window.scrollTo({ top: 0, behavior: "instant" });
         sessionStorage.setItem("cl-shown", "1");
         setPhase("done");
-      }, [], 5.6);
+      }, [], 5.65);
     };
 
     run();
     return () => { tlRef.current?.kill(); };
   }, []);
 
-  /* SSR: div cu cele două panele negre (acoperă pagina imediat) */
   if (phase === "ssr") {
     return (
       <>
@@ -198,11 +220,17 @@ export default function CinematicLoader() {
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <div className={`cl-root${split ? " splitting" : ""}`} aria-hidden="true">
 
-        {/* Panele split — z-index:1, în spatele grilei */}
+        {/* Hero bg z:0 */}
+        <div className="cl-hero-bg">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={HERO_SRC} alt="" loading="eager" />
+        </div>
+
+        {/* Panele negre z:1 */}
         <div className="cl-split-top" />
         <div className="cl-split-bottom" />
 
-        {/* Grid masonry — z-index:2 */}
+        {/* Grid z:2 */}
         <div className="cl-grid">
           {GRID_IMGS.map((img, i) => (
             <div key={i} className={`cl-cell${img.tall ? " tall" : ""}`}>
@@ -212,7 +240,7 @@ export default function CinematicLoader() {
           ))}
         </div>
 
-        {/* Logo — z-index:10 */}
+        {/* Logo z:10 */}
         <div className="cl-logo">
           <span className="cl-logo-eyebrow">Signature Collection</span>
           <span className="cl-logo-name">Moodilier</span>
