@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect, type CSSProperties } from "react";
 import Image from "next/image";
 import SitePageHero from "@/components/site/SitePageHero";
 import SiteCTA from "@/components/site/SiteCTA";
@@ -150,7 +150,12 @@ export default function ProiecteClient({
             ))}
             <div
               className="aw-filter-indicator"
-              style={{ left: indicator.left, width: indicator.width }}
+              style={
+                {
+                  ["--aw-ind-x"]: `${indicator.left}px`,
+                  ["--aw-ind-w"]: String(Math.max(1, indicator.width)),
+                } as CSSProperties
+              }
               aria-hidden
             />
           </div>
@@ -178,11 +183,12 @@ export default function ProiecteClient({
               </div>
 
               <div className="aw-room-feed-grid">
-                {roomPhotos.map((photo) => (
+                {roomPhotos.map((photo, i) => (
                   <a
                     key={photo.key}
                     href={photo.href}
                     className="aw-room-feed-item"
+                    style={{ ["--aw-i" as string]: String(Math.min(i, 24)) } as CSSProperties}
                     aria-label={`${photo.projectTitle} — ${photo.room}`}
                   >
                     <Image

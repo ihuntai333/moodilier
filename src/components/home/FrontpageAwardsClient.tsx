@@ -32,9 +32,9 @@ export default function FrontpageAwardsClient() {
     let cancelled = false;
     const cleanups: Array<() => void> = [];
 
-    const yReveal = isMobile ? 28 : 42;
-    const dur = isMobile ? 0.75 : 0.95;
-    const staggerCard = isMobile ? 0.07 : 0.1;
+    const yReveal = isMobile ? 14 : 22;
+    const dur = isMobile ? 0.55 : 0.7;
+    const staggerCard = isMobile ? 0.04 : 0.055;
 
     const splitLines = (el: HTMLElement) => {
       if (el.dataset.split === "1") return;
@@ -91,24 +91,38 @@ export default function FrontpageAwardsClient() {
         );
         const heroMedia = root.querySelector(".aw-hero-slides");
         const heroInner = root.querySelector(".aw-hero-slide.is-on");
+        const videoLed = Boolean(
+          root.querySelector(".aw-hero-slide.is-on .aw-hero-video") ||
+            root.querySelector(".aw-hero-video")
+        );
 
-        gsap.set(heroBits, { opacity: 0, y: 36 });
-        gsap.set(heroLines, { yPercent: 110 });
-        if (heroMedia) gsap.set(heroMedia, { clipPath: "inset(100% 0 0 0)" });
-        if (heroInner) gsap.set(heroInner, { scale: isMobile ? 1.12 : 1.22 });
+        gsap.set(heroBits, { opacity: 0, y: videoLed ? 18 : 28 });
+        gsap.set(heroLines, { yPercent: videoLed ? 100 : 110 });
 
-        const heroTl = gsap.timeline({ defaults: { ease: "power4.out" } });
-        heroTl
-          .to(heroMedia, { clipPath: "inset(0% 0 0 0)", duration: isMobile ? 1 : 1.2 }, 0.05)
-          .to(heroInner, { scale: 1, duration: 1.4, ease: "power3.out" }, 0.05)
-          .to(heroLines, { yPercent: 0, duration: 0.95, stagger: 0.09 }, 0.28)
-          .to(heroBits, { opacity: 1, y: 0, duration: 0.8, stagger: 0.07 }, 0.42);
+        const heroTl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+        if (videoLed) {
+          // Don't clip/scale video — keeps playback stable and avoids “chaotic photos”
+          if (heroMedia) gsap.set(heroMedia, { clearProps: "clipPath" });
+          if (heroInner) gsap.set(heroInner, { clearProps: "scale" });
+          heroTl
+            .to(heroLines, { yPercent: 0, duration: 0.7, stagger: 0.06 }, 0.05)
+            .to(heroBits, { opacity: 1, y: 0, duration: 0.55, stagger: 0.05 }, 0.12);
+        } else {
+          if (heroMedia) gsap.set(heroMedia, { clipPath: "inset(100% 0 0 0)" });
+          if (heroInner) gsap.set(heroInner, { scale: isMobile ? 1.06 : 1.1 });
+          heroTl
+            .to(heroMedia, { clipPath: "inset(0% 0 0 0)", duration: isMobile ? 0.65 : 0.75 }, 0.02)
+            .to(heroInner, { scale: 1, duration: 0.85, ease: "power2.out" }, 0.02)
+            .to(heroLines, { yPercent: 0, duration: 0.7, stagger: 0.06 }, 0.15)
+            .to(heroBits, { opacity: 1, y: 0, duration: 0.55, stagger: 0.05 }, 0.22);
+        }
 
         root.querySelectorAll(".aw-hero-copy .aw-reveal").forEach((el) => {
           el.classList.add("is-in");
         });
 
-        if (heroInner && !isMobile) {
+        if (heroInner && !isMobile && !videoLed) {
           gsap.to(heroInner, {
             yPercent: 12,
             ease: "none",
@@ -162,12 +176,12 @@ export default function FrontpageAwardsClient() {
         if (projects.length) {
           gsap.set(projects, {
             opacity: 0,
-            y: isMobile ? 36 : 56,
-            clipPath: "inset(14% 0% 0% 0%)",
+            y: isMobile ? 18 : 28,
+            clipPath: "inset(8% 0% 0% 0%)",
           });
           gsap.set(
             Array.from(projects).map((p) => p.querySelector(".aw-project-meta")),
-            { opacity: 0, y: 16 }
+            { opacity: 0, y: 10 }
           );
 
           ScrollTrigger.batch(projects, {
@@ -179,7 +193,7 @@ export default function FrontpageAwardsClient() {
                 opacity: 1,
                 y: 0,
                 clipPath: "inset(0% 0% 0% 0%)",
-                duration: isMobile ? 0.85 : 1.05,
+                duration: isMobile ? 0.55 : 0.7,
                 stagger: staggerCard,
                 ease: "power3.out",
                 overwrite: "auto",
