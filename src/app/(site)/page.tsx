@@ -8,7 +8,7 @@ import AwardsIntroLoader from "@/components/home/AwardsIntroLoader";
 import HomeHeroSlider from "@/components/home/HomeHeroSlider";
 import AwardsProjectCard from "@/components/site/AwardsProjectCard";
 import { getFeaturedProjects } from "@/lib/projects";
-import { getSiteChrome } from "@/lib/site-settings";
+import { DEFAULT_HERO_SLIDES, getSiteChrome } from "@/lib/site-settings";
 
 export const revalidate = 60;
 
@@ -300,8 +300,8 @@ export default async function HomePage() {
       <div id="aw-home">
         {/* ── HERO full-bleed slider ── */}
         <HomeHeroSlider
-          slides={chrome.heroSlides}
-          defaultDurationSec={chrome.heroDefaultDurationSec}
+          slides={DEFAULT_HERO_SLIDES}
+          defaultDurationSec={10}
           label="Tailored ✦ Furniture"
           titleHtml="The Art of<br />Custom Furniture"
           body="Mobilier premium pe comandă, executat impecabil."

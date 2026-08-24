@@ -76,6 +76,7 @@ const CSS = `
   width: auto;
   height: auto;
   object-fit: contain;
+  mix-blend-mode: screen;
 }
 .aw-intro-eyebrow {
   display: none;
@@ -156,7 +157,7 @@ export default function AwardsIntroLoader({
 
   const frames = (config.images?.length ? config.images : DEFAULT_INTRO_IMAGES).slice(0, 8);
   // Always use official brand asset — never CSS wordmark / stale admin URL
-  const logo = `/brand/logo-white.png?v=20260824b`;
+  const logo = `/brand/logo-white.png?v=20260824c`;
   const tagline = config.tagline || DEFAULT_INTRO.tagline;
 
   function close() {

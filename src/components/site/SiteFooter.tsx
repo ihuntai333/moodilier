@@ -70,18 +70,15 @@ export default function SiteFooter({ chrome }: Props) {
     <footer className="aw-footer">
       <div className="aw-container aw-footer-inner" style={{ flexDirection: "column", alignItems: "stretch" }}>
         <div className="aw-footer-grid">
-            <div className="aw-footer-brand-col">
-            <div className="aw-footer-brand-block">
-              {chrome.logoUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={`/brand/logo-white.png?v=20260824b`}
-                  alt={chrome.footerBrand}
-                  className="aw-footer-logo"
-                />
-              ) : (
-                <p className="aw-footer-brand">{chrome.footerBrand}</p>
-              )}
+            <div className="aw-footer-brand-col" style={{ alignItems: "flex-start", textAlign: "left" }}>
+            <div className="aw-footer-brand-block" style={{ alignItems: "flex-start", textAlign: "left" }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={`/brand/logo-white.png?v=20260824c`}
+                alt={chrome.footerBrand || "Moodilier"}
+                className="aw-footer-logo"
+                style={{ alignSelf: "flex-start", margin: 0 }}
+              />
               {chrome.footerTagline ? (
                 <p className="aw-footer-tagline">{chrome.footerTagline}</p>
               ) : (

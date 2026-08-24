@@ -4,10 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import type { HeroSlide } from "@/lib/site-settings";
+import { DEFAULT_HERO_SLIDES, type HeroSlide } from "@/lib/site-settings";
 
 type Props = {
-  slides: HeroSlide[];
+  slides?: HeroSlide[];
   defaultDurationSec?: number;
   label?: string;
   titleHtml?: string;
@@ -18,15 +18,23 @@ type Props = {
   ctaSecondaryHref?: string;
 };
 
-function orderSlides(slides: HeroSlide[]): HeroSlide[] {
-  const videos = slides.filter((s) => s.type === "video");
-  const images = slides.filter((s) => s.type !== "video");
-  return [...videos, ...images];
+/** Prefer local defaults with videos; ignore chaotic admin-only image lists. */
+function resolveSlides(slides: HeroSlide[] | undefined): HeroSlide[] {
+  const defaults = DEFAULT_HERO_SLIDES.map((s) => ({ ...s, durationSec: 10 }));
+  if (!slides?.length) return defaults;
+
+  const videos = slides.filter((s) => s.type === "video" && s.src?.includes("/videos/"));
+  if (videos.length === 0) return defaults;
+
+  const images = slides.filter((s) => s.type === "image" && s.src);
+  return [
+    ...videos.map((s) => ({ ...s, durationSec: Math.max(10, s.durationSec || 10) })),
+    ...images.map((s) => ({ ...s, durationSec: Math.max(10, s.durationSec || 10) })),
+  ];
 }
 
 /**
- * Full-bleed homepage hero — video + image slides, copy over media.
- * Videos always lead; slideshow waits for intro to finish.
+ * Full-bleed homepage hero — always starts with video, 10s slides, bottom white fade.
  */
 export default function HomeHeroSlider({
   slides,
@@ -39,34 +47,25 @@ export default function HomeHeroSlider({
   ctaSecondaryLabel = "Solicită o ofertă",
   ctaSecondaryHref = "/contact",
 }: Props) {
-  const list = orderSlides(
-    slides.length
-      ? slides
-      : [
-          {
-            id: "fallback",
-            type: "image" as const,
-            src: "/projects/villa-06/01.cover.webp",
-            durationSec: defaultDurationSec,
-          },
-        ]
-  );
-
+  const list = resolveSlides(slides);
   const [index, setIndex] = useState(0);
   const [ready, setReady] = useState(false);
   const videoRefs = useRef<Map<number, HTMLVideoElement>>(new Map());
   const timerRef = useRef<number | null>(null);
   const active = list[index % list.length];
 
-  // Wait for intro loader before playing / advancing
   useEffect(() => {
+    if (document.documentElement.classList.contains("aw-intro-done")) {
+      setReady(true);
+      return;
+    }
     if (!document.querySelector(".aw-intro")) {
       setReady(true);
       return;
     }
     const onDone = () => setReady(true);
     window.addEventListener("aw-intro-done", onDone);
-    const failsafe = window.setTimeout(onDone, 4000);
+    const failsafe = window.setTimeout(onDone, 3500);
     return () => {
       window.removeEventListener("aw-intro-done", onDone);
       window.clearTimeout(failsafe);
@@ -77,19 +76,21 @@ export default function HomeHeroSlider({
     if (!ready) return;
     if (timerRef.current) window.clearTimeout(timerRef.current);
 
-    const ms = Math.max(2, active.durationSec || defaultDurationSec) * 1000;
+    const ms = Math.max(10, active.durationSec || defaultDurationSec) * 1000;
     const goNext = () => setIndex((i) => (i + 1) % list.length);
 
     if (active.type === "video") {
       const v = videoRefs.current.get(index % list.length);
       if (v) {
-        try {
-          v.muted = true;
+        v.muted = true;
+        v.defaultMuted = true;
+        v.playsInline = true;
+        const play = () => {
           v.currentTime = 0;
           void v.play().catch(() => {});
-        } catch {
-          /* ignore autoplay blocks */
-        }
+        };
+        if (v.readyState >= 2) play();
+        else v.addEventListener("loadeddata", play, { once: true });
       }
     }
 
@@ -126,8 +127,8 @@ export default function HomeHeroSlider({
                   playsInline
                   autoPlay={on && ready}
                   loop
-                  preload={i === 0 ? "auto" : "metadata"}
-                  poster={slide.poster || "/projects/villa-06/01.cover.webp"}
+                  preload={i <= 1 ? "auto" : "metadata"}
+                  poster={slide.poster || "/projects/villa-06/01.living.cover.webp"}
                 />
               ) : (
                 <Image
@@ -143,8 +144,10 @@ export default function HomeHeroSlider({
           );
         })}
         <div className="aw-hero-scrim" />
-        <div className="aw-hero-fade" aria-hidden />
       </div>
+
+      {/* Fade sits on section so it always paints above media */}
+      <div className="aw-hero-fade" aria-hidden />
 
       <div className="aw-hero-overlay">
         <div className="aw-hero-copy">
