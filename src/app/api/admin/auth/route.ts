@@ -1,35 +1,44 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { setAdminSessionCookies } from "@/lib/admin-auth";
+import { timingSafeEqual } from "crypto";
+
+function safeEqual(a: string, b: string): boolean {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) {
+    // still compare to keep timing roughly constant
+    timingSafeEqual(bufA, bufA);
+    return false;
+  }
+  return timingSafeEqual(bufA, bufB);
+}
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { password } = body as { password: string };
 
-    const correctPassword =
-      process.env.ADMIN_PASSWORD || "moodilier2024";
-
-    if (password !== correctPassword) {
+    const correctPassword = process.env.ADMIN_PASSWORD?.trim();
+    if (!correctPassword) {
       return NextResponse.json(
-        { error: "Parolă incorectă." },
-        { status: 401 }
+        {
+          error:
+            process.env.NODE_ENV === "production"
+              ? "Admin neconfigurat (ADMIN_PASSWORD lipsește)."
+              : "Setează ADMIN_PASSWORD în .env.local.",
+        },
+        { status: 503 }
       );
     }
 
-    const cookieStore = await cookies();
-    cookieStore.set("admin_session", "authenticated", {
-      httpOnly: true,
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-      path: "/",
-      sameSite: "lax",
-    });
+    if (typeof password !== "string" || !safeEqual(password, correctPassword)) {
+      return NextResponse.json({ error: "Parolă incorectă." }, { status: 401 });
+    }
 
+    await setAdminSessionCookies();
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Auth error:", error);
-    return NextResponse.json(
-      { error: "Eroare internă." },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Eroare internă." }, { status: 500 });
   }
 }

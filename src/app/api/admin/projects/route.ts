@@ -7,9 +7,11 @@
  * ALTER TABLE projects ADD COLUMN IF NOT EXISTS seo_title text;
  * ALTER TABLE projects ADD COLUMN IF NOT EXISTS seo_description text;
  * ALTER TABLE projects ADD COLUMN IF NOT EXISTS is_featured boolean DEFAULT false;
+ * ALTER TABLE projects ADD COLUMN IF NOT EXISTS video text;
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabase";
 
 export async function GET() {
@@ -20,13 +22,16 @@ export async function GET() {
       .order("created_at", { ascending: false });
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.warn("Projects supabase fallback:", error.message);
+      const { readDb } = await import("@/lib/db");
+      return NextResponse.json(readDb().projects);
     }
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Projects GET error:", error);
-    return NextResponse.json({ error: "Eroare internă." }, { status: 500 });
+    console.warn("Projects fetch failed, using local db:", error);
+    const { readDb } = await import("@/lib/db");
+    return NextResponse.json(readDb().projects);
   }
 }
 
@@ -44,6 +49,7 @@ export async function POST(request: NextRequest) {
         description: body.description || "",
         cover_image: body.coverImage || body.cover_image || "",
         images: body.images || [],
+        video: body.video || null,
         // New fields
         status: body.status || "published",
         year: body.year || null,
@@ -57,6 +63,12 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    try {
+      revalidateTag("projects", "max");
+    } catch {
+      /* ignore */
     }
 
     return NextResponse.json(data, { status: 201 });

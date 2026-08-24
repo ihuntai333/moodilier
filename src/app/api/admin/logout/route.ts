@@ -1,15 +1,9 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { clearAdminSessionCookies } from "@/lib/admin-auth";
 
 export async function DELETE() {
   try {
-    const cookieStore = await cookies();
-    cookieStore.set("admin_session", "", {
-      httpOnly: true,
-      maxAge: 0,
-      path: "/",
-    });
-
+    await clearAdminSessionCookies();
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Logout error:", error);

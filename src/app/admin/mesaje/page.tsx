@@ -95,37 +95,19 @@ export default function AdminMessagesPage() {
   const unreadCount = messages.filter((m) => !m.read).length;
 
   return (
-    <div style={{ padding: "2.5rem 2rem", maxWidth: "1100px" }}>
+    <div className="adm-page">
       {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: "1.5rem",
-          flexWrap: "wrap",
-          gap: "1rem",
-        }}
-      >
+      <div className="adm-header-row" style={{ marginBottom: "1.5rem" }}>
         <div>
-          <h1
-            style={{
-              fontSize: "1.5rem",
-              fontWeight: 500,
-              color: "#e8e0d5",
-              marginBottom: "0.25rem",
-            }}
-          >
-            Mesaje
-          </h1>
-          <p style={{ fontSize: "0.85rem", color: "#6a6460", maxWidth: "none" }}>
+          <h1 className="adm-title">Mesaje</h1>
+          <p className="adm-subtitle">
             {messages.length} mesaj{messages.length !== 1 ? "e" : ""} total
             {unreadCount > 0 && (
               <span
                 style={{
                   marginLeft: "0.5rem",
-                  background: "rgba(201,169,132,0.15)",
-                  color: "#c9a984",
+                  background: "var(--adm-gold-soft)",
+                  color: "var(--adm-gold-hover)",
                   padding: "0.1rem 0.5rem",
                   borderRadius: "999px",
                   fontSize: "0.7rem",

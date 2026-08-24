@@ -209,7 +209,7 @@ export default function ProjectLightbox({
           src={images[currentIndex]}
           alt={`${projectTitle} — fotografie ${currentIndex + 1}`}
           fill
-          unoptimized
+          sizes="90vw"
           style={{
             objectFit: "contain",
             pointerEvents: "none",
@@ -361,7 +361,6 @@ export default function ProjectLightbox({
                 src={img}
                 alt={`Thumbnail ${idx + 1}`}
                 fill
-                unoptimized
                 style={{ objectFit: "cover", pointerEvents: "none" }}
                 sizes="64px"
               />

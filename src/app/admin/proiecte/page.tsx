@@ -124,55 +124,21 @@ export default function AdminProjectsPage() {
   };
 
   return (
-    <div style={{ padding: "2.5rem 2rem", maxWidth: "1300px" }}>
+    <div className="adm-page adm-page--wide">
       {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: "2rem",
-          flexWrap: "wrap",
-          gap: "1rem",
-        }}
-      >
+      <div className="adm-header-row">
         <div>
-          <h1
-            style={{
-              fontSize: "1.5rem",
-              fontWeight: 500,
-              color: "#e8e0d5",
-              marginBottom: "0.25rem",
-            }}
-          >
-            Proiecte
-          </h1>
-          <p style={{ fontSize: "0.85rem", color: "#6a6460", maxWidth: "none" }}>
+          <h1 className="adm-title">Proiecte</h1>
+          <p className="adm-subtitle">
             {projects.length} proiect{projects.length !== 1 ? "e" : ""} în total
             {projects.filter((p) => p.is_featured).length > 0 && (
-              <span style={{ color: "#c9a984", marginLeft: "0.5rem" }}>
+              <span style={{ color: "var(--adm-gold)", marginLeft: "0.5rem" }}>
                 · {projects.filter((p) => p.is_featured).length} featured
               </span>
             )}
           </p>
         </div>
-        <Link
-          href="/admin/proiecte/nou"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "0.5rem",
-            padding: "0.7rem 1.25rem",
-            background: "#c9a984",
-            color: "#0f0e0d",
-            borderRadius: "4px",
-            fontSize: "0.75rem",
-            fontWeight: 700,
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-            textDecoration: "none",
-          }}
-        >
+        <Link href="/admin/proiecte/nou" className="adm-btn adm-btn-primary">
           <Plus size={14} />
           Proiect Nou
         </Link>

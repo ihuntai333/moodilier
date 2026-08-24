@@ -20,8 +20,8 @@ const organization = {
   name: "Moodilier",
   legalName: "SC Moodilier SRL",
   url: BASE,
-  logo: `${BASE}/images-scraped/Moodelier-White-scaled.png`,
-  image: `${BASE}/images-scraped/Olimp_03.jpg`,
+  logo: `${BASE}/brand/logo-white.png`,
+  image: `${BASE}/projects/villa-06/01.cover.webp`,
   description:
     "Atelier premium de mobilier la comandă din București — bucătării, dressinguri, livinguri, dormitoare și spații comerciale executate impecabil.",
   foundingDate: "2013",

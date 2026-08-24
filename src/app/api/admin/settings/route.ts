@@ -1,31 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabase";
-
-// The canonical list of settings keys with their defaults
-const SETTINGS_DEFAULTS: Record<string, string> = {
-  ga4Id: "",
-  phone: "",
-  email: "",
-  address: "",
-  instagram: "",
-  facebook: "",
-  whatsapp: "",
-  siteTitle: "Moodilier",
-  metaDescription: "",
-};
+import { SETTINGS_STRING_DEFAULTS } from "@/lib/site-settings";
 
 export async function GET() {
   try {
-    const { data, error } = await supabaseAdmin
-      .from("settings")
-      .select("*");
+    const { data, error } = await supabaseAdmin.from("settings").select("*");
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // Transform [{key, value}, ...] → { ga4Id: '', phone: '', ... }
-    const settings: Record<string, string> = { ...SETTINGS_DEFAULTS };
+    const settings: Record<string, string> = { ...SETTINGS_STRING_DEFAULTS };
     for (const row of data ?? []) {
       settings[row.key] = row.value ?? "";
     }
@@ -41,7 +27,6 @@ export async function PATCH(request: NextRequest) {
   try {
     const body: Record<string, string> = await request.json();
 
-    // Upsert each key-value pair into the settings table
     const upserts = Object.entries(body).map(([key, value]) =>
       supabaseAdmin
         .from("settings")
@@ -55,7 +40,13 @@ export async function PATCH(request: NextRequest) {
       }
     }
 
-    // Re-fetch and return the full settings object
+    try {
+      revalidateTag("site-chrome", "max");
+      revalidateTag("contact-settings", "max");
+    } catch {
+      /* older signature fallback ignored */
+    }
+
     const { data, error: fetchError } = await supabaseAdmin
       .from("settings")
       .select("*");
@@ -64,7 +55,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: fetchError.message }, { status: 500 });
     }
 
-    const settings: Record<string, string> = { ...SETTINGS_DEFAULTS };
+    const settings: Record<string, string> = { ...SETTINGS_STRING_DEFAULTS };
     for (const row of data ?? []) {
       settings[row.key] = row.value ?? "";
     }

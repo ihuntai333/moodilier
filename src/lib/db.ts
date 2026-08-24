@@ -25,6 +25,8 @@ export interface Project {
   description?: string;
   images: ProjectImage[];
   coverImage?: string;
+  /** Hover + hero video public URL */
+  video?: string;
   createdAt: string;
   updatedAt: string;
 }

@@ -17,6 +17,8 @@ interface ProjectFormData {
   location: string;
   description: string;
   images: ProjectImage[];
+  /** Hover + project-page hero video URL */
+  video: string;
   // New fields
   status: "published" | "draft";
   year: string;
@@ -79,9 +81,13 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
   const router = useRouter();
   const slug = initialData?.slug || "";
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [pendingVideo, setPendingVideo] = useState<File | null>(null);
+  const [videoPreviewUrl, setVideoPreviewUrl] = useState<string>("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [dragIndex, setDragIndex] = useState<number | null>(null);
@@ -93,6 +99,7 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
     location: initialData?.location || "",
     description: initialData?.description || "",
     images: initialData?.images || [],
+    video: initialData?.video || "",
     status: initialData?.status || "published",
     year: initialData?.year || "",
     surface: initialData?.surface || "",
@@ -108,6 +115,16 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!pendingVideo) {
+      setVideoPreviewUrl("");
+      return;
+    }
+    const url = URL.createObjectURL(pendingVideo);
+    setVideoPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [pendingVideo]);
 
   function setField<K extends keyof ProjectFormData>(key: K, value: ProjectFormData[K]) {
     setForm((prev) => {
@@ -218,6 +235,25 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
     });
   }
 
+  async function uploadPendingVideo(slug: string): Promise<string> {
+    if (!pendingVideo) return form.video;
+    setUploadingVideo(true);
+    const formData = new FormData();
+    formData.append("slug", slug);
+    formData.append("video", pendingVideo);
+
+    const res = await fetch("/api/admin/upload", {
+      method: "POST",
+      body: formData,
+    });
+    const data = await res.json();
+    setUploadingVideo(false);
+
+    if (!res.ok) throw new Error(data.error || "Upload video eșuat");
+    if (!data.videoUrl) throw new Error("URL video lipsă după upload");
+    return data.videoUrl as string;
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
@@ -233,6 +269,7 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
     try {
       const slug = initialData?.slug || generateSlug(form.title);
       const images = await uploadPendingImages(slug);
+      const video = await uploadPendingVideo(slug);
 
       const payload = {
         title: form.title.trim(),
@@ -240,6 +277,8 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
         location: form.location.trim(),
         description: form.description.trim(),
         images,
+        coverImage: images[0]?.url || "",
+        video,
         slug,
         status: form.status,
         year: form.year.trim(),
@@ -276,10 +315,15 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
       } else {
         setSuccess("Proiect actualizat cu succes!");
         setTimeout(() => setSuccess(""), 3000);
-        setForm((prev) => ({ ...prev, images }));
+        setForm((prev) => ({ ...prev, images, video }));
+        setPendingVideo(null);
       }
-    } catch {
-      setError("Eroare la salvare. Verificați conexiunea.");
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Eroare la salvare. Verificați conexiunea."
+      );
     } finally {
       setSubmitting(false);
     }
@@ -557,6 +601,106 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
         </div>
       </div>
 
+      {/* ===== SECTION: Video hover / hero ===== */}
+      <div style={{ ...sectionHeadingStyle, marginTop: "2rem" }}>
+        Video proiect
+      </div>
+      <div style={{ marginBottom: "1.5rem" }}>
+        <label style={{ ...labelStyle, marginBottom: "0.75rem" }}>
+          Video la hover &amp; hero{" "}
+          <span style={{ color: "#5a5450", fontWeight: 400 }}>
+            — MP4 / WebM, max. 80MB. Apare la hover pe carduri și în hero pe pagina proiectului.
+          </span>
+        </label>
+
+        {(form.video || pendingVideo) && (
+          <div
+            style={{
+              position: "relative",
+              marginBottom: "0.85rem",
+              borderRadius: "6px",
+              overflow: "hidden",
+              border: "1px solid #2a2724",
+              background: "#0f0e0d",
+              maxWidth: "420px",
+            }}
+          >
+            <video
+              src={videoPreviewUrl || form.video}
+              muted
+              playsInline
+              controls
+              style={{ width: "100%", display: "block", maxHeight: "220px" }}
+            />
+            <button
+              type="button"
+              onClick={() => {
+                setPendingVideo(null);
+                setField("video", "");
+                if (videoInputRef.current) videoInputRef.current.value = "";
+              }}
+              style={{
+                position: "absolute",
+                top: "0.5rem",
+                right: "0.5rem",
+                width: "28px",
+                height: "28px",
+                borderRadius: "4px",
+                border: "none",
+                background: "rgba(15,14,13,0.85)",
+                color: "#e8e0d5",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              aria-label="Elimină video"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        )}
+
+        <input
+          ref={videoInputRef}
+          type="file"
+          accept="video/mp4,video/webm,video/quicktime"
+          style={{ display: "none" }}
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            setPendingVideo(file);
+          }}
+        />
+        <button
+          type="button"
+          onClick={() => videoInputRef.current?.click()}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            padding: "0.7rem 1.1rem",
+            background: "#0f0e0d",
+            border: "1px solid #2a2724",
+            borderRadius: "4px",
+            color: "#c9a984",
+            fontSize: "0.75rem",
+            fontWeight: 600,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            cursor: "pointer",
+          }}
+        >
+          <Upload size={14} />
+          {form.video || pendingVideo ? "Înlocuiește video" : "Încarcă video"}
+        </button>
+        {pendingVideo && (
+          <p style={{ marginTop: "0.5rem", fontSize: "0.75rem", color: "#9a9088" }}>
+            Se va încărca la salvare: {pendingVideo.name}
+          </p>
+        )}
+      </div>
+
       {/* ===== SECTION: Imagini ===== */}
       <div style={{ ...sectionHeadingStyle, marginTop: "2rem" }}>Imagini</div>
 
@@ -606,8 +750,10 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
             Trage imagini aici sau{" "}
             <span style={{ color: "#c9a984" }}>click pentru selecție</span>
           </div>
-          <div style={{ fontSize: "0.75rem", color: "#4a4540" }}>
-            JPG, PNG, WebP, GIF • Multiple fișiere acceptate
+          <div style={{ fontSize: "0.75rem", color: "#5a5450", lineHeight: 1.45 }}>
+            JPG, PNG, WEBP, GIF · la salvare se optimizează automat
+            <br />
+            (max ~2400px, WebP, fără metadata)
           </div>
         </div>
 
@@ -821,10 +967,13 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
       >
         <button
           type="submit"
-          disabled={submitting || uploadingImages}
+          disabled={submitting || uploadingImages || uploadingVideo}
           style={{
             padding: "0.875rem 2rem",
-            background: submitting || uploadingImages ? "#8a7a64" : "#c9a984",
+            background:
+              submitting || uploadingImages || uploadingVideo
+                ? "#8a7a64"
+                : "#c9a984",
             color: "#0f0e0d",
             border: "none",
             borderRadius: "4px",
@@ -832,10 +981,15 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
             fontWeight: 700,
             letterSpacing: "0.15em",
             textTransform: "uppercase",
-            cursor: submitting || uploadingImages ? "not-allowed" : "pointer",
+            cursor:
+              submitting || uploadingImages || uploadingVideo
+                ? "not-allowed"
+                : "pointer",
           }}
         >
-          {uploadingImages
+          {uploadingVideo
+            ? "Se încarcă video..."
+            : uploadingImages
             ? "Se încarcă imaginile..."
             : submitting
             ? "Se salvează..."

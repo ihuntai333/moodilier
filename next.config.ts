@@ -38,12 +38,15 @@ const securityHeaders = [
       "  *.moodilier.ro moodilier.ro",
       "  *.supabase.co",
       ";",
-      // XHR/fetch: self + analytics endpoints
+      // XHR/fetch: self + analytics + Supabase
       "connect-src 'self'",
       "  *.google-analytics.com *.analytics.google.com *.googletagmanager.com",
       "  *.facebook.com *.facebook.net",
       "  vitals.vercel-insights.com",
+      "  *.supabase.co",
       ";",
+      // Video / audio from self + Supabase Storage
+      "media-src 'self' blob: *.supabase.co;",
       // Allow iframes only from Google Maps
       "frame-src 'self' *.google.com;",
       // Only load objects from self
@@ -60,29 +63,51 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Hide Next.js "N / Rendering" activity pill — it feels like a stuck loader in dev
+  devIndicators: false,
+
+  // Avoid wrong monorepo root (parent lockfile) which breaks preview / HMR
+  turbopack: {
+    root: process.cwd(),
+  },
+
   images: {
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [
       { protocol: "https", hostname: "moodilier.ro" },
-      { protocol: "http",  hostname: "localhost" },
-      { protocol: "https", hostname: "*.supabase.co" }, // Supabase Storage CDN
+      { protocol: "http", hostname: "localhost" },
+      { protocol: "https", hostname: "*.supabase.co" },
     ],
   },
 
+  poweredByHeader: false,
+  compress: true,
+
   async headers() {
+    const isDev = process.env.NODE_ENV === "development";
+    // In Cursor/VS Code Simple Browser the page is iframed — SAMEORIGIN blocks preview.
+    const headersForAll = isDev
+      ? securityHeaders.filter((h) => h.key !== "X-Frame-Options")
+      : securityHeaders;
+
     return [
       {
-        // Apply security headers to all routes
         source: "/(.*)",
-        headers: securityHeaders,
+        headers: headersForAll,
       },
       {
-        // Allow admin API routes to be called cross-origin from Vercel dashboard
         source: "/api/(.*)",
         headers: [
           { key: "Access-Control-Allow-Credentials", value: "true" },
           { key: "Access-Control-Allow-Origin", value: "https://moodilier.ro" },
-          { key: "Access-Control-Allow-Methods", value: "GET,POST,PATCH,DELETE,OPTIONS" },
-          { key: "Access-Control-Allow-Headers", value: "Content-Type, Authorization" },
+          {
+            key: "Access-Control-Allow-Methods",
+            value: "GET,POST,PATCH,DELETE,OPTIONS",
+          },
+          {
+            key: "Access-Control-Allow-Headers",
+            value: "Content-Type, Authorization",
+          },
         ],
       },
     ];

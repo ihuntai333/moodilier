@@ -8,10 +8,23 @@ export async function PATCH(
   try {
     const { id } = await params;
     const body = await request.json();
+    const isRead =
+      typeof body.is_read === "boolean"
+        ? body.is_read
+        : typeof body.read === "boolean"
+          ? body.read
+          : undefined;
+
+    if (typeof isRead !== "boolean") {
+      return NextResponse.json(
+        { error: "Lipsește is_read / read (boolean)." },
+        { status: 400 }
+      );
+    }
 
     const { data, error } = await supabaseAdmin
       .from("messages")
-      .update({ is_read: body.is_read })
+      .update({ is_read: isRead })
       .eq("id", id)
       .select()
       .single();

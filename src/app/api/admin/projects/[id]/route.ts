@@ -7,12 +7,22 @@
  * ALTER TABLE projects ADD COLUMN IF NOT EXISTS seo_title text;
  * ALTER TABLE projects ADD COLUMN IF NOT EXISTS seo_description text;
  * ALTER TABLE projects ADD COLUMN IF NOT EXISTS is_featured boolean DEFAULT false;
+ * ALTER TABLE projects ADD COLUMN IF NOT EXISTS video text;
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabase";
 import fs from "fs";
 import path from "path";
+
+function bustProjectsCache() {
+  try {
+    revalidateTag("projects", "max");
+  } catch {
+    /* ignore */
+  }
+}
 
 export async function GET(
   _request: NextRequest,
@@ -72,6 +82,7 @@ export async function PATCH(
     if (body.seo_description !== undefined) updatePayload.seo_description = body.seo_description || null;
     if (body.isFeatured !== undefined) updatePayload.is_featured = body.isFeatured;
     if (body.is_featured !== undefined) updatePayload.is_featured = body.is_featured;
+    if (body.video !== undefined) updatePayload.video = body.video || null;
 
     const { data, error } = await supabaseAdmin
       .from("projects")
@@ -90,6 +101,7 @@ export async function PATCH(
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    bustProjectsCache();
     return NextResponse.json(data);
   } catch (error) {
     console.error("Project PATCH error:", error);
@@ -148,6 +160,7 @@ export async function DELETE(
       }
     }
 
+    bustProjectsCache();
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Project DELETE error:", error);

@@ -1,0 +1,744 @@
+import Image from "next/image";
+import Link from "next/link";
+import type { CSSProperties } from "react";
+import type { Metadata } from "next";
+import { ArrowRight } from "lucide-react";
+import FrontpageAwardsClient from "@/components/home/FrontpageAwardsClient";
+import AwardsIntroLoader from "@/components/home/AwardsIntroLoader";
+import HomeHeroSlider from "@/components/home/HomeHeroSlider";
+import AwardsProjectCard from "@/components/site/AwardsProjectCard";
+import { getFeaturedProjects } from "@/lib/projects";
+import { getSiteChrome } from "@/lib/site-settings";
+
+export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: "Moodilier — Mobilier La Comandă Premium | București",
+  description:
+    "Mobilier premium pe comandă din București — bucătării, dressinguri, livinguri, dormitoare și spații comerciale. Design contemporan, materiale premium, execuție impecabilă în atelierul propriu.",
+  keywords: [
+    "mobilier la comandă",
+    "mobilier premium București",
+    "bucătărie la comandă",
+    "dressing la comandă",
+    "mobilier living",
+    "atelier mobilier București",
+    "Moodilier",
+  ],
+  openGraph: {
+    type: "website",
+    locale: "ro_RO",
+    url: "https://moodilier.ro",
+    siteName: "Moodilier",
+    title: "Moodilier — Mobilier La Comandă Premium | București",
+    description:
+      "Atelier de mobilier premium la comandă din București. Bucătării, dressinguri, livinguri, dormitoare și spații comerciale executate impecabil.",
+    images: [
+      {
+        url: "/projects/villa-06/01.cover.webp",
+        width: 1200,
+        height: 630,
+        alt: "Mobilier premium la comandă Moodilier — București",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Moodilier — Mobilier La Comandă Premium | București",
+    description:
+      "Mobilier premium pe comandă, executat impecabil în atelierul din București.",
+    images: ["/projects/villa-06/01.cover.webp"],
+  },
+  alternates: {
+    canonical: "https://moodilier.ro",
+  },
+};
+
+const BASE = "https://moodilier.ro";
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": ["LocalBusiness", "FurnitureStore"],
+      "@id": `${BASE}/#organization`,
+      name: "Moodilier",
+      legalName: "SC Moodilier SRL",
+      url: BASE,
+      telephone: "+40729555431",
+      email: "ofertare@moodilier.com",
+      description:
+        "Atelier premium de mobilier la comandă din București — bucătării, dressinguri, livinguri, dormitoare și spații comerciale executate impecabil.",
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: "Bulevardul Basarabia 256, incinta FAUR",
+        addressLocality: "București",
+        postalCode: "030694",
+        addressRegion: "Sector 3",
+        addressCountry: "RO",
+      },
+      foundingDate: "2013",
+      priceRange: "€€€",
+      sameAs: [
+        "https://www.instagram.com/moodilier/",
+        "https://www.facebook.com/moodilier",
+        "https://www.tiktok.com/@moodilier",
+      ],
+    },
+    {
+      "@type": "WebPage",
+      name: "Moodilier — Mobilier La Comandă Premium | București",
+      description: "Mobilier premium pe comandă, executat impecabil.",
+      isPartOf: { "@type": "WebSite", name: "Moodilier", url: BASE },
+    },
+  ],
+};
+
+const benefits = [
+  {
+    title: "La comandă",
+    desc: "Proiecte unice, create special pentru spațiul tău.",
+    icon: (
+      <svg className="aw-benefit-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        {/* Tailor's chalk + fine line — bespoke measure */}
+        <path d="M8 24 L24 8" />
+        <path d="M20.5 8.5 L24 8 L23.5 11.5" />
+        <path d="M8 18 H14 M8 21 H11" />
+        <circle cx="10" cy="10" r="2.25" />
+      </svg>
+    ),
+  },
+  {
+    title: "Materiale premium",
+    desc: "Selecție atentă — Egger, Blum, Häfele și parteneri.",
+    icon: (
+      <svg className="aw-benefit-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        {/* Veneer / wood slab layers */}
+        <path d="M6 11 H26" />
+        <path d="M6 16 H26" />
+        <path d="M6 21 H26" />
+        <path d="M9 11 C11 13.5 13 13.5 15 11 C17 8.5 19 8.5 21 11 C23 13.5 25 13.5 26 11" />
+        <path d="M9 16 C11 18.5 13 18.5 15 16 C17 13.5 19 13.5 21 16 C23 18.5 25 18.5 26 16" />
+      </svg>
+    ),
+  },
+  {
+    title: "Producție proprie",
+    desc: "100% execuție în atelierul din București.",
+    icon: (
+      <svg className="aw-benefit-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        {/* Chisel + mallet — atelier craft */}
+        <path d="M7 9 H15 L13.5 12 H8.5 Z" />
+        <path d="M11 12 V22" />
+        <path d="M9.5 22 H12.5 L12 25 H10 Z" />
+        <path d="M18 8 L26 16" />
+        <path d="M20 6.5 L21.5 8 L19.5 10 L18 8.5 Z" />
+        <path d="M24.5 14.5 L26 16 L24 18 L22.5 16.5 Z" />
+      </svg>
+    ),
+  },
+  {
+    title: "Răspuns în 24h",
+    desc: "Îți răspundem rapid cu pașii concreți.",
+    icon: (
+      <svg className="aw-benefit-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        {/* Fine chronograph */}
+        <circle cx="16" cy="17" r="9" />
+        <path d="M16 12.5 V17.2 L20 19.5" />
+        <path d="M16 6.5 V8.5" />
+        <path d="M12.5 7.25 H19.5" />
+      </svg>
+    ),
+  },
+];
+
+const services = [
+  {
+    num: "01",
+    title: "Servicii de proiectare",
+    desc: "Concept, vizualizări 3D și proiectare tehnică completă, adaptată spațiului și stilului tău.",
+    icon: (
+      <svg className="aw-service-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        {/* Architect compass / dividers */}
+        <circle cx="20" cy="11" r="2.2" />
+        <path d="M20 13.2 L12 31" />
+        <path d="M20 13.2 L28 31" />
+        <path d="M14.5 25 H25.5" />
+        <path d="M11.2 31 H12.8 M27.2 31 H28.8" />
+      </svg>
+    ),
+  },
+  {
+    num: "02",
+    title: "Mobilier la comandă",
+    desc: "Bucătării, dressinguri, livinguri, dormitoare și spații comerciale executate impecabil în atelierul propriu.",
+    icon: (
+      <svg className="aw-service-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        {/* Side chair silhouette */}
+        <path d="M12 18 H27 C29 18 30 19.5 30 21.5 V24 H11 V21 C11 19.2 11.8 18 12 18 Z" />
+        <path d="M13 18 V12 C13 10 14.5 9 17 9 H22" />
+        <path d="M14 24 V32 M27 24 V32" />
+        <path d="M12 32 H16 M25 32 H29" />
+      </svg>
+    ),
+  },
+  {
+    num: "03",
+    title: "Moodilier Store",
+    desc: "Import selecționat de mobilier premium de la designeri consacrați din Italia, Danemarca și Grecia.",
+    icon: (
+      <svg className="aw-service-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        {/* Curated piece / pedestal object */}
+        <path d="M20 8 L26 14 L20 20 L14 14 Z" />
+        <path d="M20 20 V26" />
+        <path d="M13 26 H27" />
+        <path d="M15 26 V31 H25 V26" />
+        <path d="M12 31 H28" />
+      </svg>
+    ),
+  },
+  {
+    num: "04",
+    title: "Montaj profesionist",
+    desc: "Montaj precis și verificare finală pentru ca fiecare detaliu să respecte standardele noastre.",
+    icon: (
+      <svg className="aw-service-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        {/* Spirit level */}
+        <rect x="7" y="16" width="26" height="8" rx="1" />
+        <circle cx="20" cy="20" r="2.4" />
+        <path d="M20 17.6 V22.4" />
+        <path d="M11 20 H14 M26 20 H29" />
+      </svg>
+    ),
+  },
+  {
+    num: "05",
+    title: "Spații comerciale",
+    desc: "Recepții, birouri, showroom-uri și magazine — mobilier care reflectă identitatea brandului.",
+    icon: (
+      <svg className="aw-service-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        {/* Reception / counter desk */}
+        <path d="M8 28 H32" />
+        <path d="M10 28 V18 H30 V28" />
+        <path d="M10 18 L14 12 H26 L30 18" />
+        <path d="M16 22 H24" />
+      </svg>
+    ),
+  },
+  {
+    num: "06",
+    title: "Design interior",
+    desc: "Consiliere completă de design interior pentru proiecte rezidențiale și comerciale premium.",
+    icon: (
+      <svg className="aw-service-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        {/* Pendant lamp */}
+        <path d="M20 7 V12" />
+        <path d="M14 12 H26" />
+        <path d="M14 12 C14 18 16.5 22 20 22 C23.5 22 26 18 26 12" />
+        <circle cx="20" cy="16.5" r="1.4" />
+        <path d="M17 22 L15.5 31 M23 22 L24.5 31" />
+        <path d="M14 31 H26" />
+      </svg>
+    ),
+  },
+];
+
+const aboutStats = [
+  { num: "10+", label: "Ani experiență", count: "10", suffix: "+" },
+  { num: "200+", label: "Proiecte finalizate", count: "200", suffix: "+" },
+  { num: "100%", label: "Execuție proprie", count: "100", suffix: "%" },
+  { num: "24h", label: "Răspuns ofertă", count: "24", suffix: "h" },
+];
+
+const steps = [
+  { num: "01", title: "Ofertare", desc: "Analiză și ofertă personalizată." },
+  { num: "02", title: "Relevare", desc: "Măsurători exacte pe spațiu." },
+  { num: "03", title: "Dezvoltare", desc: "Soluții tehnice și funcționale." },
+  { num: "04", title: "Proiectare", desc: "Documentație completă de execuție." },
+  { num: "05", title: "Materiale", desc: "Comenzi premium, termene clare." },
+  { num: "06", title: "Atelier", desc: "Prelucrare și finisaje de calitate." },
+  { num: "07", title: "Montaj", desc: "Montaj și control final." },
+];
+
+const supplierLogos = [
+  "/images-scraped/logo_01_egger.png",
+  "/images-scraped/logo_03_blum.png",
+  "/images-scraped/logo_06_himacs.png",
+  "/images-scraped/logo_05_krono.png",
+  "/images-scraped/logo_02_avo.png",
+  "/images-scraped/logo_07_hafele.png",
+  "/images-scraped/logo_04_corian.png",
+  "/images-scraped/logo_08_sch.png",
+];
+
+const marqueeItems = [
+  "Bucătării",
+  "Dressinguri",
+  "Livinguri",
+  "Dormitoare",
+  "Spații comerciale",
+  "Design interior",
+  "Mobilier premium",
+  "Execuție proprie",
+];
+
+export default async function HomePage() {
+  const [featured, chrome] = await Promise.all([
+    getFeaturedProjects(9),
+    getSiteChrome(),
+  ]);
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <FrontpageAwardsClient />
+      <AwardsIntroLoader config={chrome.intro} />
+
+      <div id="aw-home">
+        {/* ── HERO full-bleed slider ── */}
+        <HomeHeroSlider
+          slides={chrome.heroSlides}
+          defaultDurationSec={chrome.heroDefaultDurationSec}
+          label="Tailored ✦ Furniture"
+          titleHtml="The Art of<br />Custom Furniture"
+          body="Mobilier premium pe comandă, executat impecabil."
+        />
+
+        {/* ── Marquee ── */}
+        <div className="aw-marquee" aria-hidden>
+          <div className="aw-marquee-track">
+            {[...marqueeItems, ...marqueeItems, ...marqueeItems].map((item, i) => (
+              <span key={`${item}-${i}`} className="aw-marquee-item">
+                {item}
+                <span className="aw-marquee-dot">✦</span>
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Benefits cu icoane ── */}
+        <section
+          className="aw-benefits"
+          aria-label="Avantaje Moodilier"
+          data-section-id="benefits"
+          data-section-name="Avantaje"
+        >
+          <div className="aw-container aw-benefits-grid">
+            {benefits.map((b, i) => (
+              <article key={b.title} className="aw-benefit aw-reveal" data-delay={i * 0.06}>
+                {b.icon}
+                <h3>{b.title}</h3>
+                <p>{b.desc}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        {/* ── Despre noi ── */}
+        <section
+          className="aw-about"
+          aria-labelledby="aw-about-title"
+          data-section-id="about"
+          data-section-name="Despre noi"
+        >
+          <div className="aw-container">
+            <div className="aw-section-head aw-reveal">
+              <p className="aw-label" data-key="home.about.label" data-editable="text">
+                Despre noi
+              </p>
+              <h2
+                id="aw-about-title"
+                className="aw-h2"
+                data-key="home.about.title"
+                data-editable="text"
+              >
+                „The Art of Custom Furniture”
+              </h2>
+            </div>
+            <div className="aw-about-grid">
+              <div
+                className="aw-about-media aw-clip aw-reveal"
+                data-key="home.about.image"
+                data-editable="image"
+              >
+                <div className="aw-clip-media" style={{ position: "absolute", inset: 0 }}>
+                  <Image
+                    src="/projects/villa-05/01.cover.webp"
+                    alt="Atelier Moodilier — mobilier premium"
+                    fill
+                    sizes="(max-width: 900px) 100vw, 48vw"
+                    style={{ objectFit: "cover" }}
+                  />
+                </div>
+              </div>
+              <div className="aw-about-copy">
+                <p
+                  className="aw-body aw-reveal"
+                  data-key="home.about.p1"
+                  data-editable="text"
+                >
+                  La Moodilier transformăm ideile de amenajare în piese de mobilier premium la
+                  comandă, create pentru spații elegante, funcționale și atemporale.
+                </p>
+                <p
+                  className="aw-body aw-reveal"
+                  data-key="home.about.p2"
+                  data-editable="text"
+                >
+                  Cu peste 10 ani de experiență în proiectarea și producția de mobilier premium,
+                  realizăm soluții personalizate pentru interioare rezidențiale și comerciale,
+                  punând accent pe design contemporan, materiale atent selecționate și execuție
+                  impecabilă.
+                </p>
+                <p
+                  className="aw-body aw-reveal"
+                  data-key="home.about.p3"
+                  data-editable="text"
+                >
+                  Credem că mobilierul premium înseamnă mai mult decât estetică — echilibru între
+                  design, funcționalitate și calitate autentică, fără compromisuri la detalii și
+                  finisaje.
+                </p>
+                <div className="aw-hero-ctas aw-reveal" style={{ marginTop: "1.5rem" }}>
+                  <Link
+                    href="/despre-noi"
+                    className="aw-btn-ghost aw-link-slide"
+                    data-key="home.about.cta_more"
+                    data-editable="link"
+                  >
+                    <span data-key="home.about.cta_more_label" data-editable="text">
+                      Află mai multe despre noi
+                    </span>
+                  </Link>
+                  <Link
+                    href="/contact"
+                    className="aw-btn aw-btn-primary aw-btn-fill"
+                    data-key="home.about.cta_offer"
+                    data-editable="link"
+                  >
+                    <span data-key="home.about.cta_offer_label" data-editable="text">
+                      Solicită ofertă
+                    </span>
+                    <ArrowRight size={14} />
+                  </Link>
+                </div>
+              </div>
+            </div>
+            <div className="aw-stats aw-about-stats">
+              {aboutStats.map((st, i) => (
+                <div key={st.label} className="aw-reveal" data-delay={i * 0.06}>
+                  <p
+                    className="aw-stat-num"
+                    data-count={st.count}
+                    data-suffix={st.suffix}
+                    data-key={`home.stats.${i}.num`}
+                    data-editable="number"
+                  >
+                    {st.num}
+                  </p>
+                  <p
+                    className="aw-stat-label"
+                    data-key={`home.stats.${i}.label`}
+                    data-editable="text"
+                  >
+                    {st.label}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Portofoliu ── */}
+        <section
+          className="aw-portfolio"
+          aria-labelledby="aw-portfolio-title"
+          data-section-id="portfolio"
+          data-section-name="Portofoliu"
+        >
+          <div className="aw-container">
+            <div className="aw-section-head aw-reveal">
+              <p className="aw-label" data-key="home.portfolio.label" data-editable="text">
+                Portofoliu
+              </p>
+              <h2
+                id="aw-portfolio-title"
+                className="aw-h2"
+                data-key="home.portfolio.title"
+                data-editable="text"
+              >
+                Proiecte realizate
+              </h2>
+            </div>
+
+            <div className="aw-portfolio-grid">
+              {featured.map((p, i) => (
+                <AwardsProjectCard
+                  key={p.slug}
+                  title={p.title}
+                  category={p.category}
+                  image={p.coverImage || "/projects/villa-06/01.cover.webp"}
+                  href={`/proiecte/${p.slug}`}
+                  video={p.video || null}
+                  className="aw-project-reveal"
+                  style={{ "--aw-i": i } as CSSProperties}
+                />
+              ))}
+            </div>
+
+            <div className="aw-section-foot aw-reveal">
+              <Link
+                href="/proiecte"
+                className="aw-btn aw-btn-outline-dark aw-btn-fill"
+              >
+                Vezi toate proiectele
+                <ArrowRight size={14} />
+              </Link>
+              <Link
+                href="/contact"
+                className="aw-btn aw-btn-primary aw-btn-fill"
+                style={{ marginLeft: "0.75rem" }}
+              >
+                Solicită ofertă
+                <ArrowRight size={14} />
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Servicii ── */}
+        <section
+          className="aw-services"
+          aria-labelledby="aw-services-title"
+          data-section-id="services"
+          data-section-name="Servicii"
+        >
+          <div className="aw-container">
+            <div className="aw-section-head aw-reveal">
+              <p className="aw-label" data-key="home.services.label" data-editable="text">
+                Ce oferim
+              </p>
+              <h2
+                id="aw-services-title"
+                className="aw-h2"
+                data-key="home.services.title"
+                data-editable="text"
+              >
+                Servicii oferite
+              </h2>
+            </div>
+            <div className="aw-services-grid">
+              {services.map((s, i) => (
+                <article key={s.num} className="aw-service aw-reveal" data-delay={(i % 3) * 0.06}>
+                  <div className="aw-service-top">
+                    {s.icon}
+                    <p className="aw-service-num">{s.num}</p>
+                  </div>
+                  <h3>{s.title}</h3>
+                  <p>{s.desc}</p>
+                </article>
+              ))}
+            </div>
+            <div className="aw-section-foot aw-reveal">
+              <Link
+                href="/servicii"
+                className="aw-btn aw-btn-outline-dark aw-btn-fill"
+              >
+                Toate serviciile noastre
+                <ArrowRight size={14} />
+              </Link>
+              <Link
+                href="/contact"
+                className="aw-btn aw-btn-primary aw-btn-fill"
+                style={{ marginLeft: "0.75rem" }}
+              >
+                Discută proiectul
+                <ArrowRight size={14} />
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Proces ── */}
+        <section
+          className="aw-process"
+          aria-labelledby="aw-process-title"
+          data-section-id="process"
+          data-section-name="Proces"
+        >
+          <div className="aw-container">
+            <div className="aw-section-head aw-reveal">
+              <p className="aw-label" data-key="home.process.label" data-editable="text">
+                Cum lucrăm
+              </p>
+              <h2
+                id="aw-process-title"
+                className="aw-h2"
+                data-key="home.process.title"
+                data-editable="text"
+              >
+                Etapele unui proiect
+              </h2>
+              <p
+                className="aw-body"
+                style={{ margin: "1rem auto 0", maxWidth: "42ch", textAlign: "center" }}
+                data-key="home.process.intro"
+                data-editable="text"
+              >
+                Proces clar, de la ofertă la montaj — cu precizie de atelier.
+              </p>
+            </div>
+
+            <div className="aw-steps-wrap aw-steps-seven">
+              <div className="aw-process-line" aria-hidden />
+              <ol className="aw-steps">
+                {steps.map((s, i) => (
+                  <li key={s.num} className="aw-step aw-reveal" data-delay={i * 0.05}>
+                    <p className="aw-step-num">{s.num}</p>
+                    <h3>{s.title}</h3>
+                    <p>{s.desc}</p>
+                  </li>
+                ))}
+              </ol>
+            </div>
+
+            <div className="aw-section-foot aw-reveal">
+              <Link
+                href="/contact"
+                className="aw-btn aw-btn-primary aw-btn-fill"
+              >
+                Începe proiectul tău
+                <ArrowRight size={14} />
+              </Link>
+              <Link
+                href="/proiecte"
+                className="aw-btn aw-btn-outline-dark aw-btn-fill"
+                style={{ marginLeft: "0.75rem" }}
+              >
+                Vezi proiecte
+                <ArrowRight size={14} />
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Motto ── */}
+        <section
+          className="aw-quote"
+          aria-label="Motto Moodilier"
+          data-section-id="quote"
+          data-section-name="Motto"
+        >
+          <div className="aw-container aw-quote-inner aw-reveal">
+            <blockquote data-key="home.quote" data-editable="text">
+              „Mobilier premium pe comandă, executat impecabil.”
+            </blockquote>
+          </div>
+        </section>
+
+        {/* ── Furnizori ── */}
+        <section
+          className="aw-suppliers"
+          aria-labelledby="aw-suppliers-title"
+          data-section-id="suppliers"
+          data-section-name="Furnizori"
+        >
+          <div className="aw-container">
+            <p className="aw-label aw-reveal" id="aw-suppliers-title" style={{ textAlign: "center" }}>
+              Furnizori parteneri
+            </p>
+            <div className="aw-suppliers-grid aw-reveal">
+              {supplierLogos.map((logo, i) => (
+                <div key={logo} className="aw-supplier">
+                  <Image
+                    src={logo}
+                    alt={`Furnizor partener ${i + 1}`}
+                    width={160}
+                    height={56}
+                    unoptimized
+                    style={{ height: 44, width: "auto", objectFit: "contain" }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── CTA ── */}
+        <section
+          className="aw-cta aw-cta-visual"
+          aria-labelledby="aw-cta-title"
+          data-section-id="cta"
+          data-section-name="CTA final"
+        >
+          <div className="aw-cta-bg" aria-hidden>
+            <div className="aw-cta-bg-shot aw-cta-bg-shot--left">
+              <Image
+                src="/projects/villa-06/01.living.cover.webp"
+                alt=""
+                fill
+                sizes="40vw"
+                style={{ objectFit: "cover" }}
+              />
+            </div>
+            <div className="aw-cta-bg-shot aw-cta-bg-shot--right">
+              <Image
+                src="/projects/villa-05/01.living.cover.webp"
+                alt=""
+                fill
+                sizes="40vw"
+                style={{ objectFit: "cover" }}
+              />
+            </div>
+          </div>
+          <div className="aw-container aw-cta-foreground">
+            <p className="aw-label aw-reveal" data-key="home.cta.label" data-editable="text">
+              Hai să lucrăm împreună
+            </p>
+            <h2
+              id="aw-cta-title"
+              className="aw-h2 aw-reveal"
+              data-split-lines
+              data-key="home.cta.title"
+              data-editable="html"
+            >
+              Transformăm viziunea ta
+              <br />
+              în mobilier premium
+            </h2>
+            <p className="aw-body aw-reveal" data-key="home.cta.body" data-editable="text">
+              Moodilier înseamnă mobilier la comandă realizat cu precizie, rafinament și pasiune
+              pentru design interior premium.
+            </p>
+            <div className="aw-cta-actions aw-reveal">
+              <Link
+                href="/contact"
+                className="aw-btn aw-btn-primary aw-btn-fill"
+                data-key="home.cta.primary"
+                data-editable="link"
+              >
+                <span data-key="home.cta.primary_label" data-editable="text">
+                  Solicită o ofertă gratuită
+                </span>
+                <ArrowRight size={14} />
+              </Link>
+              <Link
+                href="/proiecte"
+                className="aw-btn aw-btn-outline-dark aw-btn-fill"
+                data-key="home.cta.secondary"
+                data-editable="link"
+              >
+                <span data-key="home.cta.secondary_label" data-editable="text">
+                  Descoperă portofoliul
+                </span>
+              </Link>
+            </div>
+          </div>
+        </section>
+      </div>
+    </>
+  );
+}

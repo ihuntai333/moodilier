@@ -6,19 +6,10 @@ export const metadata = {
 
 export default function NewProjectPage() {
   return (
-    <div style={{ padding: "2.5rem 2rem", maxWidth: "860px" }}>
+    <div className="adm-page adm-page--narrow">
       <div style={{ marginBottom: "2rem" }}>
-        <h1
-          style={{
-            fontSize: "1.5rem",
-            fontWeight: 500,
-            color: "#e8e0d5",
-            marginBottom: "0.25rem",
-          }}
-        >
-          Proiect Nou
-        </h1>
-        <p style={{ fontSize: "0.85rem", color: "#6a6460", maxWidth: "none" }}>
+        <h1 className="adm-title">Proiect Nou</h1>
+        <p className="adm-subtitle">
           Completați detaliile și încărcați imaginile pentru noul proiect.
         </p>
       </div>

@@ -9,6 +9,7 @@ import {
   Clock,
   Plus,
   Settings,
+  FileText,
 } from "lucide-react";
 
 interface Stats {
@@ -39,56 +40,13 @@ function StatCard({
   accent?: boolean;
 }) {
   return (
-    <div
-      style={{
-        background: "#1a1917",
-        border: "1px solid #2a2724",
-        borderRadius: "8px",
-        padding: "1.5rem",
-        display: "flex",
-        alignItems: "flex-start",
-        gap: "1rem",
-      }}
-    >
-      <div
-        style={{
-          width: "44px",
-          height: "44px",
-          background: accent ? "rgba(201,169,132,0.12)" : "rgba(255,255,255,0.04)",
-          borderRadius: "8px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexShrink: 0,
-        }}
-      >
-        <Icon
-          size={20}
-          strokeWidth={1.5}
-          color={accent ? "#c9a984" : "#6a6460"}
-        />
+    <div className="adm-stat-card">
+      <div className={`adm-stat-icon${accent ? " is-accent" : ""}`}>
+        <Icon size={20} strokeWidth={1.5} />
       </div>
       <div>
-        <div
-          style={{
-            fontSize: "0.7rem",
-            color: "#6a6460",
-            letterSpacing: "0.05em",
-            textTransform: "uppercase",
-            marginBottom: "0.4rem",
-          }}
-        >
-          {label}
-        </div>
-        <div
-          style={{
-            fontSize: "1.75rem",
-            fontFamily: "'Cormorant Garamond', Georgia, serif",
-            fontWeight: 400,
-            color: accent ? "#c9a984" : "#e8e0d5",
-            lineHeight: 1,
-          }}
-        >
+        <div className="adm-stat-label">{label}</div>
+        <div className={`adm-stat-value${accent ? " is-accent" : ""}`}>
           {value}
         </div>
       </div>
@@ -114,64 +72,63 @@ export default function AdminDashboard() {
     fetch("/api/admin/stats")
       .then((r) => r.json())
       .then((data) => {
-        setStats(data);
+        if (data?.error) {
+          setStats({
+            totalProjects: 0,
+            unreadMessages: 0,
+            totalImages: 0,
+            lastUpdated: null,
+            recentMessages: [],
+          });
+        } else {
+          setStats({
+            totalProjects: data.totalProjects ?? 0,
+            unreadMessages: data.unreadMessages ?? 0,
+            totalImages: data.totalImages ?? 0,
+            lastUpdated: data.lastUpdated ?? null,
+            recentMessages: Array.isArray(data.recentMessages)
+              ? data.recentMessages
+              : [],
+          });
+        }
         setLoading(false);
       })
       .catch(() => setLoading(false));
   }, []);
 
   return (
-    <div style={{ padding: "2.5rem 2rem", maxWidth: "1200px" }}>
-      {/* Header */}
+    <div className="adm-page">
       <div style={{ marginBottom: "2.5rem" }}>
-        <h1
-          style={{
-            fontSize: "1.5rem",
-            fontWeight: 500,
-            color: "#e8e0d5",
-            marginBottom: "0.25rem",
-          }}
-        >
-          Dashboard
-        </h1>
-        <p style={{ fontSize: "0.85rem", color: "#6a6460", maxWidth: "none" }}>
+        <h1 className="adm-title">Dashboard</h1>
+        <p className="adm-subtitle">
           Bun venit în panoul de administrare Moodilier.
         </p>
       </div>
 
-      {/* Stats grid */}
+      <div className="adm-tip">
+        <div className="adm-tip-icon">
+          <FileText size={18} strokeWidth={1.75} />
+        </div>
+        <div className="adm-tip-body">
+          <h2 className="adm-tip-title">Unde editezi conținutul?</h2>
+          <p className="adm-tip-text">
+            Homepage-ul se editează din{" "}
+            <Link href="/admin/pagini">Pagini → Homepage</Link>. Proiectele
+            (poze, video hover, SEO) din{" "}
+            <Link href="/admin/proiecte">Proiecte</Link>. Contact &amp; site din{" "}
+            <Link href="/admin/setari">Setări</Link>.
+          </p>
+        </div>
+      </div>
+
       {loading ? (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-            gap: "1rem",
-            marginBottom: "2rem",
-          }}
-        >
+        <div className="adm-stat-grid">
           {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              style={{
-                background: "#1a1917",
-                border: "1px solid #2a2724",
-                borderRadius: "8px",
-                padding: "1.5rem",
-                height: "96px",
-                animation: "pulse 1.5s infinite",
-              }}
-            />
+            <div key={i} className="adm-skeleton" />
           ))}
         </div>
       ) : (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-            gap: "1rem",
-            marginBottom: "2.5rem",
-          }}
-        >
+        <div className="adm-stat-grid">
           <StatCard
             icon={FolderOpen}
             label="Total Proiecte"
@@ -204,86 +161,28 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* Quick actions */}
       <div style={{ marginBottom: "2.5rem" }}>
-        <div
-          style={{
-            fontSize: "0.65rem",
-            letterSpacing: "0.3em",
-            textTransform: "uppercase",
-            color: "#5a5450",
-            marginBottom: "1rem",
-          }}
-        >
-          Acțiuni rapide
-        </div>
-        <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
-          <Link
-            href="/admin/proiecte/nou"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              padding: "0.7rem 1.25rem",
-              background: "#c9a984",
-              color: "#0f0e0d",
-              borderRadius: "4px",
-              fontSize: "0.75rem",
-              fontWeight: 700,
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              textDecoration: "none",
-            }}
-          >
+        <div className="adm-section-label">Acțiuni rapide</div>
+        <div className="adm-actions">
+          <Link href="/admin/pagini/homepage" className="adm-btn adm-btn-primary">
+            <FileText size={14} />
+            Editează Homepage
+          </Link>
+          <Link href="/admin/proiecte/nou" className="adm-btn adm-btn-secondary">
             <Plus size={14} />
             Proiect Nou
           </Link>
-          <Link
-            href="/admin/setari"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              padding: "0.7rem 1.25rem",
-              background: "transparent",
-              color: "#c9a984",
-              border: "1px solid #c9a984",
-              borderRadius: "4px",
-              fontSize: "0.75rem",
-              fontWeight: 600,
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              textDecoration: "none",
-            }}
-          >
+          <Link href="/admin/setari" className="adm-btn adm-btn-ghost">
             <Settings size={14} />
             Setări
           </Link>
-          <Link
-            href="/admin/mesaje"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              padding: "0.7rem 1.25rem",
-              background: "transparent",
-              color: "#9a9088",
-              border: "1px solid #2a2724",
-              borderRadius: "4px",
-              fontSize: "0.75rem",
-              fontWeight: 600,
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              textDecoration: "none",
-            }}
-          >
+          <Link href="/admin/mesaje" className="adm-btn adm-btn-ghost">
             <MessageSquare size={14} />
             Vezi Mesaje
           </Link>
         </div>
       </div>
 
-      {/* Recent messages */}
       <div>
         <div
           style={{
@@ -293,71 +192,30 @@ export default function AdminDashboard() {
             marginBottom: "1rem",
           }}
         >
-          <div
-            style={{
-              fontSize: "0.65rem",
-              letterSpacing: "0.3em",
-              textTransform: "uppercase",
-              color: "#5a5450",
-            }}
-          >
+          <div className="adm-section-label" style={{ marginBottom: 0 }}>
             Mesaje Recente
           </div>
           <Link
             href="/admin/mesaje"
             style={{
               fontSize: "0.75rem",
-              color: "#c9a984",
+              color: "var(--adm-gold-hover)",
               textDecoration: "none",
+              fontWeight: 600,
             }}
           >
             Vezi toate →
           </Link>
         </div>
 
-        <div
-          style={{
-            background: "#1a1917",
-            border: "1px solid #2a2724",
-            borderRadius: "8px",
-            overflow: "hidden",
-          }}
-        >
-          {!stats || stats.recentMessages.length === 0 ? (
-            <div
-              style={{
-                padding: "3rem",
-                textAlign: "center",
-                color: "#5a5450",
-                fontSize: "0.875rem",
-              }}
-            >
-              Nu există mesaje încă.
-            </div>
+        <div className="adm-msg-list">
+          {!stats || (stats.recentMessages?.length ?? 0) === 0 ? (
+            <div className="adm-table-empty">Nu există mesaje încă.</div>
           ) : (
-            stats.recentMessages.map((msg, i) => (
-              <div
-                key={msg.id}
-                style={{
-                  padding: "1rem 1.5rem",
-                  borderBottom:
-                    i < stats.recentMessages.length - 1
-                      ? "1px solid #1f1e1c"
-                      : "none",
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: "1rem",
-                }}
-              >
+            stats.recentMessages.map((msg) => (
+              <div key={msg.id} className="adm-msg-item">
                 <div
-                  style={{
-                    width: "8px",
-                    height: "8px",
-                    borderRadius: "50%",
-                    background: msg.read ? "#3a3632" : "#c9a984",
-                    marginTop: "0.4rem",
-                    flexShrink: 0,
-                  }}
+                  className={`adm-dot${msg.read ? "" : " is-unread"}`}
                 />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div
@@ -366,22 +224,33 @@ export default function AdminDashboard() {
                       alignItems: "center",
                       gap: "0.75rem",
                       marginBottom: "0.25rem",
+                      flexWrap: "wrap",
                     }}
                   >
                     <span
                       style={{
                         fontSize: "0.875rem",
                         fontWeight: msg.read ? 400 : 600,
-                        color: "#e8e0d5",
+                        color: "var(--adm-text)",
                       }}
                     >
                       {msg.nume}
                     </span>
-                    <span style={{ fontSize: "0.75rem", color: "#5a5450" }}>
+                    <span
+                      style={{
+                        fontSize: "0.75rem",
+                        color: "var(--adm-text-muted)",
+                      }}
+                    >
                       {msg.email}
                     </span>
                     {msg.telefon && (
-                      <span style={{ fontSize: "0.75rem", color: "#5a5450" }}>
+                      <span
+                        style={{
+                          fontSize: "0.75rem",
+                          color: "var(--adm-text-muted)",
+                        }}
+                      >
                         {msg.telefon}
                       </span>
                     )}
@@ -389,11 +258,12 @@ export default function AdminDashboard() {
                   <p
                     style={{
                       fontSize: "0.8rem",
-                      color: "#7a7270",
+                      color: "var(--adm-text-soft)",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",
                       maxWidth: "100%",
+                      margin: 0,
                     }}
                   >
                     {msg.mesaj}
@@ -402,7 +272,7 @@ export default function AdminDashboard() {
                 <div
                   style={{
                     fontSize: "0.7rem",
-                    color: "#4a4540",
+                    color: "var(--adm-text-muted)",
                     whiteSpace: "nowrap",
                     flexShrink: 0,
                   }}

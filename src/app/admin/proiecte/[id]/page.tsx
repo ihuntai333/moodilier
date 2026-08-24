@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import ProjectForm from "@/components/admin/ProjectForm";
 
-interface Project {
+interface ProjectRow {
   id: string;
   slug: string;
   title: string;
@@ -12,12 +12,23 @@ interface Project {
   location?: string;
   description?: string;
   images: { url: string; alt?: string }[];
+  video?: string | null;
+  status?: "published" | "draft";
+  year?: string | null;
+  surface?: string | null;
+  seo_title?: string | null;
+  seo_description?: string | null;
+  is_featured?: boolean;
+  // camelCase fallbacks
+  seoTitle?: string;
+  seoDescription?: string;
+  isFeatured?: boolean;
 }
 
 export default function EditProjectPage() {
   const params = useParams();
   const id = params?.id as string;
-  const [project, setProject] = useState<Project | null>(null);
+  const [project, setProject] = useState<ProjectRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
@@ -44,25 +55,19 @@ export default function EditProjectPage() {
 
   if (loading) {
     return (
-      <div
-        style={{
-          padding: "2.5rem 2rem",
-          color: "#6a6460",
-          fontSize: "0.875rem",
-        }}
-      >
-        Se încarcă proiectul...
+      <div className="adm-page">
+        <p className="adm-subtitle">Se încarcă proiectul...</p>
       </div>
     );
   }
 
   if (notFound || !project) {
     return (
-      <div style={{ padding: "2.5rem 2rem" }}>
-        <h1 style={{ fontSize: "1.5rem", color: "#e07070", marginBottom: "0.5rem" }}>
+      <div className="adm-page">
+        <h1 className="adm-title" style={{ color: "var(--adm-danger)" }}>
           Proiect negăsit
         </h1>
-        <p style={{ color: "#6a6460", fontSize: "0.875rem" }}>
+        <p className="adm-subtitle">
           Proiectul cu ID-ul specificat nu există.
         </p>
       </div>
@@ -70,20 +75,11 @@ export default function EditProjectPage() {
   }
 
   return (
-    <div style={{ padding: "2.5rem 2rem", maxWidth: "860px" }}>
+    <div className="adm-page adm-page--narrow">
       <div style={{ marginBottom: "2rem" }}>
-        <h1
-          style={{
-            fontSize: "1.5rem",
-            fontWeight: 500,
-            color: "#e8e0d5",
-            marginBottom: "0.25rem",
-          }}
-        >
-          Editare: {project.title}
-        </h1>
-        <p style={{ fontSize: "0.85rem", color: "#6a6460", maxWidth: "none" }}>
-          Modificați detaliile sau imaginile proiectului.
+        <h1 className="adm-title">Editare: {project.title}</h1>
+        <p className="adm-subtitle">
+          Modificați detaliile, video-ul sau imaginile proiectului.
         </p>
       </div>
 
@@ -104,7 +100,15 @@ export default function EditProjectPage() {
             category: project.category,
             location: project.location || "",
             description: project.description || "",
-            images: project.images,
+            images: project.images || [],
+            video: project.video || "",
+            status: project.status || "published",
+            year: project.year || "",
+            surface: project.surface || "",
+            seoTitle: project.seo_title || project.seoTitle || "",
+            seoDescription:
+              project.seo_description || project.seoDescription || "",
+            isFeatured: Boolean(project.is_featured ?? project.isFeatured),
           }}
         />
       </div>

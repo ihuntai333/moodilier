@@ -1,154 +1,100 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
-import { Cormorant_Garamond, Inter, Geist } from "next/font/google";
-import Script from "next/script";
+import ConsentAnalytics from "@/components/ConsentAnalytics";
+import ScrollToTopOnNavigate from "@/components/ScrollToTopOnNavigate";
+import { getSiteChrome } from "@/lib/site-settings";
 import "./globals.css";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
-import WhatsAppButton from "@/components/WhatsAppButton";
-import CookieBanner from "@/components/CookieBanner";
-import ScrollReveal from "@/components/ScrollReveal";
-import FacebookPixel from "@/components/FacebookPixel";
-import { ThemeProvider } from "@/components/ThemeProvider";
-import PageLoader from "@/components/PageLoader";
-import { readDb } from "@/lib/db";
-import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
-
-
-// ── next/font: fonts served from same domain, zero render blocking ──
-const cormorant = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
-  style: ["normal", "italic"],
-  display: "swap",
-  variable: "--font-display",
-  preload: true,
-});
-
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  display: "swap",
-  variable: "--font-body",
-  preload: true,
-});
-
-function getSettings() {
-  try {
-    const db = readDb();
-    return db.settings;
-  } catch {
-    return null;
-  }
+export async function generateMetadata(): Promise<Metadata> {
+  const chrome = await getSiteChrome();
+  return {
+    metadataBase: new URL("https://moodilier.ro"),
+    title: {
+      default: chrome.siteTitle || "Moodilier — Mobilier La Comandă Premium",
+      template: "%s | Moodilier",
+    },
+    description:
+      chrome.metaDescription ||
+      "Moodilier — atelier de mobilier premium la comandă din București. Bucătării, dressinguri, livinguri, dormitoare și spații comerciale executate impecabil.",
+    keywords: [
+      "mobilier la comandă",
+      "mobilier premium București",
+      "bucătărie la comandă",
+      "dressing la comandă",
+      "mobilier living",
+      "atelier mobilier București",
+      "Moodilier",
+    ],
+    authors: [{ name: "Moodilier", url: "https://moodilier.ro" }],
+    creator: "Moodilier",
+    publisher: "SC Moodilier SRL",
+    alternates: { canonical: "https://moodilier.ro" },
+    openGraph: {
+      type: "website",
+      locale: "ro_RO",
+      url: "https://moodilier.ro",
+      siteName: "Moodilier",
+      title: chrome.siteTitle,
+      description: chrome.metaDescription,
+      images: [
+        {
+          url: "/projects/villa-06/01.cover.webp",
+          width: 1200,
+          height: 630,
+          alt: "Moodilier — mobilier premium la comandă",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: chrome.siteTitle,
+      description: chrome.metaDescription,
+      images: ["/projects/villa-06/01.cover.webp"],
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
+      },
+    },
+    verification: {
+      google: chrome.googleSiteVerification || undefined,
+      other: chrome.facebookDomainVerification
+        ? { "facebook-domain-verification": chrome.facebookDomainVerification }
+        : undefined,
+    },
+    icons: {
+      icon: "/brand/logo-dark.png",
+      apple: "/brand/logo-dark.png",
+    },
+  };
 }
-
-export const metadata: Metadata = {
-  metadataBase: new URL("https://moodilier.ro"),
-  title: {
-    default: "Moodilier — Mobilier La Comandă Premium",
-    template: "%s | Moodilier",
-  },
-  description:
-    "Moodilier — atelier de mobilier premium la comandă din București. Bucătării, dressinguri, livinguri, dormitoare și spații comerciale executate impecabil.",
-  keywords: ["mobilier la comanda", "mobilier premium", "bucatarie la comanda", "dressing", "living", "mobilier bucuresti"],
-  openGraph: {
-    type: "website",
-    locale: "ro_RO",
-    url: "https://moodilier.ro",
-    siteName: "Moodilier",
-    images: [{ url: "/images-scraped/Moodelier-White-scaled.png" }],
-  },
-  icons: {
-    icon: "/images-scraped/cropped-Untitled-design-8-192x192.png",
-    apple: "/images-scraped/cropped-Untitled-design-8-180x180.png",
-  },
-};
 
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const settings = getSettings();
-  const ga4Id = settings?.ga4Id?.trim();
-  const pixelId = settings?.pixelId?.trim();
-  const googleVerify = settings?.googleSiteVerification?.trim();
-  const fbDomainVerify = settings?.facebookDomainVerification?.trim();
-
-  const headersList = await headers();
-  const pathname = headersList.get("x-pathname") ?? "";
-  const isAdmin = pathname.startsWith("/admin");
+  const chrome = await getSiteChrome();
 
   return (
-    <html
-      lang="ro"
-      suppressHydrationWarning
-      className={cn(cormorant.variable, inter.variable, "font-sans", geist.variable)}
-    >
+    <html lang="ro" suppressHydrationWarning>
       <head>
-        {/* Resource hints for external services */}
-        <link rel="preconnect" href="https://connect.facebook.net" />
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://www.google-analytics.com" />
-
-        {/* Verification meta tags */}
-        {googleVerify && <meta name="google-site-verification" content={googleVerify} />}
-        {fbDomainVerify && <meta name="facebook-domain-verification" content={fbDomainVerify} />}
-
-        {/* Viewport & color scheme */}
-        <meta name="theme-color" content="#1f1d1a" />
-        {/* ── CRITICAL CSS INLINE: aplicat înainte de orice pixel ── */}
-        {/* globals.css poate fi asincron în Next.js → FOUC posibil.  */}
-        {/* Inline <style> e garantat sincron cu HTML-ul.              */}
-        <style dangerouslySetInnerHTML={{ __html: `
-          html, body { background: #080706 !important; }
-          .cl-root {
-            position: fixed !important;
-            inset: 0 !important;
-            z-index: 9999 !important;
-            background: #080706 !important;
-            overflow: hidden !important;
-          }
-        `}} />
-        {/* Prevent flash of wrong theme */}
-        <script dangerouslySetInnerHTML={{ __html: `
-          (function(){
-            var t=localStorage.getItem('moodilier-theme');
-            if(!t){t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';}
-            document.documentElement.setAttribute('data-theme',t);
-          })();
-        `}} />
+        <link rel="preconnect" href="https://connect.facebook.net" />
+        <meta name="theme-color" content="#ffffff" />
+        <meta name="geo.region" content="RO-B" />
+        <meta name="geo.placename" content="București" />
       </head>
       <body>
-        <ThemeProvider>
-          {!isAdmin && <PageLoader />}
-          {!isAdmin && <Header />}
-          <main>{children}</main>
-          {!isAdmin && <Footer />}
-          {!isAdmin && <WhatsAppButton phone="40729555431" />}
-          {!isAdmin && <CookieBanner />}
-          {!isAdmin && <ScrollReveal />}
-          {pixelId && <FacebookPixel pixelId={pixelId} />}
-
-        {/* ── Analytics: deferred until page is interactive ── */}
-        {ga4Id && (
-          <>
-            <Script
-              src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`}
-              strategy="afterInteractive"
-            />
-            <Script id="ga4-init" strategy="afterInteractive">
-              {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${ga4Id}');`}
-            </Script>
-          </>
-        )}
-        {pixelId && (
-          <Script id="fb-pixel" strategy="afterInteractive">
-            {`!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${pixelId}');fbq('track','PageView');`}
-          </Script>
-        )}
-        </ThemeProvider>
+        <ScrollToTopOnNavigate />
+        {children}
+        <ConsentAnalytics ga4Id={chrome.ga4Id} pixelId={chrome.pixelId} />
       </body>
     </html>
   );
