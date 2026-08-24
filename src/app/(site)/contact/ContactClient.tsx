@@ -412,7 +412,7 @@ export default function ContactClient({
               Localizare
             </p>
             <h2 className="aw-h2" style={{ maxWidth: "16ch" }}>
-              Showroom & Atelier
+              Atelier
             </h2>
             <p className="aw-body" style={{ marginTop: "0.75rem" }}>
               {settings.address}

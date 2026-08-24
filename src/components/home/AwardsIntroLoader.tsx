@@ -62,42 +62,27 @@ const CSS = `
 }
 .aw-intro-plate {
   text-align: center;
-  padding: 2rem 2.5rem;
-  background: rgba(10,10,10,.5);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,.1);
-  max-width: min(92vw, 480px);
+  padding: 1.25rem 1.5rem;
+  background: transparent;
+  backdrop-filter: none;
+  border: 0;
+  max-width: min(92vw, 420px);
 }
 .aw-intro-logo {
   display: block;
-  margin: 0 auto 1.25rem;
-  max-height: clamp(64px, 14vw, 104px);
-  max-width: min(82vw, 320px);
+  margin: 0 auto;
+  max-height: clamp(72px, 16vw, 120px);
+  max-width: min(86vw, 360px);
   width: auto;
+  height: auto;
   object-fit: contain;
 }
 .aw-intro-eyebrow {
-  display: block;
-  font-family: var(--awards-font-body), Montserrat, system-ui, sans-serif;
-  font-size: 0.62rem;
-  font-weight: 500;
-  letter-spacing: 0.42em;
-  text-transform: uppercase;
-  color: #efae74;
-  margin-bottom: 0.85rem;
+  display: none;
 }
 .aw-intro-name {
-  display: block;
-  font-family: var(--awards-font-body), Montserrat, system-ui, sans-serif;
-  font-size: clamp(1.5rem, 4vw, 2.4rem);
-  font-weight: 600;
-  letter-spacing: 0.35em;
-  text-transform: uppercase;
-  color: #fff;
-  line-height: 1;
-  padding-right: 0.35em;
+  display: none !important;
 }
-.aw-intro-name.is-hidden { display: none; }
 .aw-intro-rule {
   display: block;
   height: 1px;
@@ -157,20 +142,7 @@ function finishIntro() {
   document.documentElement.classList.remove("aw-intro-pending");
   document.documentElement.classList.add("aw-intro-done");
   document.body.style.removeProperty("overflow");
-  try {
-    sessionStorage.setItem(INTRO_KEY, "1");
-  } catch {
-    /* ignore */
-  }
   window.dispatchEvent(new CustomEvent("aw-intro-done"));
-}
-
-function alreadySeen(): boolean {
-  try {
-    return sessionStorage.getItem(INTRO_KEY) === "1";
-  } catch {
-    return false;
-  }
 }
 
 export default function AwardsIntroLoader({
@@ -179,15 +151,12 @@ export default function AwardsIntroLoader({
   config?: IntroConfig;
 }) {
   const enabled = config.enabled !== false;
-  // Must match SSR: don't read sessionStorage in useState (hydration mismatch).
   const [show, setShow] = useState(enabled);
   const closing = useRef(false);
 
   const frames = (config.images?.length ? config.images : DEFAULT_INTRO_IMAGES).slice(0, 8);
-  const brand = config.brandName || "Moodilier";
-  // Always prefer official logo — never show wordmark text next to logo (double branding).
-  const logo = config.logoUrl?.trim() || "/brand/logo-white.png";
-  const eyebrow = config.eyebrow || DEFAULT_INTRO.eyebrow;
+  // Always use official brand asset — never CSS wordmark / stale admin URL
+  const logo = `/brand/logo-white.png?v=20260824b`;
   const tagline = config.tagline || DEFAULT_INTRO.tagline;
 
   function close() {
@@ -203,17 +172,18 @@ export default function AwardsIntroLoader({
       setShow(false);
       return;
     }
-    if (alreadySeen()) {
-      finishIntro();
-      setShow(false);
-      return;
+
+    // Always show loader on each homepage visit
+    try {
+      sessionStorage.removeItem(INTRO_KEY);
+    } catch {
+      /* ignore */
     }
 
     document.documentElement.classList.add("aw-intro-pending");
     document.body.style.overflow = "hidden";
     setShow(true);
 
-    // Hard cap — never leave the site blocked
     const failsafe = window.setTimeout(close, 2800);
 
     return () => {
@@ -249,10 +219,7 @@ export default function AwardsIntroLoader({
         <div className="aw-intro-center">
           <div className="aw-intro-plate">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={logo} alt={brand || "Moodilier"} className="aw-intro-logo" />
-            {eyebrow && eyebrow !== tagline && !/moodilier/i.test(eyebrow) ? (
-              <span className="aw-intro-eyebrow">{eyebrow}</span>
-            ) : null}
+            <img src={logo} alt="Moodilier" className="aw-intro-logo" />
             <span className="aw-intro-rule" />
             <span className="aw-intro-tag">{tagline}</span>
           </div>

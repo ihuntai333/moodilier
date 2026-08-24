@@ -46,7 +46,7 @@ const mainExtended = [
     ...mainServices[2],
     points: [
       "Mărci europene selectate",
-      "Disponibil în showroom",
+      "Consultanță personalizată",
       "Livrare & montaj",
       "Garanție producător",
     ],

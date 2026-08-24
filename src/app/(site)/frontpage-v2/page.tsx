@@ -66,7 +66,7 @@ const services = [
   {
     num: "05",
     title: "Spații comerciale",
-    desc: "Recepții, birouri, showroom-uri și magazine: mobilier care reflectă identitatea brandului.",
+    desc: "Recepții, birouri și magazine: mobilier care reflectă identitatea brandului.",
     image: "/images-scraped/living_01_.jpg",
     href: "/servicii#spatii-comerciale",
   },
@@ -247,7 +247,7 @@ export default async function FrontpageV2Page() {
                 </p>
                 <p className="aw-body aw-reveal">
                   Fiecare proiect pornește de la stilul și nevoile clientului: bucătării premium,
-                  livinguri, dormitoare, recepții, birouri, showroom-uri și spații comerciale moderne.
+                  livinguri, dormitoare, recepții, birouri și spații comerciale moderne.
                 </p>
                 <div className="aw-hero-ctas aw-reveal" style={{ marginTop: "1.5rem" }}>
                   <Link href="/despre-noi" className="aw-btn-ghost aw-link-slide">

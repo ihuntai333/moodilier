@@ -132,7 +132,9 @@ function normalizeRooms(raw: unknown, gallery: ProjectImage[]): string[] {
 }
 
 function staticAsSite(): SiteProject[] {
-  return staticProjects.map((p) => {
+  return staticProjects
+    .filter((p) => !/showroom/i.test(p.slug) && !/showroom/i.test(p.title))
+    .map((p) => {
     const gallery =
       p.gallery?.length
         ? p.gallery
@@ -215,7 +217,7 @@ async function loadPublishedProjects(): Promise<SiteProject[]> {
 
 const cachedPublishedProjects = unstable_cache(
   loadPublishedProjects,
-  ["published-projects-v4-rooms"],
+  ["published-projects-v5-no-showroom"],
   { revalidate: 60, tags: ["projects"] }
 );
 

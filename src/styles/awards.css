@@ -801,10 +801,27 @@ body:has(.awards-root) {
     linear-gradient(90deg, rgba(7,7,7,.52) 0%, rgba(7,7,7,.2) 48%, rgba(7,7,7,.1) 100%),
     linear-gradient(0deg, rgba(7,7,7,.42) 0%, transparent 40%);
 }
+/* Soft white dissolve into marquee / page below */
+.aw-hero-fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  height: clamp(110px, 24%, 220px);
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.35) 45%,
+    rgba(255, 255, 255, 0.82) 78%,
+    #ffffff 100%
+  );
+}
 .aw-hero-overlay {
-  position: relative; z-index: 2; min-height: 100svh;
+  position: relative; z-index: 3; min-height: 100svh;
   display: flex; align-items: flex-end;
-  padding: calc(var(--aw-nav-h, 4.5rem) + 1rem) clamp(1.25rem, 5vw, 5rem) clamp(3.25rem, 7vh, 4.75rem);
+  padding: calc(var(--aw-nav-h, 4.5rem) + 1rem) clamp(1.25rem, 5vw, 5rem) clamp(5.5rem, 12vh, 8rem);
   pointer-events: none;
 }
 .aw-hero-copy {
@@ -823,7 +840,7 @@ body:has(.awards-root) {
 .aw-hero-ctas { display: flex; flex-wrap: wrap; align-items: center; gap: 1.5rem; }
 .aw-hero-dots {
   position: absolute; left: 50%; bottom: 1.5rem; transform: translateX(-50%);
-  z-index: 3; display: flex; gap: 0.45rem;
+  z-index: 4; display: flex; gap: 0.45rem;
   pointer-events: auto;
 }
 .aw-hero-dots button {
@@ -834,8 +851,22 @@ body:has(.awards-root) {
 .aw-hero-media { position: relative; overflow: hidden; min-height: 420px; background: var(--aw-gray-1); }
 .aw-hero-media-inner { position: absolute; inset: -8% 0; width: 100%; height: 116%; }
 @media (max-width: 900px) {
-  .aw-hero-overlay { align-items: flex-end; padding-bottom: 4.5rem; }
-  .aw-hero-copy { max-width: 100%; }
+  .aw-hero-overlay {
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 4.5rem;
+    text-align: center;
+  }
+  .aw-hero-copy {
+    max-width: 100%;
+    align-items: center;
+    text-align: center;
+    margin-inline: auto;
+  }
+  .aw-hero-copy .aw-label {
+    text-align: center;
+    margin-inline: auto;
+  }
 }
 
 /* Gallery rooms on project page */
@@ -2118,9 +2149,13 @@ body:has(.awards-root) {
     text-align: center;
     max-width: none !important;
     padding-block: 2.25rem !important;
+    align-items: center;
   }
 
+  .aw-hero-copy .aw-label,
+  .aw-hero-copy .aw-h1,
   .aw-hero-copy .aw-body {
+    text-align: center;
     margin-inline: auto;
   }
 
@@ -2143,6 +2178,11 @@ body:has(.awards-root) {
 
   .aw-portfolio-grid {
     grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Homepage: 8 projects on mobile (2×4), keep 9th for desktop only */
+  .aw-portfolio--home .aw-portfolio-grid > *:nth-child(n + 9) {
+    display: none !important;
   }
 }
 

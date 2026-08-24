@@ -214,7 +214,7 @@ const services = [
   {
     num: "05",
     title: "Spații comerciale",
-    desc: "Recepții, birouri, showroom-uri și magazine — mobilier care reflectă identitatea brandului.",
+    desc: "Recepții, birouri și magazine — mobilier care reflectă identitatea brandului.",
     icon: (
       <svg className="aw-service-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         {/* Reception / counter desk */}
@@ -454,7 +454,7 @@ export default async function HomePage() {
 
         {/* ── Portofoliu ── */}
         <section
-          className="aw-portfolio"
+          className="aw-portfolio aw-portfolio--home"
           aria-labelledby="aw-portfolio-title"
           data-section-id="portfolio"
           data-section-name="Portofoliu"

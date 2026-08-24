@@ -3,8 +3,6 @@
 import { useEffect } from "react";
 import { killSmoothScroll } from "@/lib/smooth-scroll";
 
-const INTRO_KEY = "moodilier-intro-seen";
-
 /**
  * Homepage motion — GSAP ScrollTrigger reveals for sections + portfolio.
  * Tuned lighter on mobile / reduced-motion.
@@ -53,14 +51,6 @@ export default function FrontpageAwardsClient() {
 
     const waitForIntro = () =>
       new Promise<void>((resolve) => {
-        try {
-          if (sessionStorage.getItem(INTRO_KEY) === "1") {
-            resolve();
-            return;
-          }
-        } catch {
-          /* ignore */
-        }
         if (!document.querySelector(".aw-intro")) {
           resolve();
           return;

@@ -70,12 +70,14 @@ export default function SiteNav({
     .filter(Boolean)
     .join(" ");
 
+  const brandLogoWhite = "/brand/logo-white.png?v=20260824b";
+  const brandLogoDark = "/brand/logo-dark.png?v=20260824b";
   const displayLogo =
-    overHero && logoUrl.includes("logo-dark")
-      ? logoUrl.replace("logo-dark", "logo-white")
-      : !overHero && logoUrl.includes("logo-white")
-        ? logoUrl.replace("logo-white", "logo-dark")
-        : logoUrl;
+    logoUrl && !logoUrl.includes("/brand/")
+      ? logoUrl
+      : overHero
+        ? brandLogoWhite
+        : brandLogoDark;
 
   return (
     <header className={headerClass}>

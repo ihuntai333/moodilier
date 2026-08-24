@@ -14,7 +14,7 @@ const sections = [
     number: "I",
     title: "Servicii oferite",
     content: [
-      "SC Moodilier SRL, cu sediul social în Municipiul București, oferă servicii de proiectare, producție și montaj de mobilier premium la comandă, inclusiv: bucătării, dressinguri, livinguri, dormitoare, spații comerciale, recepții, birouri și showroom-uri.",
+      "SC Moodilier SRL, cu sediul social în Municipiul București, oferă servicii de proiectare, producție și montaj de mobilier premium la comandă, inclusiv: bucătării, dressinguri, livinguri, dormitoare, spații comerciale, recepții și birouri.",
       "Serviciile sunt furnizate exclusiv pe teritoriul României, cu excepția cazurilor expres convenite în scris cu Clientul. Moodilier SRL furnizează, de asemenea, servicii de design interior, consultanță, importul și comercializarea de mobilier premium prin Moodilier Store.",
       "Societatea își rezervă dreptul de a modifica, extinde sau restrânge gama de servicii, cu notificare prealabilă a Clienților afectați, în măsura în care contractele individuale nu prevăd altfel.",
     ],

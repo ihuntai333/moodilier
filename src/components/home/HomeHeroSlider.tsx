@@ -18,12 +18,19 @@ type Props = {
   ctaSecondaryHref?: string;
 };
 
+function orderSlides(slides: HeroSlide[]): HeroSlide[] {
+  const videos = slides.filter((s) => s.type === "video");
+  const images = slides.filter((s) => s.type !== "video");
+  return [...videos, ...images];
+}
+
 /**
  * Full-bleed homepage hero — video + image slides, copy over media.
+ * Videos always lead; slideshow waits for intro to finish.
  */
 export default function HomeHeroSlider({
   slides,
-  defaultDurationSec = 6,
+  defaultDurationSec = 10,
   label = "Tailored ✦ Furniture",
   titleHtml = "The Art of<br />Custom Furniture",
   body = "Mobilier premium pe comandă, executat impecabil.",
@@ -32,44 +39,65 @@ export default function HomeHeroSlider({
   ctaSecondaryLabel = "Solicită o ofertă",
   ctaSecondaryHref = "/contact",
 }: Props) {
-  const list = slides.length
-    ? slides
-    : [
-        {
-          id: "fallback",
-          type: "image" as const,
-          src: "/projects/villa-06/01.cover.webp",
-          durationSec: defaultDurationSec,
-        },
-      ];
+  const list = orderSlides(
+    slides.length
+      ? slides
+      : [
+          {
+            id: "fallback",
+            type: "image" as const,
+            src: "/projects/villa-06/01.cover.webp",
+            durationSec: defaultDurationSec,
+          },
+        ]
+  );
 
   const [index, setIndex] = useState(0);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [ready, setReady] = useState(false);
+  const videoRefs = useRef<Map<number, HTMLVideoElement>>(new Map());
   const timerRef = useRef<number | null>(null);
   const active = list[index % list.length];
 
+  // Wait for intro loader before playing / advancing
   useEffect(() => {
+    if (!document.querySelector(".aw-intro")) {
+      setReady(true);
+      return;
+    }
+    const onDone = () => setReady(true);
+    window.addEventListener("aw-intro-done", onDone);
+    const failsafe = window.setTimeout(onDone, 4000);
+    return () => {
+      window.removeEventListener("aw-intro-done", onDone);
+      window.clearTimeout(failsafe);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!ready) return;
     if (timerRef.current) window.clearTimeout(timerRef.current);
 
     const ms = Math.max(2, active.durationSec || defaultDurationSec) * 1000;
     const goNext = () => setIndex((i) => (i + 1) % list.length);
 
     if (active.type === "video") {
-      const v = videoRef.current;
+      const v = videoRefs.current.get(index % list.length);
       if (v) {
-        v.currentTime = 0;
-        void v.play().catch(() => {});
+        try {
+          v.muted = true;
+          v.currentTime = 0;
+          void v.play().catch(() => {});
+        } catch {
+          /* ignore autoplay blocks */
+        }
       }
-      // Advance by duration setting (not only video end) so admin control works
-      timerRef.current = window.setTimeout(goNext, ms);
-    } else {
-      timerRef.current = window.setTimeout(goNext, ms);
     }
 
+    timerRef.current = window.setTimeout(goNext, ms);
     return () => {
       if (timerRef.current) window.clearTimeout(timerRef.current);
     };
-  }, [active, defaultDurationSec, list.length]);
+  }, [active, defaultDurationSec, list.length, ready, index]);
 
   return (
     <section
@@ -88,13 +116,17 @@ export default function HomeHeroSlider({
             >
               {slide.type === "video" ? (
                 <video
-                  ref={on ? videoRef : undefined}
+                  ref={(el) => {
+                    if (el) videoRefs.current.set(i, el);
+                    else videoRefs.current.delete(i);
+                  }}
                   className="aw-hero-video"
                   src={slide.src}
                   muted
                   playsInline
+                  autoPlay={on && ready}
                   loop
-                  preload={on ? "auto" : "metadata"}
+                  preload={i === 0 ? "auto" : "metadata"}
                   poster={slide.poster || "/projects/villa-06/01.cover.webp"}
                 />
               ) : (
@@ -111,6 +143,7 @@ export default function HomeHeroSlider({
           );
         })}
         <div className="aw-hero-scrim" />
+        <div className="aw-hero-fade" aria-hidden />
       </div>
 
       <div className="aw-hero-overlay">

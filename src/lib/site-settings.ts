@@ -82,12 +82,12 @@ export const DEFAULT_INTRO_IMAGES = [
   "/projects/apartment-15/01.living.cover.webp",
   "/projects/villa-03/01.living.cover.webp",
   "/projects/apartment-08/01.dormitoare.cover.webp",
-  "/projects/showroom-15/01.altele.cover.webp",
+  "/projects/apartment-09/01.bucatarii.cover.webp",
 ];
 
 export const DEFAULT_INTRO: IntroConfig = {
   enabled: true,
-  logoUrl: "/brand/logo-white.png",
+  logoUrl: "/brand/logo-white.png?v=20260824b",
   brandName: "Moodilier",
   eyebrow: "",
   tagline: "The Art of Custom Furniture",
@@ -100,32 +100,32 @@ export const DEFAULT_HERO_SLIDES: HeroSlide[] = [
     type: "video",
     src: "/videos/moodilier-vid-1.mp4",
     poster: "/projects/villa-06/01.living.cover.webp",
-    durationSec: 8,
+    durationSec: 10,
   },
   {
     id: "vid-2",
     type: "video",
     src: "/videos/moodilier-vid-2.mp4",
     poster: "/projects/villa-05/01.living.cover.webp",
-    durationSec: 8,
+    durationSec: 10,
   },
   {
     id: "img-villa-06",
     type: "image",
     src: "/projects/villa-06/01.living.cover.webp",
-    durationSec: 5,
+    durationSec: 10,
   },
   {
     id: "img-villa-04",
     type: "image",
     src: "/projects/villa-04/01.altele.cover.webp",
-    durationSec: 5,
+    durationSec: 10,
   },
 ];
 
 export const SITE_CHROME_DEFAULTS: SiteChrome = {
   brandName: "Moodilier",
-  logoUrl: "/brand/logo-white.png",
+  logoUrl: "/brand/logo-white.png?v=20260824b",
   headerMenu: DEFAULT_HEADER_MENU,
   ctaLabel: "Solicită ofertă",
   ctaHref: "/contact",
@@ -148,7 +148,7 @@ export const SITE_CHROME_DEFAULTS: SiteChrome = {
   facebookDomainVerification: "",
   intro: DEFAULT_INTRO,
   heroSlides: DEFAULT_HERO_SLIDES,
-  heroDefaultDurationSec: 6,
+  heroDefaultDurationSec: 10,
 };
 
 export const SETTINGS_STRING_DEFAULTS: Record<string, string> = {
@@ -166,7 +166,7 @@ export const SETTINGS_STRING_DEFAULTS: Record<string, string> = {
   siteTitle: SITE_CHROME_DEFAULTS.siteTitle,
   metaDescription: SITE_CHROME_DEFAULTS.metaDescription,
   brandName: SITE_CHROME_DEFAULTS.brandName,
-  logoUrl: "/brand/logo-white.png",
+  logoUrl: "/brand/logo-white.png?v=20260824b",
   ctaLabel: SITE_CHROME_DEFAULTS.ctaLabel,
   ctaHref: SITE_CHROME_DEFAULTS.ctaHref,
   footerBrand: SITE_CHROME_DEFAULTS.footerBrand,
@@ -175,13 +175,13 @@ export const SETTINGS_STRING_DEFAULTS: Record<string, string> = {
   footerMenu: JSON.stringify(DEFAULT_FOOTER_MENU),
   footerLegal: JSON.stringify(DEFAULT_FOOTER_LEGAL),
   introEnabled: "1",
-  introLogoUrl: "/brand/logo-white.png",
+  introLogoUrl: "/brand/logo-white.png?v=20260824b",
   introBrandName: "",
   introEyebrow: "",
   introTagline: DEFAULT_INTRO.tagline,
   introImages: JSON.stringify(DEFAULT_INTRO_IMAGES),
   heroSlides: JSON.stringify(DEFAULT_HERO_SLIDES),
-  heroDefaultDurationSec: "6",
+  heroDefaultDurationSec: "10",
   contactFormEnabled: "1",
   contactNotifyEmail: "ofertare@moodilier.com",
   contactSuccessMessage:
@@ -261,10 +261,52 @@ function parseHeroSlides(raw: string | undefined): HeroSlide[] {
   }
 }
 
+/** Bust browser cache when brand logos are re-uploaded with the same filename. */
+const BRAND_LOGO_CACHE = "20260824b";
+
+export function withBrandLogoCache(url: string): string {
+  const u = (url || "").trim();
+  if (!u) return `/brand/logo-white.png?v=${BRAND_LOGO_CACHE}`;
+  const path = u.split("?")[0];
+  if (path.includes("logo-dark")) {
+    return `/brand/logo-dark.png?v=${BRAND_LOGO_CACHE}`;
+  }
+  if (path.includes("/brand/")) {
+    return `/brand/logo-white.png?v=${BRAND_LOGO_CACHE}`;
+  }
+  return u.includes("?") ? u : `${u}?v=${BRAND_LOGO_CACHE}`;
+}
+
+/** Ensure hero always starts with video slides and ~10s timing. */
+export function normalizeHeroSlides(
+  slides: HeroSlide[],
+  defaultDurationSec = 10
+): HeroSlide[] {
+  const dur = Math.max(10, defaultDurationSec);
+  const source =
+    slides?.length && slides.some((s) => s.type === "video" && s.src)
+      ? slides
+      : DEFAULT_HERO_SLIDES;
+
+  const mapped = source
+    .filter((s) => s.src)
+    .map((s) => ({
+      ...s,
+      durationSec: Math.max(10, s.durationSec || dur),
+    }));
+
+  const videos = mapped.filter((s) => s.type === "video");
+  const images = mapped.filter((s) => s.type !== "video");
+  const ordered = [...videos, ...images];
+  return ordered.length
+    ? ordered
+    : DEFAULT_HERO_SLIDES.map((s) => ({ ...s, durationSec: dur }));
+}
+
 export function chromeFromFlat(flat: Record<string, string>): SiteChrome {
   return {
     brandName: flat.brandName?.trim() || SITE_CHROME_DEFAULTS.brandName,
-    logoUrl: flat.logoUrl?.trim() || SITE_CHROME_DEFAULTS.logoUrl,
+    logoUrl: withBrandLogoCache(flat.logoUrl?.trim() || SITE_CHROME_DEFAULTS.logoUrl),
     headerMenu: parseMenu(flat.headerMenu, DEFAULT_HEADER_MENU),
     ctaLabel: flat.ctaLabel?.trim() || SITE_CHROME_DEFAULTS.ctaLabel,
     ctaHref: flat.ctaHref?.trim() || SITE_CHROME_DEFAULTS.ctaHref,
@@ -288,18 +330,18 @@ export function chromeFromFlat(flat: Record<string, string>): SiteChrome {
     facebookDomainVerification: flat.facebookDomainVerification?.trim() || "",
     intro: {
       enabled: flat.introEnabled !== "0",
-      logoUrl:
-        flat.introLogoUrl?.trim() ||
-        flat.logoUrl?.trim() ||
-        DEFAULT_INTRO.logoUrl,
+      logoUrl: `/brand/logo-white.png?v=${BRAND_LOGO_CACHE}`,
       brandName: flat.introBrandName?.trim() || "",
       eyebrow: flat.introEyebrow?.trim() || "",
       tagline: flat.introTagline?.trim() || DEFAULT_INTRO.tagline,
       images: parseImages(flat.introImages),
     },
-    heroSlides: parseHeroSlides(flat.heroSlides),
+    heroSlides: normalizeHeroSlides(
+      parseHeroSlides(flat.heroSlides),
+      Math.max(10, Number(flat.heroDefaultDurationSec) || 10)
+    ),
     heroDefaultDurationSec: Math.max(
-      2,
+      10,
       Number(flat.heroDefaultDurationSec) ||
         SITE_CHROME_DEFAULTS.heroDefaultDurationSec
     ),
@@ -309,8 +351,13 @@ export function chromeFromFlat(flat: Record<string, string>): SiteChrome {
 async function loadSiteChrome(): Promise<SiteChrome> {
   const fallback = {
     ...SITE_CHROME_DEFAULTS,
-    intro: { ...DEFAULT_INTRO, images: [...DEFAULT_INTRO_IMAGES] },
-    heroSlides: DEFAULT_HERO_SLIDES.map((s) => ({ ...s })),
+    intro: {
+      ...DEFAULT_INTRO,
+      logoUrl: `/brand/logo-white.png?v=${BRAND_LOGO_CACHE}`,
+      images: [...DEFAULT_INTRO_IMAGES],
+    },
+    heroSlides: normalizeHeroSlides(DEFAULT_HERO_SLIDES, 10),
+    heroDefaultDurationSec: 10,
   };
   if (!hasSupabaseConfig) return fallback;
 
@@ -331,7 +378,7 @@ async function loadSiteChrome(): Promise<SiteChrome> {
   }
 }
 
-const cachedSiteChrome = unstable_cache(loadSiteChrome, ["site-chrome-v4-hero"], {
+const cachedSiteChrome = unstable_cache(loadSiteChrome, ["site-chrome-v6-hero-logo"], {
   revalidate: 60,
   tags: ["site-chrome"],
 });

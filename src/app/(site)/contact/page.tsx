@@ -10,11 +10,11 @@ export const revalidate = 60;
 export const metadata: Metadata = {
   title: "Contact | Moodilier",
   description:
-    "Contactați Moodilier pentru o ofertă personalizată de mobilier premium la comandă. Showroom la Bulevardul Basarabia 256, Sector 3, București.",
+    "Contactați Moodilier pentru o ofertă personalizată de mobilier premium la comandă. Atelier la Bulevardul Basarabia 256, Sector 3, București.",
   openGraph: {
     title: "Contact | Moodilier",
     description:
-      "Solicită o ofertă de mobilier la comandă. Răspundem în maxim 24 de ore. Atelier & showroom — Blv. Basarabia 256, București.",
+      "Solicită o ofertă de mobilier la comandă. Răspundem în maxim 24 de ore. Atelier — Blv. Basarabia 256, București.",
     images: ["/images-scraped/executie_sediu-office15.jpg"],
   },
 };

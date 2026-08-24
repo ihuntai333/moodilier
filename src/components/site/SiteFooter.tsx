@@ -70,16 +70,12 @@ export default function SiteFooter({ chrome }: Props) {
     <footer className="aw-footer">
       <div className="aw-container aw-footer-inner" style={{ flexDirection: "column", alignItems: "stretch" }}>
         <div className="aw-footer-grid">
-          <div>
+            <div className="aw-footer-brand-col">
             <div className="aw-footer-brand-block">
               {chrome.logoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={
-                    chrome.logoUrl.includes("logo-dark")
-                      ? chrome.logoUrl.replace("logo-dark", "logo-white")
-                      : chrome.logoUrl
-                  }
+                  src={`/brand/logo-white.png?v=20260824b`}
                   alt={chrome.footerBrand}
                   className="aw-footer-logo"
                 />
@@ -110,7 +106,7 @@ export default function SiteFooter({ chrome }: Props) {
                 ))}
               </div>
             ) : null}
-          </div>
+            </div>
 
           {chrome.footerMenu.length > 0 ? (
             <div className="aw-footer-col">

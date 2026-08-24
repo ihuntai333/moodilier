@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import type { ProjectImage } from "@/lib/projects";
+import { galleryRoomId } from "@/lib/room-anchor";
 
 const ProjectLightbox = dynamic(() => import("@/components/ProjectLightbox"), {
   ssr: false,
@@ -52,7 +53,6 @@ export default function SiteProjectGallery({
       const ib = ROOM_ORDER.indexOf(b);
       return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
     });
-    // Single unlabelled dump if everything is Altele
     if (keys.length === 1 && keys[0] === "Altele") {
       return [{ room: null as string | null, images: map.get("Altele")! }];
     }
@@ -61,6 +61,32 @@ export default function SiteProjectGallery({
       images: map.get(room)!,
     }));
   }, [items, broken]);
+
+  useEffect(() => {
+    const hash = typeof window !== "undefined" ? window.location.hash.slice(1) : "";
+    if (!hash) return;
+
+    let tries = 0;
+    let raf = 0;
+    const scrollToHash = () => {
+      const el = document.getElementById(hash);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        return true;
+      }
+      return false;
+    };
+
+    if (scrollToHash()) return;
+
+    const tick = () => {
+      tries += 1;
+      if (scrollToHash() || tries > 20) return;
+      raf = window.setTimeout(tick, 50);
+    };
+    raf = window.setTimeout(tick, 50);
+    return () => window.clearTimeout(raf);
+  }, [sections]);
 
   return (
     <>
@@ -71,40 +97,48 @@ export default function SiteProjectGallery({
         <span className="aw-gallery-count">{valid.length} fotografii</span>
       </div>
 
-      {sections.map((section) => (
-        <div key={section.room || "all"} className="aw-gallery-section">
-          {section.room ? (
-            <h3 className="aw-gallery-room">{section.room}</h3>
-          ) : null}
-          <div className="aw-gallery-grid">
-            {section.images.map((img, i) => {
-              const flatIndex = valid.findIndex((v) => v.url === img.url);
-              const isFeatured = i === 0 && sections[0] === section;
+      {sections.map((section) => {
+        const sectionId = galleryRoomId(section.room);
+        return (
+          <div
+            key={section.room || "all"}
+            id={sectionId}
+            className="aw-gallery-section"
+            style={{ scrollMarginTop: "5.5rem" }}
+          >
+            {section.room ? (
+              <h3 className="aw-gallery-room">{section.room}</h3>
+            ) : null}
+            <div className="aw-gallery-grid">
+              {section.images.map((img, i) => {
+                const flatIndex = valid.findIndex((v) => v.url === img.url);
+                const isFeatured = i === 0 && sections[0] === section;
 
-              return (
-                <button
-                  key={img.url + i}
-                  type="button"
-                  className={`aw-gallery-item${isFeatured ? " is-featured" : ""}`}
-                  onClick={() => setLightboxIndex(flatIndex >= 0 ? flatIndex : 0)}
-                  aria-label={`Deschide fotografia ${flatIndex + 1} din ${title}`}
-                >
-                  <Image
-                    src={img.url}
-                    alt={`${title}${section.room ? ` — ${section.room}` : ""} — fotografie ${i + 1}`}
-                    fill
-                    sizes="(max-width: 700px) 100vw, 50vw"
-                    style={{ objectFit: "cover" }}
-                    onError={() =>
-                      setBroken((prev) => new Set([...prev, img.url]))
-                    }
-                  />
-                </button>
-              );
-            })}
+                return (
+                  <button
+                    key={img.url + i}
+                    type="button"
+                    className={`aw-gallery-item${isFeatured ? " is-featured" : ""}`}
+                    onClick={() => setLightboxIndex(flatIndex >= 0 ? flatIndex : 0)}
+                    aria-label={`Deschide fotografia ${flatIndex + 1} din ${title}`}
+                  >
+                    <Image
+                      src={img.url}
+                      alt={`${title}${section.room ? ` — ${section.room}` : ""} — fotografie ${i + 1}`}
+                      fill
+                      sizes="(max-width: 700px) 100vw, 50vw"
+                      style={{ objectFit: "cover" }}
+                      onError={() =>
+                        setBroken((prev) => new Set([...prev, img.url]))
+                      }
+                    />
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
 
       {lightboxIndex !== null && (
         <ProjectLightbox
