@@ -1,16 +1,19 @@
 /**
- * Services mirrored from https://moodilier.ro/servicii/
- * + atelier pages: CNC, Vopsitorie MDF, Termoformare
+ * Services content — Moodilier atelier + main offers
  */
 export const servicesIntro = {
   eyebrow: "Servicii",
   title: "Servicii complete de",
   titleAccent: "design interior, mobilier premium și prelucrări personalizate",
-  body: `La Moodilier oferim servicii complete pentru proiecte de amenajare interioară și producție de mobilier premium la comandă, cu accent pe design contemporan, precizie tehnică și execuție impecabilă.
+  body: `La Moodilier oferim servicii complete pentru proiecte de amenajare interioară și producție de mobilier premium la comandă, realizate cu accent pe design contemporan, precizie tehnică și execuție impecabilă.
 
-Gestionăm întregul proces — de la concept și proiectare tehnică, până la producție, finisare și montaj — pentru spații elegante, funcționale și adaptate fiecărui proiect.
+Gestionăm întregul proces — de la concept și proiectare tehnică, până la producție, finisare și montaj — pentru a livra spații elegante, funcționale și perfect adaptate fiecărui proiect.
 
-Pe lângă mobilier personalizat, oferim termoformare, vopsitorie MDF premium și prelucrări CNC de înaltă precizie.`,
+Pe lângă producția de mobilier personalizat pentru spații rezidențiale și comerciale, oferim și servicii specializate dedicate industriei de mobilier și amenajări interioare: termoformare materiale compozite; servicii premium de vopsitorie MDF; prelucrări CNC de înaltă precizie; realizare de elemente personalizate pentru mobilier și design interior.
+
+Utilizăm materiale atent selecționate, tehnologii moderne de producție și finisaje premium pentru a obține rezultate durabile, estetice și perfect executate până la cel mai mic detaliu.
+
+Fie că este vorba despre mobilier la comandă, elemente decorative sau componente tehnice speciale, fiecare proiect este realizat cu aceeași atenție pentru calitate, funcționalitate și rafinament.`,
 };
 
 export const mainServices = [
@@ -20,7 +23,7 @@ export const mainServices = [
     short:
       "Concept, mood board, vizualizări 3D și proiect tehnic — spațiul tău prinde formă înainte de producție.",
     href: "/servicii#proiectare",
-    image: "/images-scraped/proiectare.jpg",
+    image: "/projects/villa-06/01.living.cover.webp",
   },
   {
     slug: "mobilier-la-comanda",
@@ -28,15 +31,15 @@ export const mainServices = [
     short:
       "Bucătării, dressinguri, livinguri, dormitoare și băi — executate în atelierul propriu, pe măsură.",
     href: "/servicii#mobilier-la-comanda",
-    image: "/images-scraped/buc_giurgiu_1.jpg",
+    image: "/projects/villa-01/01.bucatarii.cover.webp",
   },
   {
-    slug: "moodilier-store",
-    title: "Moodilier Store",
+    slug: "moodilier-fabrics",
+    title: "Moodilier Fabrics",
     short:
-      "Selecție de mobilier premium importat, pentru a completa execuția locală cu piese de colecție.",
-    href: "/servicii#moodilier-store",
-    image: "/images-scraped/mobilier-premium-01.webp",
+      "Soluții de perdele și draperii, sisteme de umbrire, sine electrice și storuri romane — integrate în amenajarea spațiului.",
+    href: "/servicii#moodilier-fabrics",
+    image: "/projects/villa-05/01.living.cover.webp",
   },
 ] as const;
 
@@ -46,9 +49,13 @@ export const atelierServices = [
     title: "Servicii Prelucrare CNC",
     tagline: "Ideile tale, transformate în realitate.",
     desc: "Prelucrare CNC de înaltă calitate cu echipamente de ultimă generație — precizie, repetabilitate și eficiență pentru piese complexe, panouri decorative și elemente arhitecturale.",
-    points: ["Precizie — toleranțe foarte mici", "Flexibilitate pe materiale diverse", "Eficiență și reducerea erorilor"],
+    points: [
+      "Precizie — toleranțe foarte mici",
+      "Flexibilitate pe materiale diverse",
+      "Eficiență și reducerea erorilor",
+    ],
     href: "/servicii#prelucrare-cnc",
-    image: "/images-scraped/montaj.jpg",
+    image: "/images-scraped/proiecte/servicii-prelucrare-cnc/DSC06628-HDR-1.png",
   },
   {
     slug: "vopsitorie-mdf",
@@ -61,7 +68,7 @@ export const atelierServices = [
       "Finisaj durabil, ușor de întreținut",
     ],
     href: "/servicii#vopsitorie-mdf",
-    image: "/images-scraped/living_01_.jpg",
+    image: "/images-scraped/proiecte/servicii-vopsitorie-mdf/servicii-vopsitorie-imagine.png",
   },
   {
     slug: "termoformare",
@@ -70,6 +77,6 @@ export const atelierServices = [
     desc: "Termoformare pentru forme complexe și detaliate — proces precis, cost-eficient, cu materiale durabile și plăcute estetic.",
     points: ["Costuri reduse", "Forme complexe", "Calitate superioară"],
     href: "/servicii#termoformare",
-    image: "/images-scraped/cameraA_03_.jpg",
+    image: "/images-scraped/proiecte/termoformare/Poza-Nr.-00A3-1.jpg",
   },
 ] as const;

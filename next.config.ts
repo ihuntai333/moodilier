@@ -23,11 +23,13 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       // Only load scripts from trusted sources
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "script-src 'self' 'unsafe-inline'",
       "  *.googletagmanager.com *.google-analytics.com",
       "  connect.facebook.net *.facebook.com",
       "  *.vercel-scripts.com",
       ";",
+      "default-src 'self';",
+      "frame-ancestors 'self';",
       // Styles: self + Google Fonts
       "style-src 'self' 'unsafe-inline' fonts.googleapis.com;",
       // Fonts: self + Google Fonts CDN
@@ -73,6 +75,9 @@ const nextConfig: NextConfig = {
 
   images: {
     formats: ["image/avif", "image/webp"],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [64, 96, 128, 256, 384],
+    minimumCacheTTL: 60 * 60 * 24 * 30,
     remotePatterns: [
       { protocol: "https", hostname: "moodilier.ro" },
       { protocol: "http", hostname: "localhost" },
@@ -94,6 +99,33 @@ const nextConfig: NextConfig = {
       {
         source: "/(.*)",
         headers: headersForAll,
+      },
+      {
+        source: "/videos/(.*)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/projects/(.*)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/brand/(.*)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
       },
       {
         source: "/api/(.*)",

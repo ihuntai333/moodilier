@@ -68,18 +68,8 @@ export async function optimizeImageBuffer(
   const originalBytes = input.length;
   const { maxEdge, quality, preset } = resolveLimits(options);
 
-  if (mimeType === "image/svg+xml") {
-    return {
-      buffer: input,
-      contentType: "image/svg+xml",
-      extension: "svg",
-      width: 0,
-      height: 0,
-      originalBytes,
-      optimizedBytes: originalBytes,
-      skipped: true,
-      preset,
-    };
+  if (mimeType === "image/svg+xml" || mimeType === "image/svg") {
+    throw new Error("SVG uploads are not allowed");
   }
 
   if (mimeType === "image/gif") {

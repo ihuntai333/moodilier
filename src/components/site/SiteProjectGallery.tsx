@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import type { ProjectImage } from "@/lib/projects";
@@ -38,8 +38,12 @@ export default function SiteProjectGallery({
 
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [broken, setBroken] = useState<Set<string>>(new Set());
+  const openedFotoRef = useRef(false);
 
-  const valid = items.filter((g) => !broken.has(g.url));
+  const valid = useMemo(
+    () => items.filter((g) => !broken.has(g.url)),
+    [items, broken]
+  );
   const sections = useMemo(() => {
     const map = new Map<string, ProjectImage[]>();
     for (const g of items) {
@@ -64,11 +68,16 @@ export default function SiteProjectGallery({
 
   useEffect(() => {
     const hash = typeof window !== "undefined" ? window.location.hash.slice(1) : "";
-    if (!hash) return;
+    const foto =
+      typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search).get("foto")
+        : null;
 
     let tries = 0;
     let raf = 0;
+
     const scrollToHash = () => {
+      if (!hash) return true;
       const el = document.getElementById(hash);
       if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -77,16 +86,35 @@ export default function SiteProjectGallery({
       return false;
     };
 
-    if (scrollToHash()) return;
+    const openFoto = () => {
+      if (!foto || openedFotoRef.current) return true;
+      const idx = valid.findIndex((v) => v.url === foto);
+      if (idx >= 0) {
+        openedFotoRef.current = true;
+        setLightboxIndex(idx);
+        return true;
+      }
+      return false;
+    };
+
+    // Prefer opening the photo once gallery is ready; still scroll to room section
+    const run = () => {
+      const scrolled = !hash || scrollToHash();
+      const opened = !foto || openFoto();
+      return scrolled && opened;
+    };
+
+    if (run()) return;
 
     const tick = () => {
       tries += 1;
-      if (scrollToHash() || tries > 20) return;
+      if (run() || tries > 24) return;
       raf = window.setTimeout(tick, 50);
     };
     raf = window.setTimeout(tick, 50);
     return () => window.clearTimeout(raf);
-  }, [sections]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sections, valid.length]);
 
   return (
     <>
@@ -126,7 +154,9 @@ export default function SiteProjectGallery({
                       src={img.url}
                       alt={`${title}${section.room ? ` — ${section.room}` : ""} — fotografie ${i + 1}`}
                       fill
-                      sizes="(max-width: 700px) 100vw, 50vw"
+                      sizes="(max-width: 700px) 50vw, (max-width: 1100px) 33vw, 25vw"
+                      quality={70}
+                      loading="lazy"
                       style={{ objectFit: "cover" }}
                       onError={() =>
                         setBroken((prev) => new Set([...prev, img.url]))

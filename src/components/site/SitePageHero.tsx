@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 interface SitePageHeroProps {
@@ -11,8 +14,7 @@ interface SitePageHeroProps {
 }
 
 /**
- * Inner-page hero — centered copy, full-bleed media, soft fade into page body.
- * No under-header CTA strip (filter bands live outside, e.g. proiecte).
+ * Inner-page hero — poster first (LCP), then project video when available.
  */
 export default function SitePageHero({
   label,
@@ -22,32 +24,62 @@ export default function SitePageHero({
   bgVideo,
   overlayOpacity = 0.42,
 }: SitePageHeroProps) {
-  const hasVideo = Boolean(bgVideo);
+  const hasVideo = Boolean(bgVideo?.trim());
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [videoReady, setVideoReady] = useState(false);
+
+  useEffect(() => {
+    if (!hasVideo) return;
+    const v = videoRef.current;
+    if (!v) return;
+
+    v.muted = true;
+    v.defaultMuted = true;
+    v.playsInline = true;
+
+    const tryPlay = () => {
+      void v.play().then(() => setVideoReady(true)).catch(() => {});
+    };
+
+    if (v.readyState >= 2) tryPlay();
+    else {
+      const onReady = () => tryPlay();
+      v.addEventListener("canplay", onReady, { once: true });
+      v.addEventListener("loadeddata", onReady, { once: true });
+      return () => {
+        v.removeEventListener("canplay", onReady);
+        v.removeEventListener("loadeddata", onReady);
+      };
+    }
+  }, [hasVideo, bgVideo]);
 
   return (
     <section className="aw-page-hero" aria-labelledby="aw-page-hero-title">
       <div className="aw-page-hero-bg">
+        <Image
+          src={bgImage}
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          quality={75}
+          className={`aw-page-hero-poster${videoReady ? " is-dim" : ""}`}
+          style={{ objectFit: "cover", objectPosition: "center" }}
+        />
         {hasVideo ? (
           <video
+            ref={videoRef}
+            className={`aw-page-hero-video${videoReady ? " is-on" : ""}`}
             src={bgVideo!}
             poster={bgImage}
-            autoPlay
             muted
-            loop
             playsInline
+            autoPlay
+            loop
             preload="metadata"
             aria-hidden
           />
-        ) : (
-          <Image
-            src={bgImage}
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-            style={{ objectFit: "cover", objectPosition: "center" }}
-          />
-        )}
+        ) : null}
       </div>
       <div
         className="aw-page-hero-overlay"

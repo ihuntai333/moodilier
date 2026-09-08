@@ -18,9 +18,12 @@ export default function ProjectLightbox({
   onClose,
 }: ProjectLightboxProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const [displayIndex, setDisplayIndex] = useState(initialIndex);
+  const [imgVisible, setImgVisible] = useState(true);
   const [mounted, setMounted] = useState(false);
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
+  const preferInstant = useRef(false);
   const thumbnailsRef = useRef<HTMLDivElement>(null);
   const activeThumbnailRef = useRef<HTMLButtonElement | null>(null);
 
@@ -28,6 +31,26 @@ export default function ProjectLightbox({
   useEffect(() => {
     requestAnimationFrame(() => setMounted(true));
   }, []);
+
+  // Soft crossfade on image change (skip for keyboard / reduced-motion)
+  useEffect(() => {
+    if (currentIndex === displayIndex) return;
+    const reduce =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (preferInstant.current || reduce) {
+      preferInstant.current = false;
+      setDisplayIndex(currentIndex);
+      setImgVisible(true);
+      return;
+    }
+    setImgVisible(false);
+    const t = window.setTimeout(() => {
+      setDisplayIndex(currentIndex);
+      requestAnimationFrame(() => setImgVisible(true));
+    }, 90);
+    return () => window.clearTimeout(t);
+  }, [currentIndex, displayIndex]);
 
   // Lock body scroll
   useEffect(() => {
@@ -48,12 +71,16 @@ export default function ProjectLightbox({
   const goPrev = useCallback(() => goTo(currentIndex - 1), [currentIndex, goTo]);
   const goNext = useCallback(() => goTo(currentIndex + 1), [currentIndex, goTo]);
 
-  // Keyboard navigation
+  // Keyboard navigation — instant (high frequency)
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") goPrev();
-      else if (e.key === "ArrowRight") goNext();
-      else if (e.key === "Escape") onClose();
+      if (e.key === "ArrowLeft") {
+        preferInstant.current = true;
+        goPrev();
+      } else if (e.key === "ArrowRight") {
+        preferInstant.current = true;
+        goNext();
+      } else if (e.key === "Escape") onClose();
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
@@ -205,15 +232,17 @@ export default function ProjectLightbox({
         }}
       >
         <Image
-          key={currentIndex}
-          src={images[currentIndex]}
-          alt={`${projectTitle} — fotografie ${currentIndex + 1}`}
+          key={displayIndex}
+          src={images[displayIndex]}
+          alt={`${projectTitle} — fotografie ${displayIndex + 1}`}
           fill
           sizes="90vw"
           style={{
             objectFit: "contain",
             pointerEvents: "none",
             userSelect: "none",
+            opacity: imgVisible ? 1 : 0,
+            transition: "opacity 180ms cubic-bezier(0.23, 1, 0.32, 1)",
           }}
           priority
         />

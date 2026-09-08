@@ -6,17 +6,15 @@ import SitePageHero from "@/components/site/SitePageHero";
 import SiteCTA from "@/components/site/SiteCTA";
 import JsonLd from "@/components/JsonLd";
 
-export const metadata: Metadata = {
-  title: "Despre noi | Moodilier",
+import { pageMetadata } from "@/lib/site-seo";
+
+export const metadata: Metadata = pageMetadata({
+  path: "/despre-noi",
+  title: "Despre Moodilier | Mobilier premium la comandă",
   description:
     "Povestea Moodilier — peste 10 ani de expertiză în producția de mobilier premium la comandă și amenajări interioare din București.",
-  openGraph: {
-    title: "Despre noi | Moodilier",
-    description:
-      "Atelier de mobilier premium la comandă din București — design contemporan, precizie tehnică și atenție impecabilă la detalii.",
-    images: ["/images-despre-noi/living-02.jpg"],
-  },
-};
+  image: "/projects/villa-06/01.living.cover.webp",
+});
 
 const values = [
   {
@@ -40,46 +38,47 @@ const values = [
 const stats = [
   { num: "10+", label: "Ani experiență" },
   { num: "200+", label: "Proiecte finalizate" },
-  { num: "1.200 mp", label: "Atelier propriu" },
+  { num: "2.000 mp", label: "Atelier propriu" },
   { num: "100%", label: "La comandă" },
 ];
 
+/** Project photos under the story — brief: „sub descriere câteva poze din proiecte”. */
 const galleryImages = [
   {
-    src: "/images-despre-noi/living-01.jpg",
-    alt: "Living premium cu perete de marmură și mobilier la comandă",
+    src: "/projects/villa-06/01.living.cover.webp",
+    alt: "Villa 06 — living cu mobilier la comandă Moodilier",
   },
   {
-    src: "/images-despre-noi/dormitor-01.jpg",
-    alt: "Dormitor premium cu tăblie tapițată",
+    src: "/projects/villa-03/01.living.cover.webp",
+    alt: "Villa 03 — living contemporan",
   },
   {
-    src: "/images-despre-noi/living-02.jpg",
-    alt: "Living contemporan cu candelabru",
+    src: "/projects/villa-01/01.bucatarii.cover.webp",
+    alt: "Villa 01 — bucătărie premium",
   },
   {
-    src: "/images-despre-noi/dressing-01.jpg",
-    alt: "Dressing premium cu oglindă și iluminare LED",
+    src: "/projects/villa-05/01.living.cover.webp",
+    alt: "Villa 05 — amenajare interioară",
   },
   {
-    src: "/images-despre-noi/bucatarie-01.jpg",
-    alt: "Bucătărie premium cu blat de marmură",
+    src: "/projects/villa-04/01.altele.cover.webp",
+    alt: "Villa 04 — detalii și finisaje",
   },
 ];
 
 const serviceTeasers = [
   {
-    image: "/images-scraped/proiectare.jpg",
+    image: "/projects/villa-06/01.living.cover.webp",
     title: "Proiectare & Design",
     href: "/servicii#proiectare",
   },
   {
-    image: "/images-scraped/buc_giurgiu_1.jpg",
+    image: "/projects/villa-01/01.bucatarii.cover.webp",
     title: "Mobilier la comandă",
     href: "/servicii#mobilier-la-comanda",
   },
   {
-    image: "/images-scraped/carusel_office.jpg",
+    image: "/projects/villa-02/01.altele.cover.webp",
     title: "Spații comerciale",
     href: "/servicii#mobilier-la-comanda",
   },
@@ -93,8 +92,8 @@ export default function DespreNoiPage() {
       <SitePageHero
         label="Despre noi"
         title="The Art of Custom Furniture"
-        subtitle="Mobilier premium la comandă — precizie, rafinament și pasiune pentru design interior."
-        bgImage="/images-despre-noi/living-02.jpg"
+        subtitle="Precizie, rafinament și pasiune pentru design interior — executat în atelierul din București."
+        bgImage="/projects/villa-06/01.living.cover.webp"
         overlayOpacity={0.5}
       />
 
@@ -108,7 +107,7 @@ export default function DespreNoiPage() {
               Povestea noastră
             </p>
             <h2 className="aw-h2" style={{ marginBottom: "1.5rem" }}>
-              „The Art of Custom Furniture”
+              Spații cu emoție, echilibru și identitate
             </h2>
             <p className="aw-body" style={{ margin: "0 auto 1.1rem", maxWidth: "58ch" }}>
               La Moodilier credem că mobilierul premium nu înseamnă doar obiecte bine
@@ -125,15 +124,22 @@ export default function DespreNoiPage() {
               intern pentru a garanta calitate și coerență în fiecare proiect.
             </p>
             <p className="aw-body" style={{ margin: "0 auto 1.1rem", maxWidth: "58ch" }}>
-              În atelierul nostru, tehnologia modernă și măiestria execuției lucrează împreună
-              pentru a crea mobilier personalizat cu linii curate, materiale premium și
-              finisaje rafinate. Pe lângă producție, oferim prelucrări CNC, vopsitorie MDF și
-              termoformare pentru proiecte rezidențiale și comerciale.
+              În atelierul nostru de 2.000 mp, tehnologia modernă și măiestria execuției
+              lucrează împreună pentru a crea mobilier personalizat cu linii curate, materiale
+              premium și finisaje rafinate. Pe lângă producție, oferim prelucrări CNC de înaltă
+              precizie, vopsitorie MDF premium și termoformare pentru proiecte rezidențiale și
+              comerciale.
             </p>
-            <p className="aw-body" style={{ margin: "0 auto 1.75rem", maxWidth: "58ch" }}>
+            <p className="aw-body" style={{ margin: "0 auto 1.1rem", maxWidth: "58ch" }}>
               Moodilier înseamnă mai mult decât mobilier. Înseamnă pasiune pentru detalii,
               respect pentru calitate și dorința de a construi spații care inspiră prin
               eleganță, funcționalitate și autenticitate.
+            </p>
+            <p className="aw-body" style={{ margin: "0 auto 1.75rem", maxWidth: "58ch" }}>
+              Fiecare proiect pe care îl realizăm reflectă aceeași filozofie: design bine
+              gândit, execuție impecabilă și materiale alese fără compromisuri. Pentru noi,
+              adevăratul lux stă în calitatea lucrurilor create corect și în experiența pe
+              care acestea o oferă zi de zi.
             </p>
             <Link href="/servicii" className="aw-btn-ghost aw-link-slide">
               Descoperă serviciile →
@@ -151,7 +157,19 @@ export default function DespreNoiPage() {
         </div>
       </section>
 
-      <section aria-label="Galerie" style={{ marginTop: "1rem" }}>
+      <section className="aw-page-section aw-about-gallery" aria-labelledby="aw-about-gallery">
+        <div className="aw-container">
+          <div className="aw-section-head">
+            <p className="aw-label">Portofoliu</p>
+            <h2 id="aw-about-gallery" className="aw-h2">
+              Din proiectele noastre
+            </h2>
+            <p className="aw-body" style={{ margin: "0.85rem auto 0", maxWidth: "42ch" }}>
+              Câteva imagini din execuțiile Moodilier — mobilier la comandă, integrat în spații
+              rezidențiale premium.
+            </p>
+          </div>
+        </div>
         <div className="aw-mosaic">
           {galleryImages.map((img) => (
             <div key={img.src} className="aw-mosaic-item">
@@ -159,7 +177,7 @@ export default function DespreNoiPage() {
                 src={img.src}
                 alt={img.alt}
                 fill
-                unoptimized
+                sizes="(max-width: 700px) 100vw, 33vw"
                 style={{ objectFit: "cover" }}
               />
             </div>
@@ -184,26 +202,26 @@ export default function DespreNoiPage() {
         </div>
       </section>
 
-      <section className="aw-collections aw-page-section">
+      <section className="aw-page-section aw-about-services">
         <div className="aw-container">
           <div className="aw-section-head">
             <p className="aw-label">Ce facem</p>
             <h2 className="aw-h2">De la proiectare la montaj</h2>
           </div>
-          <div className="aw-collections-grid">
+          <div className="aw-about-services-grid">
             {serviceTeasers.map((s) => (
-              <Link key={s.title} href={s.href} className="aw-collection-card">
-                <div className="aw-collection-media">
+              <Link key={s.title} href={s.href} className="aw-about-service-card">
+                <div className="aw-about-service-media">
                   <Image
                     src={s.image}
                     alt={s.title}
                     fill
-                    unoptimized
+                    sizes="(max-width: 900px) 100vw, 33vw"
                     style={{ objectFit: "cover" }}
                   />
                 </div>
                 <h3>{s.title}</h3>
-                <span className="aw-collection-link">Află mai mult →</span>
+                <span className="aw-about-service-link">Află mai mult →</span>
               </Link>
             ))}
           </div>
@@ -217,7 +235,7 @@ export default function DespreNoiPage() {
       </section>
 
       <SiteCTA
-        title="Hai să lucrăm împreună"
+        title="Transformăm viziunea ta în mobilier premium"
         body="Spune-ne despre proiectul tău — transformăm viziunea în mobilier premium, executat în atelierul nostru."
       />
     </>

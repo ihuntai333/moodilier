@@ -4,12 +4,12 @@ export default function ResetCookiesButton() {
   return (
     <button
       type="button"
-      className="aw-btn aw-btn-outline-dark aw-btn-fill"
+      className="aw-btn aw-btn-outline aw-btn-fill"
       onClick={() => {
-        if (typeof window !== "undefined") {
-          localStorage.removeItem("cookie_consent");
-          window.location.reload();
-        }
+        if (typeof window === "undefined") return;
+        localStorage.removeItem("moodilier-cookie-consent");
+        localStorage.removeItem("cookie_consent");
+        window.location.reload();
       }}
     >
       Gestionează preferințele

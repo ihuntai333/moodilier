@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { supplierNameFromSrc } from "@/lib/site-seo";
 import { ArrowRight } from "lucide-react";
 import FrontpageV2Client from "@/components/home/FrontpageV2Client";
 import AwardsProjectCard from "@/components/site/AwardsProjectCard";
@@ -51,7 +52,7 @@ const services = [
   },
   {
     num: "03",
-    title: "Moodilier Store",
+    title: "Moodilier Fabrics",
     desc: "Import selecționat de mobilier premium de la designeri consacrați din Italia, Danemarca și Grecia.",
     image: "/images-scraped/mobilier-premium-01.webp",
     href: "/servicii#moodilier-store",
@@ -163,7 +164,7 @@ export default async function FrontpageV2Page() {
               Custom Furniture
             </h1>
             <p className="aw-body aw-reveal">
-              Mobilier premium pe comandă, executat impecabil în București.
+              Transformăm ideile de amenajare în piese create pentru spații elegante, funcționale și atemporale.
             </p>
             <div className="aw-hero-ctas aw-reveal">
               <Link href="/proiecte" className="aw-btn aw-btn-primary aw-btn-fill">
@@ -425,11 +426,11 @@ export default async function FrontpageV2Page() {
               Furnizori parteneri
             </p>
             <div className="aw-suppliers-grid aw-reveal">
-              {supplierLogos.map((logo, i) => (
+              {supplierLogos.map((logo) => (
                 <div key={logo} className="aw-supplier">
                   <Image
                     src={logo}
-                    alt={`Furnizor partener ${i + 1}`}
+                    alt={supplierNameFromSrc(logo) || ""}
                     width={160}
                     height={56}
                     unoptimized

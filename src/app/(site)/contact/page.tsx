@@ -4,20 +4,16 @@ import SitePageHero from "@/components/site/SitePageHero";
 import SiteCTA from "@/components/site/SiteCTA";
 import ContactClient from "./ContactClient";
 import { getContactFormSettings } from "@/lib/contact-settings";
+import { CANONICAL_ADDRESS, pageMetadata } from "@/lib/site-seo";
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
-  title: "Contact | Moodilier",
-  description:
-    "Contactați Moodilier pentru o ofertă personalizată de mobilier premium la comandă. Atelier la Bulevardul Basarabia 256, Sector 3, București.",
-  openGraph: {
-    title: "Contact | Moodilier",
-    description:
-      "Solicită o ofertă de mobilier la comandă. Răspundem în maxim 24 de ore. Atelier — Blv. Basarabia 256, București.",
-    images: ["/images-scraped/executie_sediu-office15.jpg"],
-  },
-};
+export const metadata: Metadata = pageMetadata({
+  path: "/contact",
+  title: "Contact",
+  description: `Contactați Moodilier pentru o ofertă personalizată de mobilier premium la comandă. Atelier — ${CANONICAL_ADDRESS}.`,
+  image: "/projects/villa-05/01.living.cover.webp",
+});
 
 export default async function ContactPage() {
   const settings = await getContactFormSettings();
@@ -29,8 +25,8 @@ export default async function ContactPage() {
       <SitePageHero
         label="Contactează-ne"
         title="Contact"
-        subtitle="Suntem la dispoziția ta pentru orice întrebare sau solicitare de ofertă. Răspundem în maxim 24 de ore."
-        bgImage="/images-scraped/executie_sediu-office15.jpg"
+        subtitle="Pentru orice întrebare sau solicitare de ofertă, ne poți contacta oricând — revenim cu un răspuns cât mai rapid posibil."
+        bgImage="/projects/villa-05/01.living.cover.webp"
         overlayOpacity={0.55}
       />
       <ContactClient settings={settings} />

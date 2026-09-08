@@ -26,11 +26,11 @@ export const CONTACT_FORM_DEFAULTS: ContactFormSettings = {
     "Vă mulțumim. Vă vom contacta în cel mult 24 de ore lucrătoare.",
   hours: "Luni — Vineri\n09:00 — 18:00",
   mapEmbedUrl:
-    "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2849.9845651283857!2d26.12765!3d44.42415!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40b1fe86d1234567%3A0x1234567890abcdef!2sBulevardul+Basarabia+256%2C+Bucure%C8%99ti!5e0!3m2!1sro!2sro!4v1234567890",
+    "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2848.5!2d26.1955!3d44.4395!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40b1f8c0c0c0c0c1%3A0x0!2sBd.%20Basarabia%20256%2C%20Bucure%C8%99ti!5e0!3m2!1sro!2sro!4v1720000000000!5m2!1sro!2sro",
   requirePhone: false,
   phone: "(+40) 729 555 431",
   email: "ofertare@moodilier.com",
-  address: "Blv. Basarabia 256, FAUR, București",
+  address: "Bd. Basarabia 256, incinta FAUR, București",
   whatsapp: "40729555431",
 };
 

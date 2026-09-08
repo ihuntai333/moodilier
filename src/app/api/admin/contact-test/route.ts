@@ -6,7 +6,7 @@ import { getContactFormSettings } from "@/lib/contact-settings";
 
 /** Admin: send a test email to verify SMTP + notify address. */
 export async function POST(request: NextRequest) {
-  const denied = requireAdminApi(request);
+  const denied = await requireAdminApi(request);
   if (denied) return denied;
   const originFail = assertSameOrigin(request);
   if (originFail) return originFail;

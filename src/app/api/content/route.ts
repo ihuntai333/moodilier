@@ -4,6 +4,7 @@ import {
   ensureEditorDb,
   isEditorWriteAuthorized,
 } from "@/lib/visual-editor/store";
+import { assertSameOrigin } from "@/lib/security/request";
 
 export const runtime = "nodejs";
 
@@ -21,11 +22,14 @@ export async function GET() {
   }
 }
 
-/** Auth — bulk upsert { key, value, type }[] */
+/** Auth — bulk upsert { key, value, type }[] — verified admin_session only */
 export async function POST(request: NextRequest) {
   try {
+    const originFail = assertSameOrigin(request);
+    if (originFail) return originFail;
+
     const cookieStore = await cookies();
-    if (!isEditorWriteAuthorized(cookieStore)) {
+    if (!(await isEditorWriteAuthorized(cookieStore))) {
       return NextResponse.json(
         { error: "Neautentificat. Autentifică-te în admin." },
         { status: 401 }

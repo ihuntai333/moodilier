@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useMemo, useRef, useEffect, type CSSProperties } from "react";
-import Image from "next/image";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import SitePageHero from "@/components/site/SitePageHero";
 import SiteCTA from "@/components/site/SiteCTA";
 import AwardsProjectCard from "@/components/site/AwardsProjectCard";
-import { ROOM_FILTERS, type ProjectImage, type SiteProject } from "@/lib/projects";
+import { ROOM_FILTERS, type SiteProject } from "@/lib/projects";
 import { galleryRoomId } from "@/lib/room-anchor";
 
 const CATEGORIES = [
@@ -15,17 +15,60 @@ const CATEGORIES = [
 ] as const;
 type Category = (typeof CATEGORIES)[number];
 
-function isRoomCategory(filter: Category): boolean {
-  return filter !== "Toate" && filter !== "Comercial";
+/** Canonical room labels so CMS variants still match filters. */
+function normalizeRoomLabel(room: string): string {
+  const key = room
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+  const map: Record<string, string> = {
+    bucatarii: "Bucătării",
+    bucatarie: "Bucătării",
+    kitchen: "Bucătării",
+    living: "Living",
+    livinguri: "Living",
+    dressing: "Dressing",
+    dressinguri: "Dressing",
+    dormitoare: "Dormitoare",
+    dormitor: "Dormitoare",
+    bedroom: "Dormitoare",
+    bai: "Băi",
+    baie: "Băi",
+    bath: "Băi",
+    bathroom: "Băi",
+    hol: "Hol",
+    hallway: "Hol",
+  };
+  if (map[key]) return map[key];
+  for (const [k, v] of Object.entries(map)) {
+    if (key.includes(k)) return v;
+  }
+  return room.trim();
+}
+
+function projectRoomTags(p: SiteProject): string[] {
+  const fromRooms = (p.rooms || []).map(normalizeRoomLabel);
+  const fromGallery = (p.gallery || []).map((g) => normalizeRoomLabel(g.room));
+  const fromSpaces = (p.spaces || []).map(normalizeRoomLabel);
+  return [
+    ...new Set(
+      [...fromRooms, ...fromGallery, ...fromSpaces].filter(
+        (r) => r && r !== "Altele" && CATEGORIES.includes(r as Category)
+      )
+    ),
+  ];
 }
 
 function matchesProjectFilter(p: SiteProject, filter: Category): boolean {
   if (filter === "Toate") return true;
   if (filter === "Comercial") {
-    return p.category === "Comercial" && !/showroom/i.test(p.slug);
+    return (
+      (/comercial/i.test(p.category) || /comercial/i.test(p.projectType || "")) &&
+      !/showroom/i.test(p.slug)
+    );
   }
-  if (p.rooms?.includes(filter)) return true;
-  return p.gallery?.some((g) => g.room === filter) ?? false;
+  return projectRoomTags(p).includes(filter);
 }
 
 function projectHref(slug: string, filter: Category): string {
@@ -35,73 +78,61 @@ function projectHref(slug: string, filter: Category): string {
   return `/proiecte/${slug}#${galleryRoomId(filter)}`;
 }
 
-type RoomPhoto = {
-  key: string;
-  url: string;
-  room: string;
-  projectSlug: string;
-  projectTitle: string;
-  href: string;
-};
-
-function collectRoomPhotos(projects: SiteProject[], room: string): RoomPhoto[] {
-  const out: RoomPhoto[] = [];
-  for (const p of projects) {
-    const imgs: ProjectImage[] =
-      p.gallery?.length
-        ? p.gallery
-        : (p.images || []).map((url) => ({ url, room: "Altele" }));
-
-    imgs.forEach((g, i) => {
-      if (g.room !== room) return;
-      out.push({
-        key: `${p.slug}-${g.url}-${i}`,
-        url: g.url,
-        room: g.room,
-        projectSlug: p.slug,
-        projectTitle: p.title,
-        href: `/proiecte/${p.slug}#${galleryRoomId(room)}`,
-      });
-    });
-  }
-  return out;
+function parseCategoryParam(raw: string | null): Category {
+  if (!raw) return "Toate";
+  const decoded = decodeURIComponent(raw).trim();
+  const hit = CATEGORIES.find(
+    (c) => c.toLowerCase() === decoded.toLowerCase() || normalizeRoomLabel(decoded) === c
+  );
+  return hit || "Toate";
 }
 
 export default function ProiecteClient({
-  projects = [],
+  projects,
 }: {
   projects: SiteProject[];
 }) {
-  const [activeCategory, setActiveCategory] = useState<Category>("Toate");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const initial = parseCategoryParam(
+    searchParams.get("camera") || searchParams.get("categorie")
+  );
+  const [activeCategory, setActiveCategory] = useState<Category>(initial);
   const [indicator, setIndicator] = useState({ left: 0, width: 0 });
   const tabsRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const filterBarRef = useRef<HTMLDivElement>(null);
+  const categoryChangeRef = useRef(false);
 
-  const roomMode = isRoomCategory(activeCategory);
+  useEffect(() => {
+    const fromUrl = parseCategoryParam(
+      searchParams.get("camera") || searchParams.get("categorie")
+    );
+    setActiveCategory(fromUrl);
+  }, [searchParams]);
 
   const filteredProjects = useMemo(() => {
     return projects.filter((p) => matchesProjectFilter(p, activeCategory));
   }, [activeCategory, projects]);
 
-  const roomPhotos = useMemo(() => {
-    if (!roomMode) return [];
-    return collectRoomPhotos(projects, activeCategory);
-  }, [activeCategory, projects, roomMode]);
-
   const counts = useMemo(() => {
     const map: Record<string, number> = {};
     for (const cat of CATEGORIES) {
-      if (isRoomCategory(cat)) {
-        map[cat] = collectRoomPhotos(projects, cat).length;
-      } else {
-        map[cat] = projects.filter((p) => matchesProjectFilter(p, cat)).length;
-      }
+      map[cat] = projects.filter((p) => matchesProjectFilter(p, cat)).length;
     }
     return map;
   }, [projects]);
 
+  const visibleCategories = useMemo(() => {
+    return CATEGORIES.filter((cat) => {
+      if (cat === "Toate") return true;
+      return (counts[cat] ?? 0) > 0;
+    });
+  }, [counts]);
+
   useEffect(() => {
-    const idx = CATEGORIES.indexOf(activeCategory);
+    const idx = visibleCategories.indexOf(activeCategory);
     const btn = buttonRefs.current[idx];
     const container = tabsRef.current;
     if (btn && container) {
@@ -112,19 +143,48 @@ export default function ProiecteClient({
         width: bRect.width,
       });
     }
-  }, [activeCategory, projects]);
+  }, [activeCategory, projects, visibleCategories]);
+
+  useEffect(() => {
+    if (!visibleCategories.includes(activeCategory)) {
+      setActiveCategory("Toate");
+    }
+  }, [visibleCategories, activeCategory]);
+
+  useEffect(() => {
+    if (!categoryChangeRef.current) return;
+    categoryChangeRef.current = false;
+    const bar = filterBarRef.current;
+    if (bar) {
+      const top = bar.getBoundingClientRect().top + window.scrollY - 8;
+      window.scrollTo({ top: Math.max(0, top), behavior: "auto" });
+    } else {
+      window.scrollTo({ top: 0, behavior: "auto" });
+    }
+  }, [activeCategory]);
+
+  function selectCategory(cat: Category) {
+    if (cat === activeCategory) return;
+    categoryChangeRef.current = true;
+    setActiveCategory(cat);
+    const params = new URLSearchParams(searchParams.toString());
+    if (cat === "Toate") params.delete("camera");
+    else params.set("camera", cat);
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }
 
   return (
     <>
       <SitePageHero
         label="Portofoliu"
         title="Proiecte"
-        subtitle="Fiecare proiect Moodilier este construit în jurul unui proces clar — de la analiză și proiectare până la montajul final, cu precizie de atelier."
+        subtitle="Fiecare proiect Moodilier este construit în jurul unui proces clar, atent planificat și executat cu precizie. De la analiza inițială a spațiului și dezvoltarea proiectului tehnic, până la producție, montaj și controlul final, fiecare etapă este gândită pentru a livra mobilier premium la comandă, realizat impecabil în fiecare detaliu."
         bgImage="/projects/villa-06/01.living.cover.webp"
         overlayOpacity={0.52}
       />
 
-      <div className="aw-filter-bar">
+      <div className="aw-filter-bar" ref={filterBarRef}>
         <div className="aw-container">
           <div
             ref={tabsRef}
@@ -132,7 +192,7 @@ export default function ProiecteClient({
             role="tablist"
             aria-label="Categorii proiecte"
           >
-            {CATEGORIES.map((cat, idx) => (
+            {visibleCategories.map((cat, idx) => (
               <button
                 key={cat}
                 ref={(el) => {
@@ -142,7 +202,7 @@ export default function ProiecteClient({
                 role="tab"
                 aria-selected={activeCategory === cat}
                 className={`aw-filter-tab${activeCategory === cat ? " is-active" : ""}`}
-                onClick={() => setActiveCategory(cat)}
+                onClick={() => selectCategory(cat)}
               >
                 {cat}
                 <span>({counts[cat] ?? 0})</span>
@@ -162,87 +222,37 @@ export default function ProiecteClient({
         </div>
       </div>
 
-      <section
-        className="aw-portfolio aw-page-section"
-        aria-label={roomMode ? `Fotografii — ${activeCategory}` : "Listă proiecte"}
-      >
+      <section className="aw-portfolio aw-page-section" aria-label="Listă proiecte">
         <div className="aw-container">
-          {roomMode ? (
-            <>
-              <div className="aw-room-feed-head">
-                <p className="aw-label" style={{ textAlign: "left", width: "auto", marginBottom: "0.5rem" }}>
-                  Galerie pe tip de spațiu
-                </p>
-                <h2 className="aw-h2" style={{ margin: 0 }}>
-                  {activeCategory}
-                </h2>
-                <p className="aw-body" style={{ marginTop: "0.75rem", maxWidth: "42ch" }}>
-                  Toate fotografiile din proiecte pentru {activeCategory.toLowerCase()}. Click pe o
-                  imagine pentru a deschide proiectul la secțiunea respectivă.
-                </p>
-              </div>
+          <div className="aw-portfolio-grid">
+            {filteredProjects.map((project) => {
+              const tags = projectRoomTags(project);
+              return (
+                <AwardsProjectCard
+                  key={project.slug}
+                  title={project.title}
+                  category={project.category}
+                  tags={tags}
+                  activeTag={activeCategory === "Toate" ? null : activeCategory}
+                  image={project.coverImage || "/projects/villa-06/01.living.cover.webp"}
+                  href={projectHref(project.slug, activeCategory)}
+                  video={project.video || null}
+                />
+              );
+            })}
+          </div>
 
-              <div className="aw-room-feed-grid">
-                {roomPhotos.map((photo, i) => (
-                  <a
-                    key={photo.key}
-                    href={photo.href}
-                    className="aw-room-feed-item"
-                    style={{ ["--aw-i" as string]: String(Math.min(i, 24)) } as CSSProperties}
-                    aria-label={`${photo.projectTitle} — ${photo.room}`}
-                  >
-                    <Image
-                      src={photo.url}
-                      alt={`${photo.projectTitle} — ${photo.room}`}
-                      fill
-                      sizes="(max-width: 700px) 50vw, 33vw"
-                      style={{ objectFit: "cover" }}
-                    />
-                    <span className="aw-room-feed-meta">
-                      <span className="aw-room-feed-title">{photo.projectTitle}</span>
-                      <span className="aw-room-feed-room">{photo.room}</span>
-                    </span>
-                  </a>
-                ))}
-              </div>
-
-              {roomPhotos.length === 0 && (
-                <p className="aw-body" style={{ textAlign: "center", padding: "4rem 0" }}>
-                  Nicio fotografie în această categorie.
-                </p>
-              )}
-            </>
-          ) : (
-            <>
-              <div className="aw-portfolio-grid">
-                {filteredProjects.map((project) => (
-                  <AwardsProjectCard
-                    key={project.slug}
-                    title={project.title}
-                    category={project.rooms?.[0] || project.category}
-                    image={project.coverImage || "/projects/villa-06/01.living.cover.webp"}
-                    href={projectHref(project.slug, activeCategory)}
-                    video={project.video || null}
-                  />
-                ))}
-              </div>
-
-              {filteredProjects.length === 0 && (
-                <p className="aw-body" style={{ textAlign: "center", padding: "4rem 0" }}>
-                  Niciun proiect în această categorie.
-                </p>
-              )}
-            </>
+          {filteredProjects.length === 0 && (
+            <p className="aw-body" style={{ textAlign: "center", padding: "4rem 0" }}>
+              Niciun proiect în această categorie.
+            </p>
           )}
         </div>
       </section>
 
       <SiteCTA
-        title="Hai să lucrăm împreună"
+        title="Transformăm viziunea ta în mobilier premium"
         body="Dorești un proiect similar? Contactează-ne pentru consultanță și o ofertă personalizată."
-        primaryLabel="Solicită o ofertă gratuită"
-        secondaryLabel="Vezi serviciile"
-        secondaryHref="/servicii"
       />
     </>
   );

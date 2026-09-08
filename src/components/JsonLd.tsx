@@ -27,7 +27,7 @@ const organization = {
   foundingDate: "2013",
   address: {
     "@type": "PostalAddress",
-    streetAddress: "Bulevardul Basarabia 256, incinta FAUR",
+    streetAddress: "Bd. Basarabia 256, incinta FAUR",
     addressLocality: "București",
     postalCode: "030694",
     addressRegion: "Sector 3",

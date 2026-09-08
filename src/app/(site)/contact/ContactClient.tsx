@@ -209,7 +209,7 @@ export default function ContactClient({
                       name="website"
                       type="text"
                       tabIndex={-1}
-                      autoComplete="off"
+                      autoComplete="nope"
                       value={formData.website}
                       onChange={handleChange}
                     />
@@ -219,7 +219,7 @@ export default function ContactClient({
                       name="company"
                       type="text"
                       tabIndex={-1}
-                      autoComplete="off"
+                      autoComplete="nope"
                       value={formData.company}
                       onChange={handleChange}
                     />

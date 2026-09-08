@@ -83,7 +83,7 @@ export default function SiteFooter({ chrome }: Props) {
                 <p className="aw-footer-tagline">{chrome.footerTagline}</p>
               ) : (
                 <p className="aw-footer-tagline">
-                  Mobilier premium la comandă, executat în atelierul din București.
+                  The Art of Custom Furniture
                 </p>
               )}
             </div>

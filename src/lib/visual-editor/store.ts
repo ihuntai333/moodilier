@@ -373,12 +373,13 @@ export function getUploadsDir(): string {
   return getEditorDb().getUploadsDir();
 }
 
-import { verifyAdminSessionToken } from "@/lib/admin-auth";
+import { ADMIN_SESSION_COOKIE } from "@/lib/admin-auth";
+import { verifyAdminSessionToken } from "@/lib/admin-session";
 
-export function isEditorWriteAuthorized(cookies: {
+/** Writes require a cryptographically verified admin_session — never the UI cookie. */
+export async function isEditorWriteAuthorized(cookies: {
   get: (name: string) => { value: string } | undefined;
-}): boolean {
-  const preview = cookies.get("ihuntev_logged_in")?.value;
-  const session = cookies.get("admin_session")?.value;
-  return preview === "true" || verifyAdminSessionToken(session);
+}): Promise<boolean> {
+  const session = cookies.get(ADMIN_SESSION_COOKIE)?.value;
+  return verifyAdminSessionToken(session);
 }

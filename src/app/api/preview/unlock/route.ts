@@ -5,10 +5,38 @@ import {
   isSiteLockEnabled,
   siteLockToken,
 } from "@/lib/site-lock";
+import { assertSameOrigin } from "@/lib/security/request";
+import { clientIp, rateLimit } from "@/lib/security/rate-limit";
+import { timingSafeEqual } from "crypto";
+
+function safeEqual(a: string, b: string): boolean {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) {
+    timingSafeEqual(bufA, bufA);
+    return false;
+  }
+  return timingSafeEqual(bufA, bufB);
+}
 
 export async function POST(request: NextRequest) {
   if (!isSiteLockEnabled()) {
     return NextResponse.json({ ok: true, locked: false });
+  }
+
+  const originFail = assertSameOrigin(request);
+  if (originFail) return originFail;
+
+  const ip = clientIp(request);
+  const limited = rateLimit(`preview-unlock:${ip}`, 8, 15 * 60 * 1000);
+  if (!limited.ok) {
+    return NextResponse.json(
+      { error: "Prea multe încercări. Încearcă din nou mai târziu." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(limited.retryAfterSec) },
+      }
+    );
   }
 
   try {
@@ -16,7 +44,7 @@ export async function POST(request: NextRequest) {
     const password = String(body.password ?? "");
     const expected = getSiteLockPassword();
 
-    if (!password || password !== expected) {
+    if (!password || !safeEqual(password, expected)) {
       return NextResponse.json({ error: "Parolă incorectă." }, { status: 401 });
     }
 

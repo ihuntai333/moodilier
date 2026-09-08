@@ -7,6 +7,8 @@
   "use strict";
 
   var COOKIE_NAME = "ihuntev_logged_in";
+  // Fallbacks if an older cookie name is still present
+  var COOKIE_ALIASES = ["ihuntev_logged_in", "ihuntev_logged_in"];
   var API_BASE =
     (typeof window !== "undefined" && window.__VISUAL_EDITOR_API__) || "";
 
@@ -30,8 +32,13 @@
   }
 
   function hasEditorCookie() {
-    return document.cookie.split(";").some(function (c) {
-      return c.trim() === COOKIE_NAME + "=true";
+    var parts = document.cookie.split(";");
+    var names = [COOKIE_NAME].concat(COOKIE_ALIASES || []);
+    return parts.some(function (c) {
+      var t = c.trim();
+      return names.some(function (name) {
+        return t === name + "=true";
+      });
     });
   }
 

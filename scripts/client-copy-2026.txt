@@ -1,0 +1,66 @@
+﻿1.
+Sa se apara Logo MOODILIER mai mare daca se poate , atentie la cum o sa apara pe telefon.
+2.
+Modificari in pagina de start
+In loc de sau sub “ we are the furniture Engineers “ sa punem „Mobilier premium pe comandă, executat impecabil.”
+3.
+Inlocuim textul cu urmatorul:
+THE ART OF CUSTOM FURNITURE.
+La Moodilier transformăm ideile de amenajare în piese de mobilier premium la comandă, create pentru spații elegante, funcționale și atemporale.
+Cu peste 10 ani de experiență în proiectarea și producția de mobilier premium, realizăm soluții personalizate pentru interioare rezidențiale și comerciale, punând accent pe design contemporan, materiale atent selecționate și execuție impecabilă.
+Fiecare proiect este conceput în jurul stilului și nevoilor fiecărui client — de la bucătării premium, dressinguri, livinguri și dormitoare, până la recepții, birouri, showroom-uri și spații comerciale moderne.
+Credem că mobilierul premium înseamnă mai mult decât estetică. Înseamnă echilibru între design, funcționalitate și calitate autentică, livrate prin atenție la detalii și finisaje fără compromisuri.
+Moodilier înseamnă mobilier la comandă realizat cu precizie, rafinament și pasiune pentru design interior premium.
+4.
+Modificam etapele unui proiect
+Etapele unui proiect
+Abordarea noastră în fiecare proiect este construită în jurul preciziei, comunicării și execuției premium, pentru a transforma fiecare spațiu într-un rezultat impecabil.
+01 — Ofertarea Proiectului
+În urma discuției inițiale analizăm cerințele proiectului, stilul dorit și particularitățile spațiului, pentru a realiza o ofertă personalizată, adaptată nevoilor și bugetului clientului.
+02 — Relevarea Spațiului
+Efectuăm măsurătorile exacte ale spațiului și verificăm toate detaliile tehnice necesare pentru ca proiectul să fie executat cu precizie și eficiență.
+03 — Analiza și Dezvoltarea Proiectului de Execuție
+Stabilim soluțiile tehnice și funcționale ale mobilierului, optimizând fiecare detaliu pentru integrarea perfectă în spațiul amenajat.
+04 — Proiectare de Execuție și Pregătirea Documentației
+Realizăm proiectul tehnic complet și documentația necesară pentru producție, incluzând dimensiuni, materiale, finisaje și accesorii.
+05 — Lansarea Comenzilor pentru Materiale și Accesorii
+Selectăm și comandăm materialele premium, accesoriile și componentele necesare, asigurând standardele de calitate și termenele de execuție.
+06 — Prelucrarea și Execuția în Atelier
+Piesele de mobilier sunt prelucrate și executate în atelier cu atenție la detalii, utilizând tehnologii moderne și finisaje premium.
+07 — Montaj și Control Final
+Asigurăm montajul profesionist al mobilierului și verificăm fiecare detaliu pentru ca rezultatul final să respecte cele mai înalte standarde de calitate și estetică.
+5.
+Aici sunt in sectiunea de proiecte in josul paginii.
+Modificam si aici sa apara etapele stabilite mai sus si schimbam textul de sub Etapele unui proiect cu urmatorul text:
+“ Fiecare proiect Moodilier este construit în jurul unui proces clar, atent planificat și executat cu precizie. De la analiza inițială a spațiului și dezvoltarea proiectului tehnic, până la producție, montaj și controlul final, fiecare etapă este gândită pentru a livra mobilier premium la comandă, realizat impecabil în fiecare detaliu. “
+6.
+Aici vand ca apare o eroare in site... te rog sa o rezolvi
+Trebuie sa apara sericiile pe care le oferim. Prelucrare CNC / Servicii Vopsitorie / termoformare, sa poata da click pe unul din servicii din pagina de servicii nu doar sa poata selecta din bara de sus.
+Adaugam textul de prezentare :
+Servicii complete de
+DESIGN INTERIOR, MOBILIER PREMIUM ȘI PRELUCRĂRI PERSONALIZATE
+La Moodilier oferim servicii complete pentru proiecte de amenajare interioară și producție de mobilier premium la comandă, realizate cu accent pe design contemporan, precizie tehnică și execuție impecabilă.
+Gestionăm întregul proces — de la concept și proiectare tehnică, până la producție, finisare și montaj — pentru a livra spații elegante, funcționale și perfect adaptate fiecărui proiect.
+Pe lângă producția de mobilier personalizat pentru spații rezidențiale și comerciale, oferim și servicii specializate dedicate industriei de mobilier și amenajări interioare:
+termoformare materiale compozite;
+servicii premium de vopsitorie MDF;
+prelucrări CNC de înaltă precizie;
+realizare de elemente personalizate pentru mobilier și design interior.
+Utilizăm materiale atent selecționate, tehnologii moderne de producție și finisaje premium pentru a obține rezultate durabile, estetice și perfect executate până la cel mai mic detaliu.
+Fie că este vorba despre mobilier la comandă, elemente decorative sau componente tehnice speciale, fiecare proiect este realizat cu aceeași atenție pentru calitate, funcționalitate și rafinament.
+7.
+La sectiunea DESPRE NOI modificam textul:
+THE ART OF CUSTOM FURNITURE.
+La Moodilier credem că mobilierul premium nu înseamnă doar obiecte bine executate, ci spații care transmit emoție, echilibru și identitate. Fiecare proiect începe cu o idee, o nevoie sau o viziune, iar rolul nostru este să o transformăm într-un rezultat autentic, construit în jurul stilului de viață al fiecărui client.
+Cu peste 10 ani de experiență în producția de mobilier la comandă și amenajări interioare premium, am dezvoltat un proces complet care îmbină designul contemporan, precizia tehnică și atenția impecabilă la detalii. De la concept și proiectare, până la execuție, finisare și montaj, fiecare etapă este gestionată intern pentru a garanta calitate și coerență în fiecare proiect.
+În atelierul nostru, tehnologia modernă și măiestria execuției lucrează împreună pentru a crea mobilier personalizat cu linii curate, materiale premium și finisaje rafinate. Fiecare piesă este realizată cu grijă pentru proporții, funcționalitate și estetică, astfel încât rezultatul final să rămână relevant și elegant în timp.
+Pe lângă producția de mobilier premium la comandă, dezvoltăm și servicii specializate dedicate industriei de design interior și producție:
+prelucrări CNC de înaltă precizie;
+servicii premium de vopsitorie MDF;
+termoformare materiale compozite;
+execuție de elemente personalizate pentru proiecte rezidențiale și comerciale.
+Moodilier înseamnă mai mult decât mobilier. Înseamnă pasiune pentru detalii, respect pentru calitate și dorința de a construi spații care inspiră prin eleganță, funcționalitate și autenticitate.
+Fiecare proiect pe care îl realizăm reflectă aceeași filozofie: design bine gândit, execuție impecabilă și materiale alese fără compromisuri. Pentru noi, adevăratul lux stă în calitatea lucrurilor create corect și în experiența pe care acestea o oferă zi de zi.
+Descrierea sa fie pe mijloc , prima si sub descriere cateva poze din proiecte
+O sa gasesti un folder in atasament cu Numele de Poze – Despre noi, le poti pune pe cele din folder
+Multumesc

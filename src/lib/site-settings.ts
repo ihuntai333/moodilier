@@ -79,10 +79,6 @@ export const DEFAULT_INTRO_IMAGES = [
   "/projects/villa-05/01.living.cover.webp",
   "/projects/villa-04/01.altele.cover.webp",
   "/projects/apartment-01/01.altele.cover.webp",
-  "/projects/apartment-15/01.living.cover.webp",
-  "/projects/villa-03/01.living.cover.webp",
-  "/projects/apartment-08/01.dormitoare.cover.webp",
-  "/projects/apartment-09/01.bucatarii.cover.webp",
 ];
 
 export const DEFAULT_INTRO: IntroConfig = {
@@ -90,36 +86,18 @@ export const DEFAULT_INTRO: IntroConfig = {
   logoUrl: "/brand/logo-white.png?v=20260824b",
   brandName: "Moodilier",
   eyebrow: "",
-  tagline: "The Art of Custom Furniture",
+  tagline: "",
   images: DEFAULT_INTRO_IMAGES,
 };
 
+/** Homepage hero: single looping video background (no image carousel). */
 export const DEFAULT_HERO_SLIDES: HeroSlide[] = [
   {
     id: "vid-1",
     type: "video",
     src: "/videos/moodilier-vid-1.mp4",
-    poster: "/projects/villa-06/01.living.cover.webp",
-    durationSec: 10,
-  },
-  {
-    id: "vid-2",
-    type: "video",
-    src: "/videos/moodilier-vid-2.mp4",
-    poster: "/projects/villa-05/01.living.cover.webp",
-    durationSec: 10,
-  },
-  {
-    id: "img-villa-06",
-    type: "image",
-    src: "/projects/villa-06/01.living.cover.webp",
-    durationSec: 10,
-  },
-  {
-    id: "img-villa-04",
-    type: "image",
-    src: "/projects/villa-04/01.altele.cover.webp",
-    durationSec: 10,
+    poster: "/videos/poster-1.webp",
+    durationSec: 9999,
   },
 ];
 
@@ -130,12 +108,12 @@ export const SITE_CHROME_DEFAULTS: SiteChrome = {
   ctaLabel: "Solicită ofertă",
   ctaHref: "/contact",
   footerBrand: "Moodilier",
-  footerTagline: "",
+  footerTagline: "The Art of Custom Furniture",
   footerMenu: DEFAULT_FOOTER_MENU,
   footerLegal: DEFAULT_FOOTER_LEGAL,
   phone: "(+40) 729 555 431",
   email: "ofertare@moodilier.com",
-  address: "Blv. Basarabia 256, FAUR, București",
+  address: "Bd. Basarabia 256, incinta FAUR, București",
   instagram: "https://www.instagram.com/moodilier/",
   facebook: "https://www.facebook.com/moodilier",
   tiktok: "https://www.tiktok.com/@moodilier",
@@ -170,7 +148,7 @@ export const SETTINGS_STRING_DEFAULTS: Record<string, string> = {
   ctaLabel: SITE_CHROME_DEFAULTS.ctaLabel,
   ctaHref: SITE_CHROME_DEFAULTS.ctaHref,
   footerBrand: SITE_CHROME_DEFAULTS.footerBrand,
-  footerTagline: "",
+  footerTagline: "The Art of Custom Furniture",
   headerMenu: JSON.stringify(DEFAULT_HEADER_MENU),
   footerMenu: JSON.stringify(DEFAULT_FOOTER_MENU),
   footerLegal: JSON.stringify(DEFAULT_FOOTER_LEGAL),
@@ -311,7 +289,14 @@ export function chromeFromFlat(flat: Record<string, string>): SiteChrome {
     ctaLabel: flat.ctaLabel?.trim() || SITE_CHROME_DEFAULTS.ctaLabel,
     ctaHref: flat.ctaHref?.trim() || SITE_CHROME_DEFAULTS.ctaHref,
     footerBrand: flat.footerBrand?.trim() || SITE_CHROME_DEFAULTS.footerBrand,
-    footerTagline: flat.footerTagline?.trim() || "",
+    footerTagline: (() => {
+      const t =
+        flat.footerTagline?.trim() || "The Art of Custom Furniture";
+      if (/premium.*(comand|executat)/i.test(t)) {
+        return "The Art of Custom Furniture";
+      }
+      return t;
+    })(),
     footerMenu: parseMenu(flat.footerMenu, DEFAULT_FOOTER_MENU),
     footerLegal: parseMenu(flat.footerLegal, DEFAULT_FOOTER_LEGAL),
     phone: flat.phone?.trim() || SITE_CHROME_DEFAULTS.phone,

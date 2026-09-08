@@ -4,6 +4,11 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import ProjectForm from "@/components/admin/ProjectForm";
 
+interface ProjectImage {
+  url: string;
+  alt?: string;
+}
+
 interface ProjectRow {
   id: string;
   slug: string;
@@ -11,7 +16,7 @@ interface ProjectRow {
   category: "Rezidențial" | "Comercial" | "Bucătărie" | "Vizualizare 3D";
   location?: string;
   description?: string;
-  images: { url: string; alt?: string }[];
+  images?: unknown;
   video?: string | null;
   status?: "published" | "draft";
   year?: string | null;
@@ -19,10 +24,31 @@ interface ProjectRow {
   seo_title?: string | null;
   seo_description?: string | null;
   is_featured?: boolean;
-  // camelCase fallbacks
   seoTitle?: string;
   seoDescription?: string;
   isFeatured?: boolean;
+}
+
+function normalizeImages(raw: unknown, fallbackAlt = ""): ProjectImage[] {
+  if (!Array.isArray(raw)) return [];
+  const out: ProjectImage[] = [];
+  for (const item of raw) {
+    if (typeof item === "string") {
+      const url = item.trim();
+      if (url) out.push(fallbackAlt ? { url, alt: fallbackAlt } : { url });
+      continue;
+    }
+    if (item && typeof item === "object" && "url" in item) {
+      const url = String((item as { url: unknown }).url || "").trim();
+      if (!url) continue;
+      const alt =
+        typeof (item as { alt?: unknown }).alt === "string"
+          ? (item as { alt: string }).alt
+          : fallbackAlt || undefined;
+      out.push(alt ? { url, alt } : { url });
+    }
+  }
+  return out;
 }
 
 export default function EditProjectPage() {
@@ -34,7 +60,8 @@ export default function EditProjectPage() {
 
   useEffect(() => {
     if (!id) return;
-    fetch(`/api/admin/projects/${id}`)
+    const encoded = encodeURIComponent(decodeURIComponent(id));
+    fetch(`/api/admin/projects/${encoded}`)
       .then((r) => {
         if (!r.ok) {
           setNotFound(true);
@@ -44,7 +71,8 @@ export default function EditProjectPage() {
         return r.json();
       })
       .then((data) => {
-        if (data) setProject(data);
+        if (data && !data.error) setProject(data);
+        else if (data) setNotFound(true);
         setLoading(false);
       })
       .catch(() => {
@@ -74,6 +102,8 @@ export default function EditProjectPage() {
     );
   }
 
+  const images = normalizeImages(project.images, project.title || "");
+
   return (
     <div className="adm-page adm-page--narrow">
       <div style={{ marginBottom: "2rem" }}>
@@ -96,15 +126,15 @@ export default function EditProjectPage() {
           initialData={{
             id: project.id,
             slug: project.slug,
-            title: project.title,
-            category: project.category,
+            title: project.title || "",
+            category: project.category || "Rezidențial",
             location: project.location || "",
             description: project.description || "",
-            images: project.images || [],
+            images,
             video: project.video || "",
             status: project.status || "published",
-            year: project.year || "",
-            surface: project.surface || "",
+            year: project.year != null ? String(project.year) : "",
+            surface: project.surface != null ? String(project.surface) : "",
             seoTitle: project.seo_title || project.seoTitle || "",
             seoDescription:
               project.seo_description || project.seoDescription || "",

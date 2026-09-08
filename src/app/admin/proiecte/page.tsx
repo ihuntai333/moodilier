@@ -27,6 +27,7 @@ interface Project {
   updated_at?: string;
   status?: "published" | "draft";
   is_featured?: boolean;
+  source?: "cms" | "catalog";
 }
 
 function formatDate(iso: string) {
@@ -39,18 +40,33 @@ function formatDate(iso: string) {
 
 export default function AdminProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [meta, setMeta] = useState({ total: 0, catalogCount: 0, cmsCount: 0 });
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
   const [search, setSearch] = useState("");
   const [deleting, setDeleting] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [duplicating, setDuplicating] = useState<string | null>(null);
 
-  const fetchProjects = useCallback(async () => {
+  const fetchProjects = useCallback(async (opts?: { sync?: boolean }) => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/projects");
+      const url = opts?.sync
+        ? "/api/admin/projects?sync=1"
+        : "/api/admin/projects";
+      const res = await fetch(url);
       const data = await res.json();
-      setProjects(Array.isArray(data) ? data : []);
+      const list = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.projects)
+          ? data.projects
+          : [];
+      setProjects(list);
+      setMeta({
+        total: data?.meta?.total ?? list.length,
+        catalogCount: data?.meta?.catalogCount ?? list.length,
+        cmsCount: data?.meta?.cmsCount ?? 0,
+      });
     } catch {
       setProjects([]);
     } finally {
@@ -59,18 +75,45 @@ export default function AdminProjectsPage() {
   }, []);
 
   useEffect(() => {
-    fetchProjects();
+    // Auto-sync catalog into CMS on first load so counts match the site
+    fetchProjects({ sync: true });
   }, [fetchProjects]);
+
+  async function handleSyncCatalog() {
+    setSyncing(true);
+    try {
+      await fetch("/api/admin/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "sync-catalog" }),
+      });
+      await fetchProjects();
+    } finally {
+      setSyncing(false);
+    }
+  }
 
   const filtered = projects.filter((p) =>
     p.title.toLowerCase().includes(search.toLowerCase())
   );
 
   async function handleDelete(id: string) {
+    if (String(id).startsWith("catalog:")) {
+      alert(
+        "Proiectul există doar în catalogul site-ului. Apasă „Sincronizează catalog” ca să-l aduci în CMS, apoi poți șterge versiunea din CMS."
+      );
+      setConfirmDelete(null);
+      return;
+    }
     setDeleting(id);
     try {
       await fetch(`/api/admin/projects/${id}`, { method: "DELETE" });
       setProjects((prev) => prev.filter((p) => p.id !== id));
+      setMeta((m) => ({
+        ...m,
+        total: Math.max(0, m.total - 1),
+        cmsCount: Math.max(0, m.cmsCount - 1),
+      }));
     } finally {
       setDeleting(null);
       setConfirmDelete(null);
@@ -130,7 +173,13 @@ export default function AdminProjectsPage() {
         <div>
           <h1 className="adm-title">Proiecte</h1>
           <p className="adm-subtitle">
-            {projects.length} proiect{projects.length !== 1 ? "e" : ""} în total
+            {meta.total || projects.length} proiect
+            {(meta.total || projects.length) !== 1 ? "e" : ""} pe site
+            {meta.cmsCount > 0 && (
+              <span style={{ color: "#8a847c", marginLeft: "0.5rem" }}>
+                · {meta.cmsCount} în CMS
+              </span>
+            )}
             {projects.filter((p) => p.is_featured).length > 0 && (
               <span style={{ color: "var(--adm-gold)", marginLeft: "0.5rem" }}>
                 · {projects.filter((p) => p.is_featured).length} featured
@@ -138,10 +187,20 @@ export default function AdminProjectsPage() {
             )}
           </p>
         </div>
-        <Link href="/admin/proiecte/nou" className="adm-btn adm-btn-primary">
-          <Plus size={14} />
-          Proiect Nou
-        </Link>
+        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+          <button
+            type="button"
+            className="adm-btn adm-btn-secondary"
+            onClick={handleSyncCatalog}
+            disabled={syncing || loading}
+          >
+            {syncing ? "Se sincronizează…" : "Sincronizează catalog"}
+          </button>
+          <Link href="/admin/proiecte/nou" className="adm-btn adm-btn-primary">
+            <Plus size={14} />
+            Proiect Nou
+          </Link>
+        </div>
       </div>
 
       {/* Search */}
@@ -457,7 +516,7 @@ export default function AdminProjectsPage() {
                 >
                   {/* Edit */}
                   <Link
-                    href={`/admin/proiecte/${project.id}`}
+                    href={`/admin/proiecte/${encodeURIComponent(project.id)}`}
                     style={{
                       display: "flex",
                       alignItems: "center",

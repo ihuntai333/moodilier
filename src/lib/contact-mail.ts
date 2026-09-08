@@ -8,6 +8,7 @@ export type ContactMailPayload = {
   message: string;
   createdAt: string;
   to: string;
+  subjectPrefix?: string;
 };
 
 export function isSmtpConfigured(): boolean {
@@ -41,7 +42,7 @@ export async function sendContactNotification(
       from: `"Moodilier Website" <${from}>`,
       to: data.to,
       replyTo: data.email,
-      subject: `[Moodilier] Mesaj nou de la ${data.name.slice(0, 80)}`,
+      subject: `${data.subjectPrefix || "[Moodilier]"} Mesaj nou de la ${data.name.slice(0, 80)}`,
       html: `
 <!DOCTYPE html>
 <html lang="ro"><body style="font-family:Arial,sans-serif;background:#0a0a0a;color:#d4d4d4;padding:24px">

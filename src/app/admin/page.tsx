@@ -168,6 +168,15 @@ export default function AdminDashboard() {
             <FileText size={14} />
             Editează Homepage
           </Link>
+          <a
+            href="/?edit=1"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="adm-btn adm-btn-secondary"
+          >
+            <FileText size={14} />
+            Editor vizual pe site
+          </a>
           <Link href="/admin/proiecte/nou" className="adm-btn adm-btn-secondary">
             <Plus size={14} />
             Proiect Nou

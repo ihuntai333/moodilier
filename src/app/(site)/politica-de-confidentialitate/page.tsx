@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site-seo";
 import Link from "next/link";
 import SitePageHero from "@/components/site/SitePageHero";
 import SiteCTA from "@/components/site/SiteCTA";
 
-export const metadata: Metadata = {
-  title: "Politică de confidențialitate | Moodilier",
+export const metadata: Metadata = pageMetadata({
+  path: "/politica-de-confidentialitate",
+  title: "Politică de confidențialitate",
   description:
-    "Politica de confidențialitate a SC Moodilier SRL — informații privind prelucrarea datelor cu caracter personal conform GDPR.",
-};
+    "Politica de confidențialitate Moodilier — prelucrarea datelor personale și drepturile tale.",
+});
 
 export default function PoliticaConfidentialitatePage() {
   return (

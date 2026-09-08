@@ -3,10 +3,13 @@
 import { useRef, useState, type CSSProperties } from "react";
 import Image from "next/image";
 import { killSmoothScroll } from "@/lib/smooth-scroll";
+import { projectImageAlt } from "@/lib/site-seo";
 
 type Props = {
   title: string;
   category: string;
+  tags?: string[];
+  activeTag?: string | null;
   image: string;
   href: string;
   video?: string | null;
@@ -15,11 +18,13 @@ type Props = {
 };
 
 /**
- * Native <a> hard navigation — instant click feedback, no soft-nav queue.
+ * Project card — image by default; muted video preview on hover/focus when `video` is set.
  */
 export default function AwardsProjectCard({
   title,
   category,
+  tags = [],
+  activeTag = null,
   image,
   href,
   video,
@@ -28,23 +33,48 @@ export default function AwardsProjectCard({
 }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [hovered, setHovered] = useState(false);
-  const hasVideo = Boolean(video);
+  const [armed, setArmed] = useState(false);
+  const videoSrc = video?.trim() || "";
+  const hasVideo = Boolean(videoSrc);
   const target = href?.startsWith("/") ? href : "/proiecte";
+  const alt = projectImageAlt(title, category);
 
-  const onEnter = () => {
+  const playPreview = () => {
+    if (!hasVideo) return;
     setHovered(true);
     const v = videoRef.current;
     if (!v) return;
-    v.currentTime = 0;
-    void v.play().catch(() => {});
+    if (!armed) setArmed(true);
+    try {
+      v.muted = true;
+      v.defaultMuted = true;
+      v.playsInline = true;
+      if (v.readyState >= 2) {
+        v.currentTime = 0;
+        void v.play().catch(() => {});
+      } else {
+        const start = () => {
+          v.currentTime = 0;
+          void v.play().catch(() => {});
+        };
+        v.addEventListener("canplay", start, { once: true });
+        v.load();
+      }
+    } catch {
+      /* ignore autoplay blocks */
+    }
   };
 
-  const onLeave = () => {
+  const stopPreview = () => {
     setHovered(false);
     const v = videoRef.current;
     if (!v) return;
     v.pause();
-    v.currentTime = 0;
+    try {
+      v.currentTime = 0;
+    } catch {
+      /* ignore */
+    }
   };
 
   const go = () => {
@@ -58,17 +88,23 @@ export default function AwardsProjectCard({
       className={`aw-project${hovered ? " is-hovered" : ""}${hasVideo ? " has-video" : ""}${className ? ` ${className}` : ""}`}
       style={style}
       onClick={go}
-      onMouseEnter={onEnter}
-      onMouseLeave={onLeave}
-      onFocus={onEnter}
-      onBlur={onLeave}
+      onMouseEnter={playPreview}
+      onMouseLeave={stopPreview}
+      onFocus={playPreview}
+      onBlur={stopPreview}
+      onTouchStart={() => {
+        // First touch arms video so iOS can play after gesture
+        if (hasVideo && !armed) setArmed(true);
+      }}
     >
-      <div className="aw-project-media" aria-hidden>
+      <div className="aw-project-media">
         <Image
           src={image || "/projects/villa-06/01.cover.webp"}
-          alt=""
+          alt={alt}
           fill
-          sizes="(max-width: 700px) 100vw, 33vw"
+          sizes="(max-width: 700px) 50vw, (max-width: 1100px) 33vw, 25vw"
+          quality={70}
+          loading="lazy"
           className={`aw-project-img${hovered && hasVideo ? " is-dim" : ""}`}
           style={{ objectFit: "cover" }}
         />
@@ -76,19 +112,33 @@ export default function AwardsProjectCard({
           <video
             ref={videoRef}
             className={`aw-project-video${hovered ? " is-on" : ""}`}
-            src={video!}
+            src={armed || hovered ? videoSrc : undefined}
             muted
             playsInline
             loop
-            preload="none"
-            aria-hidden
+            preload={armed || hovered ? "metadata" : "none"}
+            aria-label={alt}
           />
         ) : null}
+        {hasVideo ? <span className="aw-project-video-cue" aria-hidden /> : null}
         <span className="aw-project-shade" />
         <span className="aw-project-frame" />
       </div>
       <div className="aw-project-meta">
-        <span className="aw-project-cat">{category}</span>
+        {tags.length > 0 ? (
+          <div className="aw-project-tags">
+            {tags.map((tag) => (
+              <span
+                key={tag}
+                className={`aw-project-tag${activeTag === tag ? " is-active" : ""}`}
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <span className="aw-project-cat">{category}</span>
+        )}
         <h3 className="aw-project-title">{title}</h3>
         <span className="aw-project-cta">Vezi proiect →</span>
       </div>

@@ -69,7 +69,7 @@ export function readDb(): Database {
         facebookDomainVerification: "",
         phone: "(+40) 729 555 431",
         email: "ofertare@moodilier.com",
-        address: "Blv. Basarabia 256, incinta FAUR, Sector 3, București",
+        address: "Bd. Basarabia 256, incinta FAUR, București",
         instagram: "https://www.instagram.com/moodilier/",
         facebook: "https://www.facebook.com/moodilier",
         whatsapp: "40729555431",

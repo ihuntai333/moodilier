@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site-seo";
 import SitePageHero from "@/components/site/SitePageHero";
 import SiteCTA from "@/components/site/SiteCTA";
 
-export const metadata: Metadata = {
-  title: "Notă legală | Moodilier",
+export const metadata: Metadata = pageMetadata({
+  path: "/nota-legala",
+  title: "Notă legală",
   description:
-    "Notă legală — identificarea societății, condiții de utilizare a site-ului, proprietate intelectuală și limitarea răspunderii. SC Moodilier SRL, București.",
-};
+    "Notă legală Moodilier — identificare societate, condiții de utilizare și proprietate intelectuală.",
+});
 
 const sections = [
   {

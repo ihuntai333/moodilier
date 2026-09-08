@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { setAdminSessionCookies } from "@/lib/admin-auth";
+import {
+  hasAdminSessionSecret,
+  setAdminSessionCookies,
+} from "@/lib/admin-auth";
 import { timingSafeEqual } from "crypto";
+import { assertSameOrigin } from "@/lib/security/request";
 
 function safeEqual(a: string, b: string): boolean {
   const bufA = Buffer.from(a);
   const bufB = Buffer.from(b);
   if (bufA.length !== bufB.length) {
-    // still compare to keep timing roughly constant
     timingSafeEqual(bufA, bufA);
     return false;
   }
@@ -15,6 +18,9 @@ function safeEqual(a: string, b: string): boolean {
 
 export async function POST(request: NextRequest) {
   try {
+    const originFail = assertSameOrigin(request);
+    if (originFail) return originFail;
+
     const body = await request.json();
     const { password } = body as { password: string };
 
@@ -26,6 +32,16 @@ export async function POST(request: NextRequest) {
             process.env.NODE_ENV === "production"
               ? "Admin neconfigurat (ADMIN_PASSWORD lipsește)."
               : "Setează ADMIN_PASSWORD în .env.local.",
+        },
+        { status: 503 }
+      );
+    }
+
+    if (!hasAdminSessionSecret()) {
+      return NextResponse.json(
+        {
+          error:
+            "ADMIN_SESSION_SECRET lipsește — obligatoriu pe production/Vercel.",
         },
         { status: 503 }
       );

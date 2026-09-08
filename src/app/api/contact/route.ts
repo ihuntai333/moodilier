@@ -14,8 +14,10 @@ type ContactBody = {
   /** Honeypot — must stay empty */
   website?: string;
   company?: string;
-  /** Client form open timestamp (ms) */
+  /** Client form open timestamp (ms) — required */
   _t?: number;
+  /** Optional topic — fabrics routes to draperii mailbox */
+  topic?: string;
 };
 
 const MAX = {
@@ -24,6 +26,10 @@ const MAX = {
   telefon: 40,
   mesaj: 4000,
 };
+
+function isServerlessProd(): boolean {
+  return process.env.VERCEL === "1" || process.env.NODE_ENV === "production";
+}
 
 export async function POST(request: NextRequest) {
   const originFail = assertSameOrigin(request);
@@ -50,21 +56,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (isServerlessProd() && !hasSupabaseConfig) {
+      console.error("Contact: Supabase required in production");
+      return NextResponse.json(
+        { error: "Serviciul de mesaje nu este configurat." },
+        { status: 503 }
+      );
+    }
+
     const body = (await request.json()) as ContactBody;
 
     // Honeypot — bots fill hidden fields
-    if ((body.website && body.website.trim()) || (body.company && body.company.trim())) {
-      // Fake success so bots don't retry
+    if (
+      (body.website && body.website.trim()) ||
+      (body.company && body.company.trim())
+    ) {
       return NextResponse.json({ ok: true });
     }
 
-    // Time trap — form must be open at least 2s (humans), max 2h
+    // Time trap — required; form must be open 2s–2h
     const opened = Number(body._t);
-    if (Number.isFinite(opened)) {
-      const age = Date.now() - opened;
-      if (age < 2000 || age > 2 * 60 * 60 * 1000) {
-        return NextResponse.json({ ok: true }); // silent drop
-      }
+    if (!Number.isFinite(opened)) {
+      return NextResponse.json({ ok: true }); // silent drop bots without _t
+    }
+    const age = Date.now() - opened;
+    if (age < 2000 || age > 2 * 60 * 60 * 1000) {
+      return NextResponse.json({ ok: true });
     }
 
     const nume = String(body.nume ?? "").trim().slice(0, MAX.nume);
@@ -98,6 +115,11 @@ export async function POST(request: NextRequest) {
     }
 
     const createdAt = new Date().toISOString();
+    const topic = String(body.topic ?? "").trim().toLowerCase();
+    const isFabrics = topic === "fabrics" || topic === "draperii";
+    const messageBody = isFabrics
+      ? `[Moodilier Fabrics — cerere ofertă draperii]\n\n${mesaj}`
+      : mesaj;
     let saved = false;
 
     if (hasSupabaseConfig) {
@@ -105,7 +127,7 @@ export async function POST(request: NextRequest) {
         name: nume,
         email,
         phone: telefon || null,
-        message: mesaj,
+        message: messageBody,
         is_read: false,
       });
       if (error) {
@@ -116,33 +138,42 @@ export async function POST(request: NextRequest) {
     }
 
     if (!saved) {
+      if (isServerlessProd()) {
+        return NextResponse.json(
+          { error: "Nu am putut salva mesajul. Încercați din nou." },
+          { status: 503 }
+        );
+      }
       await appendLocalMessage({
         name: nume,
         email,
         phone: telefon || null,
-        message: mesaj,
+        message: messageBody,
         createdAt,
       });
       saved = true;
     }
 
-    const notifyTo = settings.notifyEmail || settings.email;
-    try {
-      await sendContactNotification({
-        name: nume,
-        email,
-        phone: telefon || null,
-        message: mesaj,
-        createdAt,
-        to: notifyTo,
-      });
-    } catch (emailError) {
-      console.error("Email notification failed (non-fatal):", emailError);
+    const notifyTo = isFabrics
+      ? "draperii@moodilier.com"
+      : settings.notifyEmail || settings.email;
+    const mail = await sendContactNotification({
+      name: nume,
+      email,
+      phone: telefon || null,
+      message: messageBody,
+      createdAt,
+      to: notifyTo,
+      subjectPrefix: isFabrics ? "[Moodilier Fabrics]" : "[Moodilier]",
+    });
+    if (!mail.ok) {
+      console.error("Contact email not sent:", mail.error);
     }
 
     return NextResponse.json({
       ok: true,
       message: settings.successMessage,
+      notified: mail.ok,
     });
   } catch (error) {
     console.error("Contact API error:", error);

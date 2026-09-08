@@ -1,6 +1,4 @@
 /*
- * Run in Supabase SQL editor before using new fields:
- *
  * ALTER TABLE projects ADD COLUMN IF NOT EXISTS status text DEFAULT 'published';
  * ALTER TABLE projects ADD COLUMN IF NOT EXISTS year text;
  * ALTER TABLE projects ADD COLUMN IF NOT EXISTS surface text;
@@ -8,36 +6,72 @@
  * ALTER TABLE projects ADD COLUMN IF NOT EXISTS seo_description text;
  * ALTER TABLE projects ADD COLUMN IF NOT EXISTS is_featured boolean DEFAULT false;
  * ALTER TABLE projects ADD COLUMN IF NOT EXISTS video text;
+ * ALTER TABLE projects ADD COLUMN IF NOT EXISTS gallery jsonb;
+ * ALTER TABLE projects ADD COLUMN IF NOT EXISTS rooms jsonb;
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabase";
+import {
+  getAdminProjectsMerged,
+  normalizeAdminImages,
+  syncCatalogToSupabase,
+} from "@/lib/admin-projects";
 
-export async function GET() {
+function bustCache() {
   try {
-    const { data, error } = await supabaseAdmin
-      .from("projects")
-      .select("*")
-      .order("created_at", { ascending: false });
+    revalidateTag("projects", "max");
+  } catch {
+    /* ignore */
+  }
+}
 
-    if (error) {
-      console.warn("Projects supabase fallback:", error.message);
-      const { readDb } = await import("@/lib/db");
-      return NextResponse.json(readDb().projects);
+export async function GET(request: NextRequest) {
+  try {
+    const sync = request.nextUrl.searchParams.get("sync") === "1";
+    let syncResult: { inserted: number; total: number; error?: string } | null =
+      null;
+
+    if (sync) {
+      syncResult = await syncCatalogToSupabase();
+      bustCache();
     }
 
-    return NextResponse.json(data);
+    const { projects, catalogCount, cmsCount } = await getAdminProjectsMerged();
+
+    return NextResponse.json({
+      projects,
+      meta: {
+        total: projects.length,
+        catalogCount,
+        cmsCount,
+        sync: syncResult,
+      },
+    });
   } catch (error) {
-    console.warn("Projects fetch failed, using local db:", error);
-    const { readDb } = await import("@/lib/db");
-    return NextResponse.json(readDb().projects);
+    console.error("Admin projects GET:", error);
+    return NextResponse.json(
+      { projects: [], meta: { total: 0, catalogCount: 0, cmsCount: 0 } },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+
+    if (body?.action === "sync-catalog") {
+      const result = await syncCatalogToSupabase();
+      bustCache();
+      const { projects, catalogCount, cmsCount } = await getAdminProjectsMerged();
+      return NextResponse.json({
+        ...result,
+        projects,
+        meta: { total: projects.length, catalogCount, cmsCount },
+      });
+    }
 
     const { data, error } = await supabaseAdmin
       .from("projects")
@@ -48,9 +82,10 @@ export async function POST(request: NextRequest) {
         location: body.location || "",
         description: body.description || "",
         cover_image: body.coverImage || body.cover_image || "",
-        images: body.images || [],
+        images: normalizeAdminImages(body.images || [], body.title || ""),
+        gallery: body.gallery || [],
+        rooms: body.rooms || [],
         video: body.video || null,
-        // New fields
         status: body.status || "published",
         year: body.year || null,
         surface: body.surface || null,
@@ -65,12 +100,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    try {
-      revalidateTag("projects", "max");
-    } catch {
-      /* ignore */
-    }
-
+    bustCache();
     return NextResponse.json(data, { status: 201 });
   } catch (error) {
     console.error("Projects POST error:", error);

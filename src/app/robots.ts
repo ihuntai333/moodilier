@@ -14,12 +14,12 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/admin", "/admin/", "/api/", "/acces"],
+        disallow: ["/admin", "/admin/", "/api/", "/acces", "/frontpage-v2"],
       },
       {
         userAgent: "GPTBot",
         allow: ["/", "/llms.txt"],
-        disallow: ["/admin", "/api/", "/acces"],
+        disallow: ["/admin", "/api/", "/acces", "/frontpage-v2"],
       },
     ],
     sitemap: "https://moodilier.ro/sitemap.xml",

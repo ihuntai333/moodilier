@@ -9,7 +9,7 @@ import { isSmtpConfigured } from "@/lib/contact-mail";
 export async function GET() {
   const cookieStore = await cookies();
   const session = cookieStore.get(ADMIN_SESSION_COOKIE);
-  const authenticated = verifyAdminSessionToken(session?.value);
+  const authenticated = await verifyAdminSessionToken(session?.value);
   return NextResponse.json({
     authenticated,
     smtpConfigured: isSmtpConfigured(),

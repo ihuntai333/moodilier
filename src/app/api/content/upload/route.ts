@@ -7,13 +7,19 @@ import {
   isEditorWriteAuthorized,
 } from "@/lib/visual-editor/store";
 import { formatBytes, optimizeImageBuffer } from "@/lib/optimize-image";
+import { assertSameOrigin } from "@/lib/security/request";
 
 export const runtime = "nodejs";
 
+const BLOCKED_MIME = new Set(["image/svg+xml", "image/svg"]);
+
 export async function POST(request: NextRequest) {
   try {
+    const originFail = assertSameOrigin(request);
+    if (originFail) return originFail;
+
     const cookieStore = await cookies();
-    if (!isEditorWriteAuthorized(cookieStore)) {
+    if (!(await isEditorWriteAuthorized(cookieStore))) {
       return NextResponse.json(
         { error: "Neautentificat. Autentifică-te în admin." },
         { status: 401 }
@@ -26,9 +32,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Lipsește fișierul." }, { status: 400 });
     }
 
-    if (!file.type.startsWith("image/")) {
+    if (!file.type.startsWith("image/") || BLOCKED_MIME.has(file.type)) {
       return NextResponse.json(
-        { error: "Doar imagini sunt permise." },
+        { error: "Doar imagini raster sunt permise (fără SVG)." },
+        { status: 400 }
+      );
+    }
+
+    const lowerName = file.name.toLowerCase();
+    if (lowerName.endsWith(".svg") || lowerName.endsWith(".svgz")) {
+      return NextResponse.json(
+        { error: "SVG nu este permis." },
         { status: 400 }
       );
     }
@@ -41,9 +55,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const head = bytes.subarray(0, 256).toString("utf8").toLowerCase();
+    if (head.includes("<svg") || head.includes("<!doctype svg")) {
+      return NextResponse.json(
+        { error: "SVG nu este permis." },
+        { status: 400 }
+      );
+    }
+
     const optimized = await optimizeImageBuffer(bytes, file.type, {
       preset: "gallery",
     });
+    if (optimized.extension === "svg") {
+      return NextResponse.json(
+        { error: "SVG nu este permis." },
+        { status: 400 }
+      );
+    }
+
     const safeBase = file.name
       .replace(/\.[^.]+$/, "")
       .replace(/[^a-zA-Z0-9._-]/g, "_");

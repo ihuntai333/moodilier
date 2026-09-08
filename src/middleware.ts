@@ -5,7 +5,10 @@ import {
   isSiteLockEnabled,
   isValidSiteLockCookie,
 } from "@/lib/site-lock";
-import { verifyAdminSessionToken } from "@/lib/admin-auth";
+import {
+  ADMIN_SESSION_COOKIE,
+  verifyAdminSessionToken,
+} from "@/lib/admin-session";
 import { clientIp, rateLimit } from "@/lib/security/rate-limit";
 
 function withPathname(request: NextRequest) {
@@ -35,7 +38,7 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const requestHeaders = withPathname(request);
 
-  // ── Site lock (client preview) ──────────────────────────────────────────
+  // ── Site lock (optional private preview) ────────────────────────────────
   if (isSiteLockEnabled() && !isPublicWhenLocked(pathname)) {
     const cookie = request.cookies.get(SITE_LOCK_COOKIE)?.value;
     const unlocked = await isValidSiteLockCookie(cookie);
@@ -52,10 +55,29 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // ── Protect ALL /api/admin/* except auth helpers ────────────────────────
+  // ── Protect visual-editor APIs (defense in depth) ───────────────────────
+  if (
+    pathname === "/api/content" ||
+    pathname.startsWith("/api/content/") ||
+    pathname === "/api/media"
+  ) {
+    if (request.method !== "GET" && request.method !== "HEAD" && request.method !== "OPTIONS") {
+      const token = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
+      if (!(await verifyAdminSessionToken(token))) {
+        return NextResponse.json({ error: "Neautentificat." }, { status: 401 });
+      }
+    } else if (pathname === "/api/media") {
+      const token = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
+      if (!(await verifyAdminSessionToken(token))) {
+        return NextResponse.json({ error: "Neautentificat." }, { status: 401 });
+      }
+    }
+  }
+
+  // ── Protect /api/admin/* except auth helpers ────────────────────────────
   if (pathname.startsWith("/api/admin/") && !ADMIN_API_PUBLIC.has(pathname)) {
-    const token = request.cookies.get("admin_session")?.value;
-    if (!verifyAdminSessionToken(token)) {
+    const token = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
+    if (!(await verifyAdminSessionToken(token))) {
       return NextResponse.json({ error: "Neautentificat." }, { status: 401 });
     }
   }
@@ -81,8 +103,8 @@ export async function middleware(request: NextRequest) {
       return NextResponse.next({ request: { headers: requestHeaders } });
     }
 
-    const session = request.cookies.get("admin_session");
-    if (!verifyAdminSessionToken(session?.value)) {
+    const session = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
+    if (!(await verifyAdminSessionToken(session))) {
       const loginUrl = new URL("/admin/login", request.url);
       loginUrl.searchParams.set("from", pathname);
       return NextResponse.redirect(loginUrl);

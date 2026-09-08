@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site-seo";
 import Link from "next/link";
 import SitePageHero from "@/components/site/SitePageHero";
 import SiteCTA from "@/components/site/SiteCTA";
 import ResetCookiesButton from "./ResetCookiesButton";
 
-export const metadata: Metadata = {
-  title: "Politică cookies | Moodilier",
+export const metadata: Metadata = pageMetadata({
+  path: "/politica-cookies",
+  title: "Politică cookies",
   description:
-    "Politica de utilizare a cookie-urilor pe site-ul Moodilier — tipuri de cookie-uri, scopuri și cum vă puteți gestiona preferințele.",
-};
+    "Politica de cookies Moodilier — tipuri de cookie-uri și preferințe.",
+});
 
 const categories = [
   {

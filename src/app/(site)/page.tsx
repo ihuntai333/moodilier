@@ -6,16 +6,25 @@ import { ArrowRight } from "lucide-react";
 import FrontpageAwardsClient from "@/components/home/FrontpageAwardsClient";
 import AwardsIntroLoader from "@/components/home/AwardsIntroLoader";
 import HomeHeroSlider from "@/components/home/HomeHeroSlider";
+import HomeCategoryMarquee from "@/components/home/HomeCategoryMarquee";
 import AwardsProjectCard from "@/components/site/AwardsProjectCard";
 import { getFeaturedProjects } from "@/lib/projects";
-import { DEFAULT_HERO_SLIDES, getSiteChrome } from "@/lib/site-settings";
+import { getSiteChrome } from "@/lib/site-settings";
+import {
+  pageMetadata,
+  supplierNameFromSrc,
+} from "@/lib/site-seo";
 
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "Moodilier — Mobilier La Comandă Premium | București",
-  description:
-    "Mobilier premium pe comandă din București — bucătării, dressinguri, livinguri, dormitoare și spații comerciale. Design contemporan, materiale premium, execuție impecabilă în atelierul propriu.",
+  ...pageMetadata({
+    path: "/",
+    title: "Moodilier — Mobilier la comandă premium în București",
+    description:
+      "Mobilier premium pe comandă din București — bucătării, dressinguri, livinguri, dormitoare și spații comerciale. Design contemporan, materiale premium, execuție impecabilă în atelierul propriu.",
+    image: "/projects/villa-06/01.living.cover.webp",
+  }),
   keywords: [
     "mobilier la comandă",
     "mobilier premium București",
@@ -25,33 +34,6 @@ export const metadata: Metadata = {
     "atelier mobilier București",
     "Moodilier",
   ],
-  openGraph: {
-    type: "website",
-    locale: "ro_RO",
-    url: "https://moodilier.ro",
-    siteName: "Moodilier",
-    title: "Moodilier — Mobilier La Comandă Premium | București",
-    description:
-      "Atelier de mobilier premium la comandă din București. Bucătării, dressinguri, livinguri, dormitoare și spații comerciale executate impecabil.",
-    images: [
-      {
-        url: "/projects/villa-06/01.cover.webp",
-        width: 1200,
-        height: 630,
-        alt: "Mobilier premium la comandă Moodilier — București",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Moodilier — Mobilier La Comandă Premium | București",
-    description:
-      "Mobilier premium pe comandă, executat impecabil în atelierul din București.",
-    images: ["/projects/villa-06/01.cover.webp"],
-  },
-  alternates: {
-    canonical: "https://moodilier.ro",
-  },
 };
 
 const BASE = "https://moodilier.ro";
@@ -71,7 +53,7 @@ const jsonLd = {
         "Atelier premium de mobilier la comandă din București — bucătării, dressinguri, livinguri, dormitoare și spații comerciale executate impecabil.",
       address: {
         "@type": "PostalAddress",
-        streetAddress: "Bulevardul Basarabia 256, incinta FAUR",
+        streetAddress: "Bd. Basarabia 256, incinta FAUR",
         addressLocality: "București",
         postalCode: "030694",
         addressRegion: "Sector 3",
@@ -88,7 +70,8 @@ const jsonLd = {
     {
       "@type": "WebPage",
       name: "Moodilier — Mobilier La Comandă Premium | București",
-      description: "Mobilier premium pe comandă, executat impecabil.",
+      description:
+        "Atelier de mobilier la comandă din București — design contemporan și execuție în atelierul propriu.",
       isPartOf: { "@type": "WebSite", name: "Moodilier", url: BASE },
     },
   ],
@@ -184,16 +167,15 @@ const services = [
   },
   {
     num: "03",
-    title: "Moodilier Store",
-    desc: "Import selecționat de mobilier premium de la designeri consacrați din Italia, Danemarca și Grecia.",
+    title: "Moodilier Fabrics",
+    desc: "Perdele, draperii, sisteme de umbrire, sine electrice și storuri romane.",
     icon: (
       <svg className="aw-service-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-        {/* Curated piece / pedestal object */}
-        <path d="M20 8 L26 14 L20 20 L14 14 Z" />
-        <path d="M20 20 V26" />
-        <path d="M13 26 H27" />
-        <path d="M15 26 V31 H25 V26" />
-        <path d="M12 31 H28" />
+        <path d="M10 8 V32" />
+        <path d="M30 8 V32" />
+        <path d="M10 8 Q20 14 30 8" />
+        <path d="M10 12 Q20 20 30 12" />
+        <path d="M10 18 Q20 26 30 18" />
       </svg>
     ),
   },
@@ -246,8 +228,8 @@ const services = [
 const aboutStats = [
   { num: "10+", label: "Ani experiență", count: "10", suffix: "+" },
   { num: "200+", label: "Proiecte finalizate", count: "200", suffix: "+" },
+  { num: "2.000 mp", label: "Atelier propriu", count: "2000", suffix: " mp" },
   { num: "100%", label: "Execuție proprie", count: "100", suffix: "%" },
-  { num: "24h", label: "Răspuns ofertă", count: "24", suffix: "h" },
 ];
 
 const steps = [
@@ -271,17 +253,6 @@ const supplierLogos = [
   "/images-scraped/logo_08_sch.png",
 ];
 
-const marqueeItems = [
-  "Bucătării",
-  "Dressinguri",
-  "Livinguri",
-  "Dormitoare",
-  "Spații comerciale",
-  "Design interior",
-  "Mobilier premium",
-  "Execuție proprie",
-];
-
 export default async function HomePage() {
   const [featured, chrome] = await Promise.all([
     getFeaturedProjects(9),
@@ -294,30 +265,21 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <FrontpageAwardsClient />
       <AwardsIntroLoader config={chrome.intro} />
+      <FrontpageAwardsClient />
 
       <div id="aw-home">
         {/* ── HERO full-bleed slider ── */}
         <HomeHeroSlider
-          slides={DEFAULT_HERO_SLIDES}
+          slides={chrome.heroSlides}
           defaultDurationSec={10}
-          label="Tailored ✦ Furniture"
+          label=""
           titleHtml="The Art of<br />Custom Furniture"
-          body="Mobilier premium pe comandă, executat impecabil."
+          body=""
         />
 
-        {/* ── Marquee ── */}
-        <div className="aw-marquee" aria-hidden>
-          <div className="aw-marquee-track">
-            {[...marqueeItems, ...marqueeItems, ...marqueeItems].map((item, i) => (
-              <span key={`${item}-${i}`} className="aw-marquee-item">
-                {item}
-                <span className="aw-marquee-dot">✦</span>
-              </span>
-            ))}
-          </div>
-        </div>
+        {/* ── Marquee mapped to gallery categories ── */}
+        <HomeCategoryMarquee />
 
         {/* ── Benefits cu icoane ── */}
         <section
@@ -355,7 +317,7 @@ export default async function HomePage() {
                 data-key="home.about.title"
                 data-editable="text"
               >
-                „The Art of Custom Furniture”
+                The Art of Custom Furniture
               </h2>
             </div>
             <div className="aw-about-grid">
@@ -366,10 +328,12 @@ export default async function HomePage() {
               >
                 <div className="aw-clip-media" style={{ position: "absolute", inset: 0 }}>
                   <Image
-                    src="/projects/villa-05/01.cover.webp"
+                    src="/projects/villa-06/01.living.cover.webp"
                     alt="Atelier Moodilier — mobilier premium"
                     fill
                     sizes="(max-width: 900px) 100vw, 48vw"
+                    quality={70}
+                    loading="lazy"
                     style={{ objectFit: "cover" }}
                   />
                 </div>
@@ -403,7 +367,7 @@ export default async function HomePage() {
                   finisaje.
                 </p>
                 <div className="aw-hero-ctas aw-reveal" style={{ marginTop: "1.5rem" }}>
-                  <Link
+                  <a
                     href="/despre-noi"
                     className="aw-btn-ghost aw-link-slide"
                     data-key="home.about.cta_more"
@@ -412,8 +376,8 @@ export default async function HomePage() {
                     <span data-key="home.about.cta_more_label" data-editable="text">
                       Află mai multe despre noi
                     </span>
-                  </Link>
-                  <Link
+                  </a>
+                  <a
                     href="/contact"
                     className="aw-btn aw-btn-primary aw-btn-fill"
                     data-key="home.about.cta_offer"
@@ -422,8 +386,8 @@ export default async function HomePage() {
                     <span data-key="home.about.cta_offer_label" data-editable="text">
                       Solicită ofertă
                     </span>
-                    <ArrowRight size={14} />
-                  </Link>
+                    <ArrowRight size={18} />
+                  </a>
                 </div>
               </div>
             </div>
@@ -495,15 +459,15 @@ export default async function HomePage() {
                 className="aw-btn aw-btn-outline-dark aw-btn-fill"
               >
                 Vezi toate proiectele
-                <ArrowRight size={14} />
+                <ArrowRight size={18} />
               </Link>
               <Link
                 href="/contact"
                 className="aw-btn aw-btn-primary aw-btn-fill"
-                style={{ marginLeft: "0.75rem" }}
+               
               >
                 Solicită ofertă
-                <ArrowRight size={14} />
+                <ArrowRight size={18} />
               </Link>
             </div>
           </div>
@@ -548,15 +512,15 @@ export default async function HomePage() {
                 className="aw-btn aw-btn-outline-dark aw-btn-fill"
               >
                 Toate serviciile noastre
-                <ArrowRight size={14} />
+                <ArrowRight size={18} />
               </Link>
               <Link
                 href="/contact"
                 className="aw-btn aw-btn-primary aw-btn-fill"
-                style={{ marginLeft: "0.75rem" }}
+               
               >
                 Discută proiectul
-                <ArrowRight size={14} />
+                <ArrowRight size={18} />
               </Link>
             </div>
           </div>
@@ -584,11 +548,15 @@ export default async function HomePage() {
               </h2>
               <p
                 className="aw-body"
-                style={{ margin: "1rem auto 0", maxWidth: "42ch", textAlign: "center" }}
+                style={{ margin: "1rem auto 0", maxWidth: "54ch", textAlign: "center" }}
                 data-key="home.process.intro"
                 data-editable="text"
               >
-                Proces clar, de la ofertă la montaj — cu precizie de atelier.
+                Fiecare proiect Moodilier este construit în jurul unui proces clar, atent
+                planificat și executat cu precizie. De la analiza inițială a spațiului și
+                dezvoltarea proiectului tehnic, până la producție, montaj și controlul final,
+                fiecare etapă este gândită pentru a livra mobilier premium la comandă, realizat
+                impecabil în fiecare detaliu.
               </p>
             </div>
 
@@ -611,15 +579,15 @@ export default async function HomePage() {
                 className="aw-btn aw-btn-primary aw-btn-fill"
               >
                 Începe proiectul tău
-                <ArrowRight size={14} />
+                <ArrowRight size={18} />
               </Link>
               <Link
                 href="/proiecte"
                 className="aw-btn aw-btn-outline-dark aw-btn-fill"
-                style={{ marginLeft: "0.75rem" }}
+               
               >
                 Vezi proiecte
-                <ArrowRight size={14} />
+                <ArrowRight size={18} />
               </Link>
             </div>
           </div>
@@ -634,7 +602,7 @@ export default async function HomePage() {
         >
           <div className="aw-container aw-quote-inner aw-reveal">
             <blockquote data-key="home.quote" data-editable="text">
-              „Mobilier premium pe comandă, executat impecabil.”
+              „Pentru noi, adevăratul lux stă în calitatea lucrurilor create corect și în experiența pe care acestea o oferă zi de zi.”
             </blockquote>
           </div>
         </section>
@@ -651,18 +619,21 @@ export default async function HomePage() {
               Furnizori parteneri
             </p>
             <div className="aw-suppliers-grid aw-reveal">
-              {supplierLogos.map((logo, i) => (
-                <div key={logo} className="aw-supplier">
-                  <Image
-                    src={logo}
-                    alt={`Furnizor partener ${i + 1}`}
-                    width={160}
-                    height={56}
-                    unoptimized
-                    style={{ height: 44, width: "auto", objectFit: "contain" }}
-                  />
-                </div>
-              ))}
+              {supplierLogos.map((logo) => {
+                const name = supplierNameFromSrc(logo);
+                return (
+                  <div key={logo} className="aw-supplier">
+                    <Image
+                      src={logo}
+                      alt={name || ""}
+                      width={160}
+                      height={56}
+                      unoptimized
+                      style={{ height: 44, width: "auto", objectFit: "contain" }}
+                    />
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -696,7 +667,7 @@ export default async function HomePage() {
           </div>
           <div className="aw-container aw-cta-foreground">
             <p className="aw-label aw-reveal" data-key="home.cta.label" data-editable="text">
-              Hai să lucrăm împreună
+              Contact
             </p>
             <h2
               id="aw-cta-title"
@@ -714,7 +685,7 @@ export default async function HomePage() {
               pentru design interior premium.
             </p>
             <div className="aw-cta-actions aw-reveal">
-              <Link
+              <a
                 href="/contact"
                 className="aw-btn aw-btn-primary aw-btn-fill"
                 data-key="home.cta.primary"
@@ -723,9 +694,9 @@ export default async function HomePage() {
                 <span data-key="home.cta.primary_label" data-editable="text">
                   Solicită o ofertă gratuită
                 </span>
-                <ArrowRight size={14} />
-              </Link>
-              <Link
+                <ArrowRight size={18} />
+              </a>
+              <a
                 href="/proiecte"
                 className="aw-btn aw-btn-outline-dark aw-btn-fill"
                 data-key="home.cta.secondary"
@@ -734,7 +705,7 @@ export default async function HomePage() {
                 <span data-key="home.cta.secondary_label" data-editable="text">
                   Descoperă portofoliul
                 </span>
-              </Link>
+              </a>
             </div>
           </div>
         </section>

@@ -1,17 +1,24 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { getPublishedProjects } from "@/lib/projects";
+import { pageMetadata } from "@/lib/site-seo";
 import ProiecteClient from "./ProiecteClient";
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
-  title: "Proiecte | Moodilier — Portofoliu mobilier premium",
+export const metadata: Metadata = pageMetadata({
+  path: "/proiecte",
+  title: "Proiecte mobilier la comandă",
   description:
     "Portofoliu Moodilier: proiecte rezidențiale și comerciale de mobilier la comandă din București — bucătării, dressinguri, livinguri și spații complete.",
-  alternates: { canonical: "https://moodilier.ro/proiecte" },
-};
+  image: "/projects/villa-06/01.living.cover.webp",
+});
 
 export default async function ProiectePage() {
   const projects = await getPublishedProjects();
-  return <ProiecteClient projects={projects} />;
+  return (
+    <Suspense fallback={null}>
+      <ProiecteClient projects={projects} />
+    </Suspense>
+  );
 }

@@ -15,9 +15,16 @@ function hostAllowed(hostname: string): boolean {
   return false;
 }
 
+function sameSiteHosts(a: string, b: string): boolean {
+  if (a === b) return true;
+  const pair = new Set([a, b]);
+  if (pair.has("moodilier.ro") && pair.has("www.moodilier.ro")) return true;
+  return false;
+}
+
 /**
- * Reject cross-site POSTs (basic CSRF for cookie-less public APIs).
- * Skipped in development when Origin is missing (some tools omit it).
+ * Reject cross-site POSTs (basic CSRF for cookie-bearing / public APIs).
+ * Origin/Referer hostname must match the request Host (not any *.vercel.app).
  */
 export function assertSameOrigin(request: NextRequest): NextResponse | null {
   const origin = request.headers.get("origin");
@@ -32,16 +39,12 @@ export function assertSameOrigin(request: NextRequest): NextResponse | null {
   try {
     const url = origin || referer || "";
     const parsed = new URL(url);
-    if (!hostAllowed(parsed.hostname)) {
+    const originHost = parsed.hostname.toLowerCase();
+    if (!hostAllowed(originHost)) {
       return NextResponse.json({ error: "Origin nepermis." }, { status: 403 });
     }
-    // Host header should match when present
     const reqHost = host.replace(/:\d+$/, "").toLowerCase();
-    if (
-      reqHost &&
-      parsed.hostname.toLowerCase() !== reqHost &&
-      !hostAllowed(parsed.hostname)
-    ) {
+    if (reqHost && !sameSiteHosts(originHost, reqHost)) {
       return NextResponse.json({ error: "Origin nepermis." }, { status: 403 });
     }
   } catch {

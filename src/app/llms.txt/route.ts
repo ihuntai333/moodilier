@@ -17,7 +17,7 @@ export async function GET() {
 ## Companie
 
 - **SC Moodilier SRL**
-- Blv. Basarabia 256, FAUR, Sector 3, București
+- Bd. Basarabia 256, incinta FAUR, București
 - Telefon: (+40) 729 555 431
 - Email: ofertare@moodilier.com
 

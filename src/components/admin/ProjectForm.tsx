@@ -77,6 +77,31 @@ function blurGray(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | H
   (e.target as HTMLElement).style.borderColor = "#2a2724";
 }
 
+function coerceImages(raw: unknown, fallbackAlt = ""): ProjectImage[] {
+  if (!Array.isArray(raw)) return [];
+  const out: ProjectImage[] = [];
+  for (const item of raw) {
+    if (typeof item === "string") {
+      const url = item.trim();
+      if (url) out.push(fallbackAlt ? { url, alt: fallbackAlt } : { url });
+      continue;
+    }
+    if (item && typeof item === "object" && "url" in item) {
+      const obj = item as ProjectImage;
+      const url = String(obj.url || "").trim();
+      if (!url && !obj.preview && !obj.file) continue;
+      const alt = obj.alt || fallbackAlt || undefined;
+      out.push({
+        url,
+        ...(alt ? { alt } : {}),
+        ...(obj.file ? { file: obj.file } : {}),
+        ...(obj.preview ? { preview: obj.preview } : {}),
+      });
+    }
+  }
+  return out;
+}
+
 export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
   const router = useRouter();
   const slug = initialData?.slug || "";
@@ -92,21 +117,42 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
   const [success, setSuccess] = useState("");
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [projectId, setProjectId] = useState(initialData?.id || "");
 
-  const [form, setForm] = useState<ProjectFormData>({
+  const [form, setForm] = useState<ProjectFormData>(() => ({
     title: initialData?.title || "",
     category: initialData?.category || "Rezidențial",
     location: initialData?.location || "",
     description: initialData?.description || "",
-    images: initialData?.images || [],
+    images: coerceImages(initialData?.images, initialData?.title || ""),
     video: initialData?.video || "",
     status: initialData?.status || "published",
-    year: initialData?.year || "",
-    surface: initialData?.surface || "",
+    year: initialData?.year != null ? String(initialData.year) : "",
+    surface: initialData?.surface != null ? String(initialData.surface) : "",
     seoTitle: initialData?.seoTitle || "",
     seoDescription: initialData?.seoDescription || "",
     isFeatured: initialData?.isFeatured || false,
-  });
+  }));
+
+  // Keep form in sync when edit page loads / refreshes initialData
+  useEffect(() => {
+    if (!initialData || mode !== "edit") return;
+    setProjectId(initialData.id || "");
+    setForm({
+      title: initialData.title || "",
+      category: initialData.category || "Rezidențial",
+      location: initialData.location || "",
+      description: initialData.description || "",
+      images: coerceImages(initialData.images, initialData.title || ""),
+      video: initialData.video || "",
+      status: initialData.status || "published",
+      year: initialData.year != null ? String(initialData.year) : "",
+      surface: initialData.surface != null ? String(initialData.surface) : "",
+      seoTitle: initialData.seoTitle || "",
+      seoDescription: initialData.seoDescription || "",
+      isFeatured: initialData.isFeatured || false,
+    });
+  }, [mode, initialData?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-fill SEO title from project title when SEO title is empty
   useEffect(() => {
@@ -297,7 +343,8 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
           body: JSON.stringify(payload),
         });
       } else {
-        res = await fetch(`/api/admin/projects/${initialData?.id}`, {
+        const editId = projectId || initialData?.id || "";
+        res = await fetch(`/api/admin/projects/${encodeURIComponent(editId)}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
@@ -313,9 +360,14 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
       if (mode === "create") {
         router.push("/admin/proiecte");
       } else {
+        if (data?.id) setProjectId(String(data.id));
         setSuccess("Proiect actualizat cu succes!");
         setTimeout(() => setSuccess(""), 3000);
-        setForm((prev) => ({ ...prev, images, video }));
+        setForm((prev) => ({
+          ...prev,
+          images: coerceImages(data?.images ?? images, form.title),
+          video: typeof data?.video === "string" ? data.video : video,
+        }));
         setPendingVideo(null);
       }
     } catch (err) {
