@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { randomUUID } from "crypto";
 import { formatBytes, optimizeImageBuffer } from "@/lib/optimize-image";
-import { requireAdminApi } from "@/lib/admin-auth";
-import { assertSameOrigin } from "@/lib/security/request";
+import { requireAdminMutation } from "@/lib/admin-auth";
 
 /**
  * POST /api/admin/upload
@@ -35,10 +34,8 @@ const MAX_IMAGE_BYTES = 40 * 1024 * 1024; // 40MB raw before optimize
 
 export async function POST(request: NextRequest) {
   try {
-    const denied = await requireAdminApi(request);
+    const denied = await requireAdminMutation(request);
     if (denied) return denied;
-    const originFail = assertSameOrigin(request);
-    if (originFail) return originFail;
 
     const formData = await request.formData();
     const slug = (formData.get("slug") as string) || "general";

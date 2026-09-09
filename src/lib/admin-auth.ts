@@ -6,6 +6,7 @@ import {
   createAdminSessionToken,
   verifyAdminSessionToken,
 } from "@/lib/admin-session";
+import { assertSameOrigin } from "@/lib/security/request";
 
 export {
   ADMIN_SESSION_COOKIE,
@@ -28,6 +29,15 @@ export async function requireAdminApi(
 ): Promise<NextResponse | null> {
   if (await isAdminRequest(request)) return null;
   return NextResponse.json({ error: "Neautentificat." }, { status: 401 });
+}
+
+/** Session + same-origin check for cookie-bearing writes (CSRF). */
+export async function requireAdminMutation(
+  request: NextRequest
+): Promise<NextResponse | null> {
+  const denied = await requireAdminApi(request);
+  if (denied) return denied;
+  return assertSameOrigin(request);
 }
 
 export async function setAdminSessionCookies() {

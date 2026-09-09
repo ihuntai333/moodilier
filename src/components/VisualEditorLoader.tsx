@@ -26,7 +26,7 @@ export default async function VisualEditorLoader() {
         </Script>
       ) : null}
       <Script
-        src="/editor.js?v=20260902a"
+        src="/editor.js?v=20260909img"
         strategy="afterInteractive"
         id="moodilier-visual-editor"
       />

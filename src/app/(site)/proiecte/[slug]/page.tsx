@@ -7,18 +7,17 @@ import SiteCTA from "@/components/site/SiteCTA";
 import SiteProjectGallery from "@/components/site/SiteProjectGallery";
 import JsonLd from "@/components/JsonLd";
 import {
+  getCatalogSlugs,
   getProjectBySlug,
   getPublishedProjects,
-  getProjectSlugs,
 } from "@/lib/projects";
 import { pageMetadata } from "@/lib/site-seo";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 export const dynamicParams = true;
 
-export async function generateStaticParams() {
-  const slugs = await getProjectSlugs();
-  return slugs.map((slug) => ({ slug }));
+export function generateStaticParams() {
+  return getCatalogSlugs().map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({

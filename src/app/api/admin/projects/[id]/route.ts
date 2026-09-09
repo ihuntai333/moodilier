@@ -11,71 +11,53 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { revalidateTag } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabase";
 import {
   decodeProjectParam,
   ensureProjectInCms,
   getAdminProjectById,
   normalizeAdminImages,
+  parseProjectId,
 } from "@/lib/admin-projects";
+import { bustProjectCaches } from "@/lib/project-cache";
+import { sanitizeGallery, sanitizeMediaUrl } from "@/lib/media-url";
+import { requireAdminApi, requireAdminMutation } from "@/lib/admin-auth";
 import fs from "fs";
 import path from "path";
 
-function bustProjectsCache() {
-  try {
-    revalidateTag("projects", "max");
-  } catch {
-    /* ignore */
-  }
-}
-
 function isCatalogOrSlugId(id: string): boolean {
-  const decoded = decodeProjectParam(id);
-  return (
-    decoded.startsWith("catalog:") ||
-    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-      decoded
-    )
-  );
+  return parseProjectId(id).kind !== "uuid";
 }
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const denied = await requireAdminApi(request);
+  if (denied) return denied;
   try {
     const { id: rawId } = await params;
     const id = decodeProjectParam(rawId);
 
-    // Catalog / slug: materialize into CMS so edit saves against a real UUID
-    if (isCatalogOrSlugId(id)) {
-      const { project, error } = await ensureProjectInCms(id);
-      if (project) {
-        return NextResponse.json(project);
-      }
-      return NextResponse.json(
-        { error: error || "Proiectul nu a fost găsit." },
-        { status: 404 }
-      );
+    // Load only — do not require CMS insert on open (Supabase blips caused "fetch failed")
+    const project = await getAdminProjectById(id);
+    if (project) {
+      return NextResponse.json(project);
     }
 
-    let project = await getAdminProjectById(id);
-    if (!project) {
-      const ensured = await ensureProjectInCms(id);
-      project = ensured.project;
-      if (!project) {
-        return NextResponse.json(
-          { error: ensured.error || "Proiectul nu a fost găsit." },
-          { status: 404 }
-        );
-      }
-    }
-
-    return NextResponse.json(project);
+    return NextResponse.json(
+      { error: "Proiectul nu a fost găsit." },
+      { status: 404 }
+    );
   } catch (error) {
     console.error("Project GET error:", error);
-    return NextResponse.json({ error: "Eroare internă." }, { status: 500 });
+    return NextResponse.json(
+      {
+        error:
+          "Nu am putut încărca proiectul (serviciu temporar indisponibil).",
+      },
+      { status: 503 }
+    );
   }
 }
 
@@ -83,6 +65,9 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const denied = await requireAdminMutation(request);
+  if (denied) return denied;
+
   try {
     const { id: rawId } = await params;
     const body = await request.json();
@@ -107,15 +92,17 @@ export async function PATCH(
     if (body.category !== undefined) updatePayload.category = body.category;
     if (body.location !== undefined) updatePayload.location = body.location;
     if (body.description !== undefined) updatePayload.description = body.description;
-    if (body.coverImage !== undefined) updatePayload.cover_image = body.coverImage;
-    if (body.cover_image !== undefined) updatePayload.cover_image = body.cover_image;
+    if (body.coverImage !== undefined)
+      updatePayload.cover_image = sanitizeMediaUrl(body.coverImage);
+    if (body.cover_image !== undefined)
+      updatePayload.cover_image = sanitizeMediaUrl(body.cover_image);
     if (body.images !== undefined) {
       updatePayload.images = normalizeAdminImages(
         body.images,
         typeof body.title === "string" ? body.title : ""
-      );
+      ).filter((img) => sanitizeMediaUrl(img.url));
     }
-    if (body.gallery !== undefined) updatePayload.gallery = body.gallery;
+    if (body.gallery !== undefined) updatePayload.gallery = sanitizeGallery(body.gallery);
     if (body.rooms !== undefined) updatePayload.rooms = body.rooms;
     if (body.status !== undefined) updatePayload.status = body.status;
     if (body.year !== undefined) updatePayload.year = body.year || null;
@@ -130,12 +117,36 @@ export async function PATCH(
     if (body.is_featured !== undefined) updatePayload.is_featured = body.is_featured;
     if (body.video !== undefined) updatePayload.video = body.video || null;
 
-    const { data, error } = await supabaseAdmin
+    let { data, error } = await supabaseAdmin
       .from("projects")
       .update(updatePayload)
       .eq("id", cmsId)
       .select()
       .single();
+
+    if (error && error.code !== "PGRST116") {
+      const core: Record<string, unknown> = {};
+      for (const key of [
+        "title",
+        "slug",
+        "category",
+        "location",
+        "description",
+        "cover_image",
+        "images",
+        "video",
+      ]) {
+        if (updatePayload[key] !== undefined) core[key] = updatePayload[key];
+      }
+      const retry = await supabaseAdmin
+        .from("projects")
+        .update(core)
+        .eq("id", cmsId)
+        .select()
+        .single();
+      data = retry.data;
+      error = retry.error;
+    }
 
     if (error) {
       if (error.code === "PGRST116") {
@@ -147,7 +158,7 @@ export async function PATCH(
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    bustProjectsCache();
+    bustProjectCaches();
     const normalized = await getAdminProjectById(String(data.id));
     return NextResponse.json(normalized || data);
   } catch (error) {
@@ -157,9 +168,12 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const denied = await requireAdminMutation(request);
+  if (denied) return denied;
+
   try {
     const { id: rawId } = await params;
     const decoded = decodeProjectParam(rawId);
@@ -215,7 +229,7 @@ export async function DELETE(
       }
     }
 
-    bustProjectsCache();
+    bustProjectCaches();
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Project DELETE error:", error);

@@ -4,11 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import ProjectForm from "@/components/admin/ProjectForm";
-
-interface ProjectImage {
-  url: string;
-  alt?: string;
-}
+import {
+  decodeProjectParam,
+  normalizeAdminImages,
+} from "@/lib/admin-projects";
 
 interface ProjectRow {
   id: string;
@@ -30,45 +29,9 @@ interface ProjectRow {
   isFeatured?: boolean;
 }
 
-function normalizeImages(raw: unknown, fallbackAlt = ""): ProjectImage[] {
-  if (!Array.isArray(raw)) return [];
-  const out: ProjectImage[] = [];
-  for (const item of raw) {
-    if (typeof item === "string") {
-      const url = item.trim();
-      if (url) out.push(fallbackAlt ? { url, alt: fallbackAlt } : { url });
-      continue;
-    }
-    if (item && typeof item === "object" && "url" in item) {
-      const url = String((item as { url: unknown }).url || "").trim();
-      if (!url) continue;
-      const alt =
-        typeof (item as { alt?: unknown }).alt === "string"
-          ? (item as { alt: string }).alt
-          : fallbackAlt || undefined;
-      out.push(alt ? { url, alt } : { url });
-    }
-  }
-  return out;
-}
-
-function decodeParam(raw: string): string {
-  let s = String(raw || "").trim();
-  for (let i = 0; i < 3; i++) {
-    try {
-      const next = decodeURIComponent(s);
-      if (next === s) break;
-      s = next;
-    } catch {
-      break;
-    }
-  }
-  return s.trim();
-}
-
 export default function EditProjectPage() {
   const params = useParams();
-  const id = decodeParam(String(params?.id || ""));
+  const id = decodeProjectParam(String(params?.id || ""));
   const [project, setProject] = useState<ProjectRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -86,13 +49,17 @@ export default function EditProjectPage() {
         const data = await r.json().catch(() => ({}));
         if (cancelled) return;
         if (!r.ok) {
-          setError(
-            typeof data?.error === "string"
-              ? data.error
-              : r.status === 401
-                ? "Sesiune expirată — reautentifică-te."
-                : "Proiectul cu ID-ul specificat nu există."
-          );
+          const msg =
+            typeof data?.error === "string" ? data.error : "";
+          // Never surface raw Node/undici errors like "TypeError: fetch failed"
+          const friendly =
+            /fetch failed|ECONNREFUSED|ETIMEDOUT|network/i.test(msg)
+              ? "Conexiune temporar indisponibilă. Reîncearcă peste câteva secunde."
+              : msg ||
+                (r.status === 401
+                  ? "Sesiune expirată — reautentifică-te."
+                  : "Proiectul cu ID-ul specificat nu există.");
+          setError(friendly);
           setProject(null);
           return;
         }
@@ -148,7 +115,7 @@ export default function EditProjectPage() {
     );
   }
 
-  const images = normalizeImages(project.images, project.title || "");
+  const images = normalizeAdminImages(project.images, project.title || "");
 
   return (
     <div className="adm-page adm-page--narrow">

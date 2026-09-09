@@ -23,6 +23,7 @@ export default function ServiciiPage() {
         subtitle="Design interior, mobilier premium la comandă și prelucrări specializate — totul în atelierul nostru din București."
         bgImage="/projects/villa-01/01.bucatarii.cover.webp"
         overlayOpacity={0.48}
+        imageKey="servicii.hero.image"
       />
 
       <ServiciiClient />

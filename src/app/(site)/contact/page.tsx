@@ -28,6 +28,7 @@ export default async function ContactPage() {
         subtitle="Pentru orice întrebare sau solicitare de ofertă, ne poți contacta oricând — revenim cu un răspuns cât mai rapid posibil."
         bgImage="/projects/villa-05/01.living.cover.webp"
         overlayOpacity={0.55}
+        imageKey="contact.hero.image"
       />
       <ContactClient settings={settings} />
       <SiteCTA

@@ -4,7 +4,7 @@ import { getPublishedProjects } from "@/lib/projects";
 import { pageMetadata } from "@/lib/site-seo";
 import ProiecteClient from "./ProiecteClient";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = pageMetadata({
   path: "/proiecte",

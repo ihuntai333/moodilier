@@ -1,36 +1,32 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { readDb } from "@/lib/db";
 import { supabaseAdmin, hasSupabaseConfig } from "@/lib/supabase";
 import { getCatalogProjects } from "@/lib/admin-projects";
+import { requireAdminApi } from "@/lib/admin-auth";
+import { mapAdminMessage, type AdminMessage, type DbMessage } from "@/lib/admin-messages";
 
-type DbMessage = {
-  id: string;
-  name?: string;
-  nume?: string;
-  email?: string;
-  phone?: string;
-  telefon?: string;
-  message?: string;
-  mesaj?: string;
-  is_read?: boolean;
-  read?: boolean;
-  created_at?: string;
-  data?: string;
-};
-
-function mapMessage(row: DbMessage) {
-  return {
-    id: row.id,
-    nume: row.nume ?? row.name ?? "",
-    email: row.email ?? "",
-    telefon: row.telefon ?? row.phone ?? "",
-    mesaj: row.mesaj ?? row.message ?? "",
-    data: row.data ?? row.created_at ?? new Date().toISOString(),
-    read: Boolean(row.read ?? row.is_read),
-  };
+function localRecentMessages(): AdminMessage[] {
+  const db = readDb();
+  return [...db.messages]
+    .sort((a, b) => +new Date(b.data) - +new Date(a.data))
+    .slice(0, 5)
+    .map((m) =>
+      mapAdminMessage({
+        id: m.id,
+        nume: m.nume,
+        email: m.email,
+        telefon: m.telefon,
+        mesaj: m.mesaj,
+        data: m.data,
+        read: m.read,
+      })
+    );
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const denied = await requireAdminApi(request);
+  if (denied) return denied;
+
   try {
     const catalogCount = getCatalogProjects().length;
     let cmsCount = 0;
@@ -59,7 +55,7 @@ export async function GET() {
     const totalProjects = Math.max(catalogCount, cmsCount);
 
     let unreadMessages = 0;
-    let recentMessages: ReturnType<typeof mapMessage>[] = [];
+    let recentMessages: AdminMessage[] = [];
 
     try {
       const [
@@ -80,7 +76,7 @@ export async function GET() {
       if (!unreadError && !recentError) {
         unreadMessages = unread ?? 0;
         recentMessages = (recent ?? []).map((row) =>
-          mapMessage(row as DbMessage)
+          mapAdminMessage(row as DbMessage)
         );
       } else {
         throw unreadError || recentError;
@@ -88,20 +84,7 @@ export async function GET() {
     } catch {
       const db = readDb();
       unreadMessages = db.messages.filter((m) => !m.read).length;
-      recentMessages = [...db.messages]
-        .sort((a, b) => +new Date(b.data) - +new Date(a.data))
-        .slice(0, 5)
-        .map((m) =>
-          mapMessage({
-            id: m.id,
-            nume: m.nume,
-            email: m.email,
-            telefon: m.telefon,
-            mesaj: m.mesaj,
-            data: m.data,
-            read: m.read,
-          })
-        );
+      recentMessages = localRecentMessages();
     }
 
     return NextResponse.json({
@@ -122,20 +105,7 @@ export async function GET() {
       unreadMessages: db.messages.filter((m) => !m.read).length,
       totalImages: db.projects.reduce((n, p) => n + (p.images?.length ?? 0), 0),
       lastUpdated: db.projects[0]?.updatedAt ?? null,
-      recentMessages: [...db.messages]
-        .sort((a, b) => +new Date(b.data) - +new Date(a.data))
-        .slice(0, 5)
-        .map((m) =>
-          mapMessage({
-            id: m.id,
-            nume: m.nume,
-            email: m.email,
-            telefon: m.telefon,
-            mesaj: m.mesaj,
-            data: m.data,
-            read: m.read,
-          })
-        ),
+      recentMessages: localRecentMessages(),
       source: "local",
     });
   }

@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import FabricsOfferModal from "@/components/FabricsOfferModal";
+import EditableMedia from "@/components/site/EditableMedia";
 import {
   servicesIntro,
   mainServices,
@@ -111,7 +112,10 @@ export default function ServiciiClient() {
               id={service.slug}
               className={`aw-service-block${i % 2 === 1 ? " is-flip" : ""}`}
             >
-              <div className="aw-service-media">
+              <EditableMedia
+                className="aw-service-media"
+                dataKey={`servicii.main.${service.slug}.image`}
+              >
                 <Image
                   src={service.image}
                   alt={service.title}
@@ -119,7 +123,7 @@ export default function ServiciiClient() {
                   sizes="(max-width: 900px) 100vw, 50vw"
                   style={{ objectFit: "cover" }}
                 />
-              </div>
+              </EditableMedia>
               <div className="aw-service-copy">
                 <p className="aw-label">{String(i + 1).padStart(2, "0")}</p>
                 <h3 className="aw-h3">{service.title}</h3>
@@ -170,7 +174,10 @@ export default function ServiciiClient() {
         <div className="svc-atelier-grid aw-container">
           {atelierServices.map((service) => (
             <article key={service.slug} id={service.slug} className="svc-atelier-card">
-              <div className="svc-atelier-media">
+              <EditableMedia
+                className="svc-atelier-media"
+                dataKey={`servicii.atelier.${service.slug}.image`}
+              >
                 <Image
                   src={service.image}
                   alt={service.title}
@@ -178,7 +185,7 @@ export default function ServiciiClient() {
                   sizes="(max-width: 900px) 100vw, 33vw"
                   style={{ objectFit: "cover" }}
                 />
-              </div>
+              </EditableMedia>
               <div className="svc-atelier-copy">
                 <h3>{service.title}</h3>
                 <p>{service.desc}</p>

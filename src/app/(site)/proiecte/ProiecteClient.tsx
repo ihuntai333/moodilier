@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import SitePageHero from "@/components/site/SitePageHero";
 import SiteCTA from "@/components/site/SiteCTA";
 import AwardsProjectCard from "@/components/site/AwardsProjectCard";
-import { ROOM_FILTERS, type SiteProject } from "@/lib/projects";
+import { ROOM_FILTERS, normalizeRoomLabel, type SiteProject } from "@/lib/projects";
 import { galleryRoomId } from "@/lib/room-anchor";
 
 const CATEGORIES = [
@@ -14,38 +14,6 @@ const CATEGORIES = [
   "Comercial",
 ] as const;
 type Category = (typeof CATEGORIES)[number];
-
-/** Canonical room labels so CMS variants still match filters. */
-function normalizeRoomLabel(room: string): string {
-  const key = room
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim();
-  const map: Record<string, string> = {
-    bucatarii: "Bucătării",
-    bucatarie: "Bucătării",
-    kitchen: "Bucătării",
-    living: "Living",
-    livinguri: "Living",
-    dressing: "Dressing",
-    dressinguri: "Dressing",
-    dormitoare: "Dormitoare",
-    dormitor: "Dormitoare",
-    bedroom: "Dormitoare",
-    bai: "Băi",
-    baie: "Băi",
-    bath: "Băi",
-    bathroom: "Băi",
-    hol: "Hol",
-    hallway: "Hol",
-  };
-  if (map[key]) return map[key];
-  for (const [k, v] of Object.entries(map)) {
-    if (key.includes(k)) return v;
-  }
-  return room.trim();
-}
 
 function projectRoomTags(p: SiteProject): string[] {
   const fromRooms = (p.rooms || []).map(normalizeRoomLabel);
@@ -182,6 +150,7 @@ export default function ProiecteClient({
         subtitle="Fiecare proiect Moodilier este construit în jurul unui proces clar, atent planificat și executat cu precizie. De la analiza inițială a spațiului și dezvoltarea proiectului tehnic, până la producție, montaj și controlul final, fiecare etapă este gândită pentru a livra mobilier premium la comandă, realizat impecabil în fiecare detaliu."
         bgImage="/projects/villa-06/01.living.cover.webp"
         overlayOpacity={0.52}
+        imageKey="proiecte.hero.image"
       />
 
       <div className="aw-filter-bar" ref={filterBarRef}>

@@ -5,9 +5,10 @@ import { supplierNameFromSrc } from "@/lib/site-seo";
 import { ArrowRight } from "lucide-react";
 import FrontpageV2Client from "@/components/home/FrontpageV2Client";
 import AwardsProjectCard from "@/components/site/AwardsProjectCard";
+import EditableMedia from "@/components/site/EditableMedia";
 import { getFeaturedProjects } from "@/lib/projects";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Frontpage v2 (preview) | Moodilier",
@@ -224,7 +225,11 @@ export default async function FrontpageV2Page() {
               </h2>
             </div>
             <div className="aw-about-grid">
-              <div className="aw-about-media aw-clip aw-reveal">
+              <div
+                className="aw-about-media aw-clip aw-reveal"
+                data-key="home.about.image"
+                data-editable="image"
+              >
                 <div className="aw-clip-media" style={{ position: "absolute", inset: 0 }}>
                   <Image
                     src="/images-scraped/mobilier-premium-01.webp"
@@ -337,7 +342,12 @@ export default async function FrontpageV2Page() {
                   className="aw-service-panel aw-reveal"
                   data-delay={(i % 3) * 0.06}
                 >
-                  <div className="aw-service-panel-bg" aria-hidden>
+                  <div
+                    className="aw-service-panel-bg"
+                    aria-hidden
+                    data-key={`home.services.${s.num}.image`}
+                    data-editable="image"
+                  >
                     <Image
                       src={s.image}
                       alt=""
@@ -426,8 +436,12 @@ export default async function FrontpageV2Page() {
               Furnizori parteneri
             </p>
             <div className="aw-suppliers-grid aw-reveal">
-              {supplierLogos.map((logo) => (
-                <div key={logo} className="aw-supplier">
+              {supplierLogos.map((logo, i) => (
+                <EditableMedia
+                  key={logo}
+                  className="aw-supplier"
+                  dataKey={`home.suppliers.${i}.image`}
+                >
                   <Image
                     src={logo}
                     alt={supplierNameFromSrc(logo) || ""}
@@ -436,7 +450,7 @@ export default async function FrontpageV2Page() {
                     unoptimized
                     style={{ height: 44, width: "auto", objectFit: "contain" }}
                   />
-                </div>
+                </EditableMedia>
               ))}
             </div>
           </div>
@@ -444,7 +458,12 @@ export default async function FrontpageV2Page() {
 
         {/* Visual CTA with suggestive imagery */}
         <section className="aw-cta-visual" aria-labelledby="aw-v2-cta-title">
-          <div className="aw-cta-visual-media" aria-hidden>
+          <div
+            className="aw-cta-visual-media"
+            aria-hidden
+            data-key="home.cta.image"
+            data-editable="image"
+          >
             <Image
               src="/images-scraped/Olimp_03.jpg"
               alt=""

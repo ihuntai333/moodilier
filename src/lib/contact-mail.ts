@@ -1,13 +1,17 @@
 import nodemailer from "nodemailer";
 import { escapeHtml } from "@/lib/security/request";
+import {
+  resolveContactInbox,
+  resolveContactTopic,
+  type ContactTopic,
+} from "@/lib/contact-topic";
 
-/** Form / department topics for routing + branded mail. */
-export type ContactTopic = "mobilier" | "draperii";
-
-export const CONTACT_INBOX = {
-  mobilier: "ofertare@moodilier.com",
-  draperii: "draperii@moodilier.com",
-} as const;
+export {
+  CONTACT_INBOX,
+  resolveContactInbox,
+  resolveContactTopic,
+  type ContactTopic,
+} from "@/lib/contact-topic";
 
 export type ContactMailPayload = {
   name: string;
@@ -19,36 +23,6 @@ export type ContactMailPayload = {
   /** Override inbox — otherwise resolved from topic */
   to?: string;
 };
-
-export function resolveContactTopic(
-  raw: string | null | undefined
-): ContactTopic {
-  const t = String(raw || "")
-    .trim()
-    .toLowerCase();
-  if (
-    t === "draperii" ||
-    t === "fabrics" ||
-    t === "perdele" ||
-    t === "perdele-draperii"
-  ) {
-    return "draperii";
-  }
-  return "mobilier";
-}
-
-export function resolveContactInbox(topic: ContactTopic): string {
-  if (topic === "draperii") {
-    return (
-      process.env.CONTACT_DRAPERII_EMAIL?.trim() || CONTACT_INBOX.draperii
-    );
-  }
-  return (
-    process.env.CONTACT_MOBILIER_EMAIL?.trim() ||
-    process.env.CONTACT_NOTIFY_EMAIL?.trim() ||
-    CONTACT_INBOX.mobilier
-  );
-}
 
 export function isSmtpConfigured(): boolean {
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env;
@@ -165,8 +139,7 @@ export async function sendContactNotification(
 
   try {
     const transporter = await getTransporter();
-
-    await transporter.sendMail({
+    const staffPayload = {
       from: `"${copy.fromName}" <${fromAddr}>`,
       to,
       replyTo: data.email,
@@ -190,7 +163,24 @@ export async function sendContactNotification(
         ``,
         data.createdAt,
       ].join("\n"),
-    });
+    };
+
+    let lastError: unknown;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        await transporter.sendMail(staffPayload);
+        lastError = null;
+        break;
+      } catch (err) {
+        lastError = err;
+        await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
+      }
+    }
+    if (lastError) {
+      const msg =
+        lastError instanceof Error ? lastError.message : "Trimitere eșuată";
+      return { ok: false, error: msg };
+    }
 
     // Personalized confirmation to the visitor (best-effort)
     if (process.env.CONTACT_AUTO_REPLY !== "0") {

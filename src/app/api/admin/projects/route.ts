@@ -11,23 +11,19 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { revalidateTag } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabase";
 import {
   getAdminProjectsMerged,
   normalizeAdminImages,
   syncCatalogToSupabase,
 } from "@/lib/admin-projects";
-
-function bustCache() {
-  try {
-    revalidateTag("projects", "max");
-  } catch {
-    /* ignore */
-  }
-}
+import { bustProjectCaches } from "@/lib/project-cache";
+import { requireAdminApi, requireAdminMutation } from "@/lib/admin-auth";
 
 export async function GET(request: NextRequest) {
+  const denied = await requireAdminApi(request);
+  if (denied) return denied;
+
   try {
     const sync = request.nextUrl.searchParams.get("sync") === "1";
     let syncResult: { inserted: number; total: number; error?: string } | null =
@@ -38,7 +34,7 @@ export async function GET(request: NextRequest) {
       const backfill =
         request.nextUrl.searchParams.get("backfill") === "1";
       syncResult = await syncCatalogToSupabase({ backfill });
-      bustCache();
+      bustProjectCaches();
     }
 
     const { projects, catalogCount, cmsCount } = await getAdminProjectsMerged();
@@ -62,6 +58,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const denied = await requireAdminMutation(request);
+  if (denied) return denied;
+
   try {
     const body = await request.json();
 
@@ -69,7 +68,7 @@ export async function POST(request: NextRequest) {
       const result = await syncCatalogToSupabase({
         backfill: body?.backfill !== false,
       });
-      bustCache();
+      bustProjectCaches();
       const { projects, catalogCount, cmsCount } = await getAdminProjectsMerged();
       return NextResponse.json({
         ...result,
@@ -105,7 +104,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    bustCache();
+    bustProjectCaches();
     return NextResponse.json(data, { status: 201 });
   } catch (error) {
     console.error("Projects POST error:", error);

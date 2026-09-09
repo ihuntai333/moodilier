@@ -147,7 +147,11 @@ export default function HomeHeroSlider({
     >
       <div className="aw-hero-slides" aria-hidden>
         {/* LCP poster — always painted first */}
-        <div className={`aw-hero-slide aw-hero-poster${mediaReady && active.type === "video" ? " is-dim" : " is-on"}`}>
+        <div
+          className={`aw-hero-slide aw-hero-poster${mediaReady && active.type === "video" ? " is-dim" : " is-on"}`}
+          data-key="home.hero.poster"
+          data-editable="image"
+        >
           <Image
             src={poster}
             alt=""
@@ -179,7 +183,11 @@ export default function HomeHeroSlider({
         ) : null}
 
         {ready && active.type === "image" ? (
-          <div className="aw-hero-slide is-on">
+          <div
+            className="aw-hero-slide is-on"
+            data-key="home.hero.image"
+            data-editable="image"
+          >
             <Image
               src={active.src}
               alt=""

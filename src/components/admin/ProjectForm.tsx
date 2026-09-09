@@ -316,6 +316,22 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
       const slug = initialData?.slug || generateSlug(form.title);
       const images = await uploadPendingImages(slug);
       const video = await uploadPendingVideo(slug);
+      const coverUrl = images[0]?.url || "";
+
+      const roomFromUrl = (url: string) => {
+        const base = url.split("/").pop() || "";
+        const m = base.match(/^\d+\.([a-z0-9-]+)\./i);
+        if (!m) return "Altele";
+        const map: Record<string, string> = {
+          bucatarii: "Bucătării",
+          living: "Living",
+          dressing: "Dressing",
+          dormitoare: "Dormitoare",
+          bai: "Băi",
+          hol: "Hol",
+        };
+        return map[m[1]] || "Altele";
+      };
 
       const payload = {
         title: form.title.trim(),
@@ -323,7 +339,11 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
         location: form.location.trim(),
         description: form.description.trim(),
         images,
-        coverImage: images[0]?.url || "",
+        coverImage: coverUrl,
+        // Keep gallery in the same order as images (cover first)
+        gallery: images
+          .filter((img) => img.url)
+          .map((img) => ({ url: img.url, room: roomFromUrl(img.url) })),
         video,
         slug,
         status: form.status,
@@ -343,7 +363,8 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
           body: JSON.stringify(payload),
         });
       } else {
-        const editId = projectId || initialData?.id || "";
+        const editId =
+          initialData?.slug || projectId || initialData?.id || "";
         res = await fetch(`/api/admin/projects/${encodeURIComponent(editId)}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },

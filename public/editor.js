@@ -79,6 +79,27 @@
     updateUnsavedBadge();
   }
 
+  function setImageSrc(el, url) {
+    if (!el || !url) return;
+    function applyImg(img) {
+      img.setAttribute("src", url);
+      img.removeAttribute("srcset");
+      img.removeAttribute("sizes");
+    }
+    if (el.tagName === "IMG") {
+      applyImg(el);
+      return;
+    }
+    var imgs = el.querySelectorAll("img");
+    if (imgs.length) {
+      imgs.forEach(applyImg);
+      return;
+    }
+    el.style.backgroundImage = 'url("' + String(url).replace(/"/g, "") + '")';
+    el.style.backgroundSize = "cover";
+    el.style.backgroundPosition = "center";
+  }
+
   function badgeLabel(type) {
     if (type === "link") return "🔗 LINK";
     if (type === "number") return "# NUMĂR";
@@ -100,13 +121,7 @@
       var val = data[key];
 
       if (type === "image") {
-        if (el.tagName === "IMG") {
-          el.setAttribute("src", val);
-        } else {
-          var img = el.querySelector("img");
-          if (img) img.setAttribute("src", val);
-          else el.style.backgroundImage = 'url("' + val + '")';
-        }
+        setImageSrc(el, val);
       } else if (type === "link") {
         if (el.tagName === "A") el.setAttribute("href", val);
         else {
@@ -182,7 +197,9 @@
       "body.ve-edit-mode [data-editable=\"number\"]{outline-color:rgba(241,196,15,.9)}" +
       "body.ve-edit-mode [data-editable=\"html\"]{outline-color:rgba(155,89,182,.75)}" +
       "body.ve-edit-mode [data-editable=\"link\"]{outline-color:rgba(46,204,113,.75)}" +
-      "body.ve-edit-mode [data-editable=\"image\"]{outline-color:rgba(230,126,34,.85)}" +
+      "body.ve-edit-mode [data-editable=\"image\"]{outline-color:rgba(230,126,34,.85);z-index:6;pointer-events:auto;cursor:pointer}" +
+      "body.ve-edit-mode .aw-page-hero-overlay,body.ve-edit-mode .aw-page-hero-fade,body.ve-edit-mode .aw-hero-scrim,body.ve-edit-mode .aw-hero-fade{pointer-events:none!important}" +
+      "body.ve-edit-mode .aw-cta-bg-shot{z-index:4;pointer-events:auto}" +
       "body.ve-edit-mode [data-editable]:hover::after{content:attr(data-ve-badge);position:absolute;top:-20px;left:0;background:#111;color:#fff;font:700 9px/1 Montserrat,sans-serif;padding:4px 7px;border-radius:4px;letter-spacing:.03em;pointer-events:none;z-index:20;white-space:nowrap}" +
       "body.ve-edit-mode [data-section-id]{position:relative}" +
       ".ve-section-controls{position:absolute;top:8px;right:8px;z-index:60;display:none;gap:4px}" +
@@ -536,12 +553,7 @@
     var el = activeImageEl;
     var key = activeImageKey;
     if (!el || !key) return;
-    if (el.tagName === "IMG") el.setAttribute("src", url);
-    else {
-      var img = el.querySelector("img");
-      if (img) img.setAttribute("src", url);
-      else el.style.backgroundImage = 'url("' + url + '")';
-    }
+    setImageSrc(el, url);
     trackChange(key, url, "image");
     closeModals();
     toast("Imagine actualizată", "success");

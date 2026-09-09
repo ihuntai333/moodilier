@@ -11,6 +11,8 @@ interface SitePageHeroProps {
   bgVideo?: string | null;
   /** 0–1, default 0.42 */
   overlayOpacity?: number;
+  /** Visual-editor key. Omit on project pages (covers come from CMS). */
+  imageKey?: string;
 }
 
 /**
@@ -23,6 +25,7 @@ export default function SitePageHero({
   bgImage,
   bgVideo,
   overlayOpacity = 0.42,
+  imageKey,
 }: SitePageHeroProps) {
   const hasVideo = Boolean(bgVideo?.trim());
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -55,7 +58,11 @@ export default function SitePageHero({
 
   return (
     <section className="aw-page-hero" aria-labelledby="aw-page-hero-title">
-      <div className="aw-page-hero-bg">
+      <div
+        className="aw-page-hero-bg"
+        data-key={imageKey || undefined}
+        data-editable={imageKey ? "image" : undefined}
+      >
         <Image
           src={bgImage}
           alt=""

@@ -95,7 +95,7 @@ function normalizeDbRow(row: Record<string, unknown>): AdminProjectRow {
   const title = asText(row.title);
   let images = normalizeAdminImages(row.images, title);
 
-  const gallery = Array.isArray(row.gallery)
+  let gallery = Array.isArray(row.gallery)
     ? (row.gallery as { url?: unknown; room?: unknown }[])
         .map((g) => {
           const url = asText(g?.url).trim();
@@ -120,6 +120,19 @@ function normalizeDbRow(row: Record<string, unknown>): AdminProjectRow {
   }
 
   const cover = coverRaw || images[0]?.url || "";
+
+  // Persist cover as first image so public site + admin thumbnails match
+  if (cover) {
+    images = [
+      ...normalizeAdminImages([cover], title),
+      ...images.filter((img) => img.url !== cover),
+    ];
+    const coverHits = gallery.filter((g) => g.url === cover);
+    const restGal = gallery.filter((g) => g.url !== cover);
+    gallery = coverHits.length
+      ? [...coverHits, ...restGal]
+      : [{ url: cover, room: "Altele" }, ...restGal];
+  }
 
   const seoTitle =
     asText(row.seo_title).trim() || asText(row.seoTitle).trim();
@@ -209,7 +222,7 @@ export function decodeProjectParam(raw: string): string {
   return s.trim();
 }
 
-function parseProjectId(
+export function parseProjectId(
   id: string
 ): { kind: "uuid" | "catalog" | "slug"; value: string } {
   const decoded = decodeProjectParam(id);
@@ -230,6 +243,7 @@ function parseProjectId(
 /**
  * Resolve a project for admin edit by UUID, `catalog:slug`, or plain slug.
  * CMS rows with empty media/text are filled from the static catalog.
+ * Supabase failures fall back to catalog — never throw "fetch failed" to the UI.
  */
 export async function getAdminProjectById(
   id: string
@@ -239,48 +253,61 @@ export async function getAdminProjectById(
   if (parsed.kind === "catalog" || parsed.kind === "slug") {
     const catalog = getCatalogBySlug(parsed.value);
     if (hasSupabaseConfig) {
-      const { data } = await supabaseAdmin
-        .from("projects")
-        .select("*")
-        .eq("slug", parsed.value)
-        .maybeSingle();
-      if (data) {
-        return mergeWithCatalog(
-          normalizeDbRow(data as Record<string, unknown>),
-          catalog
-        );
+      try {
+        const { data, error } = await supabaseAdmin
+          .from("projects")
+          .select("*")
+          .eq("slug", parsed.value)
+          .maybeSingle();
+        if (!error && data) {
+          return mergeWithCatalog(
+            normalizeDbRow(data as Record<string, unknown>),
+            catalog
+          );
+        }
+      } catch (err) {
+        console.warn("getAdminProjectById slug lookup failed:", err);
       }
     }
     return catalog;
   }
 
   // UUID
-  if (!hasSupabaseConfig) return null;
-  const { data, error } = await supabaseAdmin
-    .from("projects")
-    .select("*")
-    .eq("id", parsed.value)
-    .maybeSingle();
+  if (hasSupabaseConfig) {
+    try {
+      const { data, error } = await supabaseAdmin
+        .from("projects")
+        .select("*")
+        .eq("id", parsed.value)
+        .maybeSingle();
 
-  if (!error && data) {
-    const row = normalizeDbRow(data as Record<string, unknown>);
-    return mergeWithCatalog(row, getCatalogBySlug(row.slug));
+      if (!error && data) {
+        const row = normalizeDbRow(data as Record<string, unknown>);
+        return mergeWithCatalog(row, getCatalogBySlug(row.slug));
+      }
+    } catch (err) {
+      console.warn("getAdminProjectById uuid lookup failed:", err);
+    }
   }
 
   // Fallback: treat opaque id as slug (bad links / non-uuid cms ids)
   const asSlug = getCatalogBySlug(parsed.value);
   if (asSlug) return asSlug;
   if (hasSupabaseConfig) {
-    const { data: bySlug } = await supabaseAdmin
-      .from("projects")
-      .select("*")
-      .eq("slug", parsed.value)
-      .maybeSingle();
-    if (bySlug) {
-      return mergeWithCatalog(
-        normalizeDbRow(bySlug as Record<string, unknown>),
-        getCatalogBySlug(String(bySlug.slug || ""))
-      );
+    try {
+      const { data: bySlug } = await supabaseAdmin
+        .from("projects")
+        .select("*")
+        .eq("slug", parsed.value)
+        .maybeSingle();
+      if (bySlug) {
+        return mergeWithCatalog(
+          normalizeDbRow(bySlug as Record<string, unknown>),
+          getCatalogBySlug(String(bySlug.slug || ""))
+        );
+      }
+    } catch (err) {
+      console.warn("getAdminProjectById slug fallback failed:", err);
     }
   }
   return null;
@@ -290,12 +317,18 @@ async function insertCmsProject(
   payload: Record<string, unknown>
 ): Promise<{ data: Record<string, unknown> | null; error?: string }> {
   const attempt = async (body: Record<string, unknown>) => {
-    const { data, error } = await supabaseAdmin
-      .from("projects")
-      .insert(body)
-      .select("*")
-      .single();
-    return { data: data as Record<string, unknown> | null, error };
+    try {
+      const { data, error } = await supabaseAdmin
+        .from("projects")
+        .insert(body)
+        .select("*")
+        .single();
+      return { data: data as Record<string, unknown> | null, error };
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Conexiune Supabase eșuată";
+      return { data: null, error: { message } as { message: string } };
+    }
   };
 
   let { data, error } = await attempt(payload);
@@ -314,12 +347,15 @@ async function insertCmsProject(
   ({ data, error } = await attempt(minimal));
   if (!error && data) return { data };
 
-  return { data: null, error: error?.message || "Insert eșuat" };
+  return {
+    data: null,
+    error: error?.message || "Insert eșuat",
+  };
 }
 
 /**
  * Ensure a catalog (or slug) project exists in CMS so PATCH/edit can persist.
- * Returns the CMS row with a real UUID.
+ * Returns the CMS row with a real UUID when possible; otherwise catalog row.
  */
 export async function ensureProjectInCms(
   idOrSlug: string
@@ -335,7 +371,7 @@ export async function ensureProjectInCms(
   }
 
   if (!hasSupabaseConfig) {
-    return { project: existing, error: "Supabase neconfigurat" };
+    return { project: existing };
   }
 
   const catalog = getCatalogBySlug(existing.slug) || existing;
@@ -357,32 +393,35 @@ export async function ensureProjectInCms(
   const inserted = await insertCmsProject(insertPayload);
   if (inserted.data) {
     return {
-      project: mergeWithCatalog(
-        normalizeDbRow(inserted.data),
-        catalog
-      ),
+      project: mergeWithCatalog(normalizeDbRow(inserted.data), catalog),
     };
   }
 
   // Race / duplicate slug: load existing row
-  const { data: again } = await supabaseAdmin
-    .from("projects")
-    .select("*")
-    .eq("slug", catalog.slug)
-    .maybeSingle();
+  try {
+    const { data: again } = await supabaseAdmin
+      .from("projects")
+      .select("*")
+      .eq("slug", catalog.slug)
+      .maybeSingle();
 
-  if (again) {
-    return {
-      project: mergeWithCatalog(
-        normalizeDbRow(again as Record<string, unknown>),
-        catalog
-      ),
-    };
+    if (again) {
+      return {
+        project: mergeWithCatalog(
+          normalizeDbRow(again as Record<string, unknown>),
+          catalog
+        ),
+      };
+    }
+  } catch (err) {
+    console.warn("ensureProjectInCms re-fetch failed:", err);
   }
 
+  // Soft fail: still return catalog so the edit form can open
   return {
-    project: null,
-    error: inserted.error || "Nu s-a putut crea proiectul în CMS.",
+    project: catalog,
+    error:
+      "CMS temporar indisponibil — poți vedea proiectul; salvarea poate eșua.",
   };
 }
 

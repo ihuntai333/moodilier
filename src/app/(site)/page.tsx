@@ -7,6 +7,7 @@ import FrontpageAwardsClient from "@/components/home/FrontpageAwardsClient";
 import AwardsIntroLoader from "@/components/home/AwardsIntroLoader";
 import HomeHeroSlider from "@/components/home/HomeHeroSlider";
 import AwardsProjectCard from "@/components/site/AwardsProjectCard";
+import EditableMedia from "@/components/site/EditableMedia";
 import { getFeaturedProjects } from "@/lib/projects";
 import { getSiteChrome } from "@/lib/site-settings";
 import {
@@ -14,7 +15,7 @@ import {
   supplierNameFromSrc,
 } from "@/lib/site-seo";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   ...pageMetadata({
@@ -640,10 +641,14 @@ export default async function HomePage() {
               Furnizori parteneri
             </p>
             <div className="aw-suppliers-grid aw-reveal">
-              {supplierLogos.map((logo) => {
+              {supplierLogos.map((logo, i) => {
                 const name = supplierNameFromSrc(logo);
                 return (
-                  <div key={logo} className="aw-supplier">
+                  <EditableMedia
+                    key={logo}
+                    className="aw-supplier"
+                    dataKey={`home.suppliers.${i}.image`}
+                  >
                     <Image
                       src={logo}
                       alt={name || ""}
@@ -652,7 +657,7 @@ export default async function HomePage() {
                       unoptimized
                       style={{ height: 44, width: "auto", objectFit: "contain" }}
                     />
-                  </div>
+                  </EditableMedia>
                 );
               })}
             </div>
@@ -667,7 +672,10 @@ export default async function HomePage() {
           data-section-name="CTA final"
         >
           <div className="aw-cta-bg" aria-hidden>
-            <div className="aw-cta-bg-shot aw-cta-bg-shot--left">
+            <EditableMedia
+              className="aw-cta-bg-shot aw-cta-bg-shot--left"
+              dataKey="home.cta.image_left"
+            >
               <Image
                 src="/projects/villa-06/01.living.cover.webp"
                 alt=""
@@ -675,8 +683,11 @@ export default async function HomePage() {
                 sizes="40vw"
                 style={{ objectFit: "cover" }}
               />
-            </div>
-            <div className="aw-cta-bg-shot aw-cta-bg-shot--right">
+            </EditableMedia>
+            <EditableMedia
+              className="aw-cta-bg-shot aw-cta-bg-shot--right"
+              dataKey="home.cta.image_right"
+            >
               <Image
                 src="/projects/villa-05/01.living.cover.webp"
                 alt=""
@@ -684,7 +695,7 @@ export default async function HomePage() {
                 sizes="40vw"
                 style={{ objectFit: "cover" }}
               />
-            </div>
+            </EditableMedia>
           </div>
           <div className="aw-container aw-cta-foreground">
             <p className="aw-label aw-reveal" data-key="home.cta.label" data-editable="text">

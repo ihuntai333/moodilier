@@ -8,10 +8,9 @@ import {
   type ProjectImage,
 } from "@/data/projects-aug";
 import { PROJECT_DESCRIPTIONS_AUG } from "@/data/project-descriptions-aug";
-import { timeoutSignal } from "@/lib/with-timeout";
-
-/** Don't block page navigations on a slow Supabase. */
-const SUPABASE_MS = 1800;
+/** CMS covers must win over the static catalog. Don't abort the whole list. */
+const PROJECT_SELECT =
+  "id, slug, title, category, description, seo_title, short_description, project_type, cover_image, images, gallery, rooms, location, video, is_featured, year, surface, status";
 
 export { ROOM_FILTERS };
 export type { ProjectImage };
@@ -66,10 +65,29 @@ function normalizeRow(row: RawRow): SiteProject | null {
   const title = asString(row.title).trim();
   if (!slug || !title) return null;
 
-  const images = normalizeImages(row.images);
-  const cover =
-    asString(row.cover_image || row.coverImage).trim() || images[0] || "";
-  const gallery = normalizeGallery(row.gallery, images);
+  let images = normalizeImages(row.images);
+  const coverRaw = asString(row.cover_image || row.coverImage).trim();
+  let gallery = normalizeGallery(row.gallery, images);
+
+  // CMS often has gallery filled but images empty after sync
+  if (!images.length && gallery.length) {
+    images = gallery.map((g) => g.url);
+  }
+  if (!images.length && coverRaw) {
+    images = [coverRaw];
+  }
+
+  const cover = coverRaw || images[0] || "";
+  // Keep cover as first image so cards / hero / gallery stay in sync
+  if (cover) {
+    images = [cover, ...images.filter((u) => u !== cover)];
+    const coverHits = gallery.filter((g) => g.url === cover);
+    const rest = gallery.filter((g) => g.url !== cover);
+    gallery = coverHits.length
+      ? [...coverHits, ...rest]
+      : [{ url: cover, room: roomFromImageUrl(cover) }, ...rest];
+  }
+
   const rooms = normalizeRooms(row.rooms, gallery);
 
   return {
@@ -120,42 +138,45 @@ function normalizeGallery(raw: unknown, fallbackImages: string[]): ProjectImage[
   }));
 }
 
+const ROOM_LABEL_MAP: Record<string, string> = {
+  bucatarii: "Bucătării",
+  bucatarie: "Bucătării",
+  kitchen: "Bucătării",
+  living: "Living",
+  livinguri: "Living",
+  dressing: "Dressing",
+  dressinguri: "Dressing",
+  dormitoare: "Dormitoare",
+  dormitor: "Dormitoare",
+  bedroom: "Dormitoare",
+  bai: "Băi",
+  baie: "Băi",
+  bath: "Băi",
+  bathroom: "Băi",
+  hol: "Hol",
+  hallway: "Hol",
+  altele: "Altele",
+};
+
 function roomFromImageUrl(url: string): string {
   const base = url.split("/").pop() || "";
   const m = base.match(/^\d+\.([a-z0-9-]+)\./i);
   if (!m) return "Altele";
-  const slug = m[1];
-  const map: Record<string, string> = {
-    bucatarii: "Bucătării",
-    living: "Living",
-    dressing: "Dressing",
-    dormitoare: "Dormitoare",
-    bai: "Băi",
-    hol: "Hol",
-  };
-  return map[slug] || "Altele";
+  return ROOM_LABEL_MAP[m[1]] || "Altele";
 }
 
-function normalizeRoomLabel(room: string): string {
+/** Canonical room labels so CMS variants still match public filters. */
+export function normalizeRoomLabel(room: string): string {
   const key = room
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .trim();
-  const map: Record<string, string> = {
-    bucatarii: "Bucătării",
-    bucatarie: "Bucătării",
-    living: "Living",
-    dressing: "Dressing",
-    dressinguri: "Dressing",
-    dormitoare: "Dormitoare",
-    dormitor: "Dormitoare",
-    bai: "Băi",
-    baie: "Băi",
-    hol: "Hol",
-    altele: "Altele",
-  };
-  return map[key] || room.trim();
+  if (ROOM_LABEL_MAP[key]) return ROOM_LABEL_MAP[key];
+  for (const [alias, label] of Object.entries(ROOM_LABEL_MAP)) {
+    if (alias !== "altele" && key.includes(alias)) return label;
+  }
+  return room.trim();
 }
 
 function normalizeRooms(raw: unknown, gallery: ProjectImage[]): string[] {
@@ -248,26 +269,58 @@ function staticAsSite(): SiteProject[] {
   });
 }
 
+function publishedFromRows(rows: unknown[]): SiteProject[] {
+  return rows
+    .map((row) => normalizeRow(row as RawRow))
+    .filter((p): p is SiteProject => Boolean(p))
+    .filter((p) => (p.status || "published") !== "draft");
+}
+
 async function fetchFromSupabase(): Promise<SiteProject[] | null> {
   if (!hasSupabaseConfig) return null;
   try {
-    const { data, error } = await supabaseAdmin
+    const first = await supabaseAdmin
       .from("projects")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .abortSignal(timeoutSignal(SUPABASE_MS));
+      .select(PROJECT_SELECT)
+      .order("created_at", { ascending: false });
 
-    if (error || !data?.length) return null;
+    let rows: unknown[] | null = !first.error ? (first.data as unknown[]) : null;
 
-    const list = data
-      .map((row) => normalizeRow(row as RawRow))
-      .filter((p): p is SiteProject => Boolean(p))
-      .filter((p) => (p.status || "published") !== "draft");
+    if (first.error) {
+      const fallback = await supabaseAdmin
+        .from("projects")
+        .select(
+          "id, slug, title, category, description, cover_image, images, location, video, is_featured, status"
+        )
+        .order("created_at", { ascending: false });
+      if (fallback.error || !fallback.data?.length) {
+        console.warn("Projects CMS fetch failed:", first.error.message);
+        return null;
+      }
+      rows = fallback.data as unknown[];
+    }
 
+    if (!rows?.length) return null;
+    const list = publishedFromRows(rows);
     return list.length ? list : null;
-  } catch {
+  } catch (err) {
+    console.warn("Projects CMS fetch failed:", err);
     return null;
   }
+}
+
+function preferCoverFirst(project: SiteProject): SiteProject {
+  const cover = (project.coverImage || "").trim();
+  if (!cover) return project;
+
+  const images = [cover, ...project.images.filter((u) => u !== cover)];
+  const coverEntries = project.gallery.filter((g) => g.url === cover);
+  const restGallery = project.gallery.filter((g) => g.url !== cover);
+  const gallery = coverEntries.length
+    ? [...coverEntries, ...restGallery]
+    : [{ url: cover, room: roomFromImageUrl(cover) }, ...restGallery];
+
+  return { ...project, coverImage: cover, images, gallery };
 }
 
 function sortByAugOrder(list: SiteProject[]): SiteProject[] {
@@ -290,14 +343,25 @@ async function loadPublishedProjects(): Promise<SiteProject[]> {
   const enriched = staticList.map((p) => {
     const r = remote.find((x) => x.slug === p.slug);
     if (!r) return p;
-    return {
+    const cover =
+      (r.coverImage || "").trim() ||
+      r.images?.[0] ||
+      p.coverImage;
+    const cmsImages = r.images?.length ? r.images : [];
+    const merged: SiteProject = {
       ...p,
       ...r,
-      images: r.images?.length ? r.images : p.images,
-      coverImage: r.coverImage || p.coverImage,
-      gallery: r.gallery?.length ? r.gallery : p.gallery,
+      // CMS media wins whenever present (admin cover / reorder)
+      images: cmsImages.length ? cmsImages : p.images,
+      coverImage: cover,
+      gallery: r.gallery?.length
+        ? r.gallery
+        : cmsImages.length
+          ? cmsImages.map((url) => ({ url, room: roomFromImageUrl(url) }))
+          : p.gallery,
       rooms: r.rooms?.length ? r.rooms : p.rooms,
       video: r.video?.trim() || p.video || null,
+      isFeatured: Boolean(r.isFeatured),
       description: resolveDescription(p.slug, r.description, p.description),
       shortDescription:
         r.shortDescription?.trim() ||
@@ -306,26 +370,36 @@ async function loadPublishedProjects(): Promise<SiteProject[]> {
           180
         ),
     };
+    return preferCoverFirst(merged);
   });
-  const extras = remote.filter(
-    (r) =>
-      !staticBySlug.has(r.slug) && (r.status || "published") !== "draft"
-  );
+  const extras = remote
+    .filter(
+      (r) =>
+        !staticBySlug.has(r.slug) && (r.status || "published") !== "draft"
+    )
+    .map(preferCoverFirst);
   return sortByAugOrder([...enriched, ...extras]);
 }
 
 const cachedPublishedProjects = unstable_cache(
   loadPublishedProjects,
-  ["published-projects-v12-villa-then-apt"],
-  { revalidate: 60, tags: ["projects"] }
+  ["published-projects-v14-cms-cover"],
+  { revalidate: 15, tags: ["projects"] }
 );
 
 /** Published projects for the live site (Supabase → static fallback). */
 export const getPublishedProjects = cache(cachedPublishedProjects);
 
-/** Homepage cards — first N in Villa 01→N then Apartment 01→N order. */
+/**
+ * Homepage cards — featured projects first (admin ★), then fill from portfolio order.
+ */
 export const getFeaturedProjects = cache(async (limit = 6): Promise<SiteProject[]> => {
   const all = await getPublishedProjects();
+  const starred = all.filter((p) => p.isFeatured);
+  if (starred.length) {
+    const rest = all.filter((p) => !p.isFeatured);
+    return [...starred, ...rest].slice(0, limit);
+  }
   return all.slice(0, limit);
 });
 
@@ -336,7 +410,7 @@ export const getProjectBySlug = cache(async (slug: string): Promise<SiteProject 
   return all.find((p) => p.slug === slug) ?? null;
 });
 
-export const getProjectSlugs = cache(async (): Promise<string[]> => {
-  const all = await getPublishedProjects();
-  return all.map((p) => p.slug);
-});
+/** Catalog slugs only — no CMS roundtrip (safe at build). */
+export function getCatalogSlugs(): string[] {
+  return staticAsSite().map((p) => p.slug);
+}

@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 import SitePageHero from "@/components/site/SitePageHero";
 import SiteCTA from "@/components/site/SiteCTA";
 import JsonLd from "@/components/JsonLd";
+import EditableMedia from "@/components/site/EditableMedia";
 
 import { pageMetadata } from "@/lib/site-seo";
 
@@ -95,6 +96,7 @@ export default function DespreNoiPage() {
         subtitle="Precizie, rafinament și pasiune pentru design interior — executat în atelierul din București."
         bgImage="/projects/villa-06/01.living.cover.webp"
         overlayOpacity={0.5}
+        imageKey="despre.hero.image"
       />
 
       <section className="aw-about">
@@ -171,8 +173,12 @@ export default function DespreNoiPage() {
           </div>
         </div>
         <div className="aw-mosaic">
-          {galleryImages.map((img) => (
-            <div key={img.src} className="aw-mosaic-item">
+          {galleryImages.map((img, i) => (
+            <EditableMedia
+              key={img.src}
+              className="aw-mosaic-item"
+              dataKey={`despre.gallery.${i}.image`}
+            >
               <Image
                 src={img.src}
                 alt={img.alt}
@@ -180,7 +186,7 @@ export default function DespreNoiPage() {
                 sizes="(max-width: 700px) 100vw, 33vw"
                 style={{ objectFit: "cover" }}
               />
-            </div>
+            </EditableMedia>
           ))}
         </div>
       </section>
@@ -209,9 +215,12 @@ export default function DespreNoiPage() {
             <h2 className="aw-h2">De la proiectare la montaj</h2>
           </div>
           <div className="aw-about-services-grid">
-            {serviceTeasers.map((s) => (
+            {serviceTeasers.map((s, i) => (
               <Link key={s.title} href={s.href} className="aw-about-service-card">
-                <div className="aw-about-service-media">
+                <EditableMedia
+                  className="aw-about-service-media"
+                  dataKey={`despre.teaser.${i}.image`}
+                >
                   <Image
                     src={s.image}
                     alt={s.title}
@@ -219,7 +228,7 @@ export default function DespreNoiPage() {
                     sizes="(max-width: 900px) 100vw, 33vw"
                     style={{ objectFit: "cover" }}
                   />
-                </div>
+                </EditableMedia>
                 <h3>{s.title}</h3>
                 <span className="aw-about-service-link">Află mai mult →</span>
               </Link>
