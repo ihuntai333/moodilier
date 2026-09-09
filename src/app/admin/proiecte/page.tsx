@@ -75,8 +75,8 @@ export default function AdminProjectsPage() {
   }, []);
 
   useEffect(() => {
-    // Auto-sync catalog into CMS on first load so counts match the site
-    fetchProjects({ sync: true });
+    // Fast list load — no full catalog sync (that made admin feel stuck)
+    fetchProjects();
   }, [fetchProjects]);
 
   async function handleSyncCatalog() {
@@ -516,7 +516,7 @@ export default function AdminProjectsPage() {
                 >
                   {/* Edit */}
                   <Link
-                    href={`/admin/proiecte/${encodeURIComponent(project.id)}`}
+                    href={`/admin/proiecte/${encodeURIComponent(project.slug || project.id)}`}
                     style={{
                       display: "flex",
                       alignItems: "center",

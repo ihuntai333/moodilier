@@ -14,14 +14,20 @@ function isProductionRuntime(): boolean {
   );
 }
 
+/**
+ * Dynamic `process.env[name]` — Next may inline `process.env.FOO` at build time.
+ * Vercel Sensitive secrets are absent during build, so a static read becomes "".
+ */
+function envTrim(name: string): string {
+  return String(process.env[name] ?? "").trim();
+}
+
 /** Dedicated secret only in production; password/dev fallback local only. */
 function sessionSecret(): string | null {
-  const dedicated = process.env.ADMIN_SESSION_SECRET?.trim();
+  const dedicated = envTrim("ADMIN_SESSION_SECRET");
   if (dedicated) return dedicated;
   if (isProductionRuntime()) return null;
-  return (
-    process.env.ADMIN_PASSWORD?.trim() || "dev-insecure-session-secret"
-  );
+  return envTrim("ADMIN_PASSWORD") || "dev-insecure-session-secret";
 }
 
 export function hasAdminSessionSecret(): boolean {

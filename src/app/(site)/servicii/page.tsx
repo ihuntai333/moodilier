@@ -9,7 +9,7 @@ export const metadata: Metadata = pageMetadata({
   path: "/servicii",
   title: "Servicii mobilier la comandă",
   description:
-    "Servicii complete Moodilier: proiectare 3D, mobilier la comandă, Moodilier Fabrics, prelucrare CNC, vopsitorie MDF și termoformare — atelier propriu în București.",
+    "Servicii complete Moodilier: proiectare 3D, mobilier la comandă, perdele și draperii, prelucrare CNC, vopsitorie MDF și termoformare — atelier propriu în București.",
   image: "/projects/villa-01/01.bucatarii.cover.webp",
 });
 

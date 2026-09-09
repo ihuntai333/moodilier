@@ -194,16 +194,31 @@ export function getCatalogBySlug(slug: string): AdminProjectRow | null {
   return found || null;
 }
 
+/** Decode path/query ids that may be encoded once or twice (`catalog%3A…`). */
+export function decodeProjectParam(raw: string): string {
+  let s = String(raw || "").trim();
+  for (let i = 0; i < 3; i++) {
+    try {
+      const next = decodeURIComponent(s);
+      if (next === s) break;
+      s = next;
+    } catch {
+      break;
+    }
+  }
+  return s.trim();
+}
+
 function parseProjectId(
   id: string
 ): { kind: "uuid" | "catalog" | "slug"; value: string } {
-  const decoded = decodeURIComponent(id || "").trim();
+  const decoded = decodeProjectParam(id);
   if (decoded.startsWith("catalog:")) {
     return { kind: "catalog", value: decoded.slice("catalog:".length) };
   }
-  // UUID v4-ish
+  // UUID (v1–v5 classic, or loose 8-4-4-4-12)
   if (
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
       decoded
     )
   ) {
@@ -247,9 +262,59 @@ export async function getAdminProjectById(
     .eq("id", parsed.value)
     .maybeSingle();
 
-  if (error || !data) return null;
-  const row = normalizeDbRow(data as Record<string, unknown>);
-  return mergeWithCatalog(row, getCatalogBySlug(row.slug));
+  if (!error && data) {
+    const row = normalizeDbRow(data as Record<string, unknown>);
+    return mergeWithCatalog(row, getCatalogBySlug(row.slug));
+  }
+
+  // Fallback: treat opaque id as slug (bad links / non-uuid cms ids)
+  const asSlug = getCatalogBySlug(parsed.value);
+  if (asSlug) return asSlug;
+  if (hasSupabaseConfig) {
+    const { data: bySlug } = await supabaseAdmin
+      .from("projects")
+      .select("*")
+      .eq("slug", parsed.value)
+      .maybeSingle();
+    if (bySlug) {
+      return mergeWithCatalog(
+        normalizeDbRow(bySlug as Record<string, unknown>),
+        getCatalogBySlug(String(bySlug.slug || ""))
+      );
+    }
+  }
+  return null;
+}
+
+async function insertCmsProject(
+  payload: Record<string, unknown>
+): Promise<{ data: Record<string, unknown> | null; error?: string }> {
+  const attempt = async (body: Record<string, unknown>) => {
+    const { data, error } = await supabaseAdmin
+      .from("projects")
+      .insert(body)
+      .select("*")
+      .single();
+    return { data: data as Record<string, unknown> | null, error };
+  };
+
+  let { data, error } = await attempt(payload);
+  if (!error && data) return { data };
+
+  // Schema drift: retry without optional columns that may be missing in older DBs
+  const minimal: Record<string, unknown> = {
+    title: payload.title,
+    slug: payload.slug,
+    category: payload.category,
+    location: payload.location || "",
+    description: payload.description || "",
+    cover_image: payload.cover_image || "",
+    images: payload.images || [],
+  };
+  ({ data, error } = await attempt(minimal));
+  if (!error && data) return { data };
+
+  return { data: null, error: error?.message || "Insert eșuat" };
 }
 
 /**
@@ -274,7 +339,7 @@ export async function ensureProjectInCms(
   }
 
   const catalog = getCatalogBySlug(existing.slug) || existing;
-  const insertPayload = {
+  const insertPayload: Record<string, unknown> = {
     title: catalog.title,
     slug: catalog.slug,
     category: catalog.category,
@@ -289,16 +354,11 @@ export async function ensureProjectInCms(
     is_featured: false,
   };
 
-  const { data, error } = await supabaseAdmin
-    .from("projects")
-    .insert(insertPayload)
-    .select("*")
-    .single();
-
-  if (data) {
+  const inserted = await insertCmsProject(insertPayload);
+  if (inserted.data) {
     return {
       project: mergeWithCatalog(
-        normalizeDbRow(data as Record<string, unknown>),
+        normalizeDbRow(inserted.data),
         catalog
       ),
     };
@@ -322,7 +382,7 @@ export async function ensureProjectInCms(
 
   return {
     project: null,
-    error: error?.message || "Nu s-a putut crea proiectul în CMS.",
+    error: inserted.error || "Nu s-a putut crea proiectul în CMS.",
   };
 }
 
@@ -332,13 +392,16 @@ export function getCatalogProjects(): AdminProjectRow[] {
     .map(catalogToAdmin);
 }
 
-/** Insert missing catalog projects; backfill empty media on existing CMS rows. */
-export async function syncCatalogToSupabase(): Promise<{
+/** Insert missing catalog projects; optionally backfill empty media on CMS rows. */
+export async function syncCatalogToSupabase(opts?: {
+  backfill?: boolean;
+}): Promise<{
   inserted: number;
   updated: number;
   total: number;
   error?: string;
 }> {
+  const backfill = opts?.backfill === true;
   const catalog = getCatalogProjects();
   if (!hasSupabaseConfig) {
     return {
@@ -354,24 +417,45 @@ export async function syncCatalogToSupabase(): Promise<{
     .select("id, slug, title, description, cover_image, images, gallery, rooms");
 
   if (fetchErr) {
-    return {
-      inserted: 0,
-      updated: 0,
-      total: catalog.length,
-      error: fetchErr.message,
-    };
+    // Older schemas may lack gallery/rooms — retry slim select
+    const slim = await supabaseAdmin
+      .from("projects")
+      .select("id, slug, title, description, cover_image, images");
+    if (slim.error) {
+      return {
+        inserted: 0,
+        updated: 0,
+        total: catalog.length,
+        error: slim.error.message,
+      };
+    }
+    return syncWithExistingRows(catalog, slim.data || [], backfill);
   }
 
+  return syncWithExistingRows(catalog, existing || [], backfill);
+}
+
+async function syncWithExistingRows(
+  catalog: AdminProjectRow[],
+  existing: Record<string, unknown>[],
+  backfill: boolean
+): Promise<{
+  inserted: number;
+  updated: number;
+  total: number;
+  error?: string;
+}> {
   const bySlug = new Map(
-    (existing || []).map((r) => [String(r.slug), r as Record<string, unknown>])
+    existing.map((r) => [String(r.slug), r as Record<string, unknown>])
   );
   const missing = catalog.filter((p) => p.slug && !bySlug.has(p.slug));
 
   let inserted = 0;
   let updated = 0;
 
-  if (missing.length) {
-    const rows = missing.map((p) => ({
+  // Insert missing one-by-one with schema fallback (avoids one bad column aborting all)
+  for (const p of missing) {
+    const result = await insertCmsProject({
       title: p.title,
       slug: p.slug,
       category: p.category,
@@ -384,21 +468,17 @@ export async function syncCatalogToSupabase(): Promise<{
       video: null,
       status: "published",
       is_featured: false,
-    }));
-
-    const { error: insertErr } = await supabaseAdmin.from("projects").insert(rows);
-    if (insertErr) {
-      return {
-        inserted: 0,
-        updated: 0,
-        total: catalog.length,
-        error: insertErr.message,
-      };
+    });
+    if (result.data) {
+      inserted += 1;
+      bySlug.set(p.slug, result.data);
     }
-    inserted = rows.length;
   }
 
-  // Backfill CMS rows that synced without media / empty text
+  if (!backfill) {
+    return { inserted, updated, total: catalog.length };
+  }
+
   for (const c of catalog) {
     const row = bySlug.get(c.slug);
     if (!row) continue;

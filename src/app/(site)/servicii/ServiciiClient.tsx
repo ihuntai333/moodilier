@@ -104,7 +104,7 @@ export default function ServiciiClient() {
 
       <section aria-label="Servicii principale" className="svc-list">
         {mainExtended.map((service, i) => {
-          const isFabrics = service.slug === "moodilier-fabrics";
+          const isDraperii = service.slug === "perdele-draperii";
           return (
             <article
               key={service.slug}
@@ -129,15 +129,18 @@ export default function ServiciiClient() {
                     <li key={p}>{p}</li>
                   ))}
                 </ul>
-                {isFabrics ? (
-                  <button
-                    type="button"
+                {isDraperii ? (
+                  <a
+                    href="#perdele-draperii"
                     className="aw-btn aw-btn-primary aw-btn-fill"
-                    onClick={() => setFabricsOpen(true)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setFabricsOpen(true);
+                    }}
                   >
-                    Solicită ofertă draperii
+                    Solicită ofertă
                     <ArrowRight size={14} />
-                  </button>
+                  </a>
                 ) : (
                   <a href="/contact" className="aw-btn aw-btn-primary aw-btn-fill">
                     Solicită ofertă

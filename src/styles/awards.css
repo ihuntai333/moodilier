@@ -732,6 +732,28 @@ body:has(.awards-root) {
   white-space: nowrap;
 }
 
+@media (min-width: 1200px) {
+  .aw-nav-links {
+    gap: 2rem;
+  }
+
+  .aw-nav-links a {
+    font-size: 0.8125rem;
+    letter-spacing: 0.12em;
+  }
+
+  .aw-nav-actions .aw-btn {
+    font-size: 0.75rem;
+    padding: 0.95rem 1.5rem;
+  }
+}
+
+@media (min-width: 1600px) {
+  .aw-nav-links a {
+    font-size: 0.875rem;
+  }
+}
+
 .aw-nav-links a:hover {
   opacity: 1;
 }
@@ -1869,10 +1891,11 @@ body:has(.awards-root) {
   height: 100%;
   object-fit: cover;
   transition:
-    transform 220ms var(--aw-ease-out),
-    filter 220ms ease,
-    opacity 220ms ease;
+    transform 520ms var(--aw-ease-out),
+    filter 520ms ease,
+    opacity 320ms ease;
   filter: saturate(0.88) brightness(0.9) contrast(1.04);
+  will-change: transform;
 }
 
 .aw-project-img.is-dim {
@@ -1939,7 +1962,7 @@ body:has(.awards-root) {
     rgba(0, 0, 0, 0.72) 100%
   );
   opacity: 0.9;
-  transition: opacity 240ms ease;
+  transition: opacity 420ms ease;
 }
 
 .aw-project-frame {
@@ -1951,8 +1974,8 @@ body:has(.awards-root) {
   transform: scale(1);
   transform-origin: center;
   transition:
-    border-color 240ms ease,
-    transform 240ms var(--aw-ease-out);
+    border-color 480ms ease,
+    transform 520ms var(--aw-ease-out);
 }
 
 .aw-project-meta {
@@ -1964,7 +1987,7 @@ body:has(.awards-root) {
   color: #fff;
   z-index: 4;
   transform: translateY(10px);
-  transition: transform 240ms var(--aw-ease-out);
+  transition: transform 420ms var(--aw-ease-out);
 }
 
 .aw-project-cat {
@@ -1998,7 +2021,7 @@ body:has(.awards-root) {
   text-transform: uppercase;
   opacity: 0;
   transform: translateY(6px);
-  transition: opacity 200ms ease, transform 200ms var(--aw-ease-out);
+  transition: opacity 380ms ease, transform 420ms var(--aw-ease-out);
   color: #fff;
 }
 
@@ -2006,8 +2029,8 @@ body:has(.awards-root) {
   .aw-project:hover .aw-project-media img,
   .aw-project:hover .aw-project-img,
   .aw-project.is-hovered .aw-project-img {
-    transform: scale(1.03);
-    filter: saturate(1.05) brightness(1.02) contrast(1.05);
+    transform: scale(1.045);
+    filter: saturate(1.04) brightness(1.03) contrast(1.04);
   }
 
   .aw-project:hover .aw-project-shade,
@@ -2017,8 +2040,8 @@ body:has(.awards-root) {
 
   .aw-project:hover .aw-project-frame,
   .aw-project.is-hovered .aw-project-frame {
-    border-color: rgba(255, 255, 255, 0.35);
-    transform: scale(0.97);
+    border-color: rgba(255, 255, 255, 0.42);
+    transform: scale(0.965);
   }
 
   .aw-project:hover .aw-project-meta,

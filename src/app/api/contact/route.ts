@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin, hasSupabaseConfig } from "@/lib/supabase";
-import { sendContactNotification } from "@/lib/contact-mail";
+import {
+  resolveContactTopic,
+  resolveContactInbox,
+  sendContactNotification,
+} from "@/lib/contact-mail";
 import { getContactFormSettings } from "@/lib/contact-settings";
 import { assertSameOrigin } from "@/lib/security/request";
 import { clientIp, rateLimit } from "@/lib/security/rate-limit";
@@ -16,7 +20,7 @@ type ContactBody = {
   company?: string;
   /** Client form open timestamp (ms) — required */
   _t?: number;
-  /** Optional topic — fabrics routes to draperii mailbox */
+  /** mobilier | draperii (fabrics / perdele) */
   topic?: string;
 };
 
@@ -66,7 +70,6 @@ export async function POST(request: NextRequest) {
 
     const body = (await request.json()) as ContactBody;
 
-    // Honeypot — bots fill hidden fields
     if (
       (body.website && body.website.trim()) ||
       (body.company && body.company.trim())
@@ -74,10 +77,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: true });
     }
 
-    // Time trap — required; form must be open 2s–2h
     const opened = Number(body._t);
     if (!Number.isFinite(opened)) {
-      return NextResponse.json({ ok: true }); // silent drop bots without _t
+      return NextResponse.json({ ok: true });
     }
     const age = Date.now() - opened;
     if (age < 2000 || age > 2 * 60 * 60 * 1000) {
@@ -88,6 +90,7 @@ export async function POST(request: NextRequest) {
     const email = String(body.email ?? "").trim().slice(0, MAX.email);
     const telefon = String(body.telefon ?? "").trim().slice(0, MAX.telefon);
     const mesaj = String(body.mesaj ?? "").trim().slice(0, MAX.mesaj);
+    const topic = resolveContactTopic(body.topic);
 
     if (nume.length < 2) {
       return NextResponse.json(
@@ -115,11 +118,11 @@ export async function POST(request: NextRequest) {
     }
 
     const createdAt = new Date().toISOString();
-    const topic = String(body.topic ?? "").trim().toLowerCase();
-    const isFabrics = topic === "fabrics" || topic === "draperii";
-    const messageBody = isFabrics
-      ? `[Moodilier Fabrics — cerere ofertă draperii]\n\n${mesaj}`
-      : mesaj;
+    const topicTag =
+      topic === "draperii"
+        ? "[Perdele și draperii]"
+        : "[Mobilier la comandă]";
+    const messageBody = `${topicTag}\n\n${mesaj}`;
     let saved = false;
 
     if (hasSupabaseConfig) {
@@ -154,17 +157,22 @@ export async function POST(request: NextRequest) {
       saved = true;
     }
 
-    const notifyTo = isFabrics
-      ? "draperii@moodilier.com"
-      : settings.notifyEmail || settings.email;
+    // Draperii → draperii@… ; mobilier → CMS notify / ofertare@…
+    const notifyTo =
+      topic === "draperii"
+        ? resolveContactInbox("draperii")
+        : settings.notifyEmail?.trim() ||
+          settings.email?.trim() ||
+          resolveContactInbox("mobilier");
+
     const mail = await sendContactNotification({
       name: nume,
       email,
       phone: telefon || null,
-      message: messageBody,
+      message: mesaj,
       createdAt,
+      topic,
       to: notifyTo,
-      subjectPrefix: isFabrics ? "[Moodilier Fabrics]" : "[Moodilier]",
     });
     if (!mail.ok) {
       console.error("Contact email not sent:", mail.error);
@@ -174,6 +182,7 @@ export async function POST(request: NextRequest) {
       ok: true,
       message: settings.successMessage,
       notified: mail.ok,
+      topic,
     });
   } catch (error) {
     console.error("Contact API error:", error);

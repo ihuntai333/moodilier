@@ -52,7 +52,7 @@ const services = [
   },
   {
     num: "03",
-    title: "Moodilier Fabrics",
+    title: "Perdele și draperii",
     desc: "Import selecționat de mobilier premium de la designeri consacrați din Italia, Danemarca și Grecia.",
     image: "/images-scraped/mobilier-premium-01.webp",
     href: "/servicii#moodilier-store",

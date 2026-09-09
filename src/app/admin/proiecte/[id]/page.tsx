@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import ProjectForm from "@/components/admin/ProjectForm";
 
@@ -51,34 +52,74 @@ function normalizeImages(raw: unknown, fallbackAlt = ""): ProjectImage[] {
   return out;
 }
 
+function decodeParam(raw: string): string {
+  let s = String(raw || "").trim();
+  for (let i = 0; i < 3; i++) {
+    try {
+      const next = decodeURIComponent(s);
+      if (next === s) break;
+      s = next;
+    } catch {
+      break;
+    }
+  }
+  return s.trim();
+}
+
 export default function EditProjectPage() {
   const params = useParams();
-  const id = params?.id as string;
+  const id = decodeParam(String(params?.id || ""));
   const [project, setProject] = useState<ProjectRow | null>(null);
   const [loading, setLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
-    const encoded = encodeURIComponent(decodeURIComponent(id));
-    fetch(`/api/admin/projects/${encoded}`)
-      .then((r) => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    fetch(`/api/admin/projects/${encodeURIComponent(id)}`, {
+      credentials: "same-origin",
+    })
+      .then(async (r) => {
+        const data = await r.json().catch(() => ({}));
+        if (cancelled) return;
         if (!r.ok) {
-          setNotFound(true);
-          setLoading(false);
-          return null;
+          setError(
+            typeof data?.error === "string"
+              ? data.error
+              : r.status === 401
+                ? "Sesiune expirată — reautentifică-te."
+                : "Proiectul cu ID-ul specificat nu există."
+          );
+          setProject(null);
+          return;
         }
-        return r.json();
-      })
-      .then((data) => {
-        if (data && !data.error) setProject(data);
-        else if (data) setNotFound(true);
-        setLoading(false);
+        if (data?.error || !data?.id) {
+          setError(
+            typeof data?.error === "string"
+              ? data.error
+              : "Proiectul cu ID-ul specificat nu există."
+          );
+          setProject(null);
+          return;
+        }
+        setProject(data as ProjectRow);
       })
       .catch(() => {
-        setNotFound(true);
-        setLoading(false);
+        if (!cancelled) {
+          setError("Nu am putut încărca proiectul. Încearcă din nou.");
+          setProject(null);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
       });
+
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
   if (loading) {
@@ -89,14 +130,19 @@ export default function EditProjectPage() {
     );
   }
 
-  if (notFound || !project) {
+  if (error || !project) {
     return (
       <div className="adm-page">
         <h1 className="adm-title" style={{ color: "var(--adm-danger)" }}>
           Proiect negăsit
         </h1>
         <p className="adm-subtitle">
-          Proiectul cu ID-ul specificat nu există.
+          {error || "Proiectul cu ID-ul specificat nu există."}
+        </p>
+        <p style={{ marginTop: "1.25rem" }}>
+          <Link href="/admin/proiecte" className="adm-btn adm-btn-secondary">
+            ← Înapoi la proiecte
+          </Link>
         </p>
       </div>
     );

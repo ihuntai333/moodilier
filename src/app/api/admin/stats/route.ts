@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { readDb } from "@/lib/db";
-import { supabaseAdmin } from "@/lib/supabase";
-import { getAdminProjectsMerged } from "@/lib/admin-projects";
+import { supabaseAdmin, hasSupabaseConfig } from "@/lib/supabase";
+import { getCatalogProjects } from "@/lib/admin-projects";
 
 type DbMessage = {
   id: string;
@@ -32,17 +32,31 @@ function mapMessage(row: DbMessage) {
 
 export async function GET() {
   try {
-    const { projects, catalogCount, cmsCount } = await getAdminProjectsMerged();
-    const totalImages = projects.reduce(
-      (n, p) => n + (p.images?.length ?? 0),
-      0
-    );
-    const lastUpdated =
-      projects
-        .map((p) => p.updated_at || p.updatedAt)
-        .filter(Boolean)
-        .sort()
-        .at(-1) ?? null;
+    const catalogCount = getCatalogProjects().length;
+    let cmsCount = 0;
+    let totalImages = 0;
+    let lastUpdated: string | null = null;
+
+    if (hasSupabaseConfig) {
+      const [{ count }, { data: recentProjects }] = await Promise.all([
+        supabaseAdmin
+          .from("projects")
+          .select("id", { count: "exact", head: true }),
+        supabaseAdmin
+          .from("projects")
+          .select("updated_at, images, cover_image")
+          .order("updated_at", { ascending: false })
+          .limit(40),
+      ]);
+      cmsCount = count ?? 0;
+      for (const row of recentProjects || []) {
+        const imgs = Array.isArray(row.images) ? row.images.length : 0;
+        totalImages += imgs || (row.cover_image ? 1 : 0);
+        if (!lastUpdated && row.updated_at) lastUpdated = String(row.updated_at);
+      }
+    }
+
+    const totalProjects = Math.max(catalogCount, cmsCount);
 
     let unreadMessages = 0;
     let recentMessages: ReturnType<typeof mapMessage>[] = [];
@@ -91,14 +105,14 @@ export async function GET() {
     }
 
     return NextResponse.json({
-      totalProjects: projects.length,
+      totalProjects,
       catalogCount,
       cmsCount,
       totalImages,
       lastUpdated,
       unreadMessages,
       recentMessages,
-      source: "merged",
+      source: "light",
     });
   } catch (error) {
     console.warn("Stats fetch failed:", error);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { X } from "lucide-react";
+import { ArrowRight, X } from "lucide-react";
 
 type Props = {
   open: boolean;
@@ -14,6 +14,7 @@ const FABRICS_EMAIL = "draperii@moodilier.com";
 export default function FabricsOfferModal({ open, onClose }: Props) {
   const titleId = useId();
   const openedAt = useRef(Date.now());
+  const firstFieldRef = useRef<HTMLInputElement>(null);
   const [nume, setNume] = useState("");
   const [email, setEmail] = useState("");
   const [telefon, setTelefon] = useState("");
@@ -34,7 +35,9 @@ export default function FabricsOfferModal({ open, onClose }: Props) {
     document.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    const t = window.setTimeout(() => firstFieldRef.current?.focus(), 40);
     return () => {
+      window.clearTimeout(t);
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
     };
@@ -57,7 +60,7 @@ export default function FabricsOfferModal({ open, onClose }: Props) {
           mesaj,
           website,
           company: "",
-          topic: "fabrics",
+          topic: "draperii",
           _t: openedAt.current,
         }),
       });
@@ -88,33 +91,40 @@ export default function FabricsOfferModal({ open, onClose }: Props) {
         onClick={(e) => e.stopPropagation()}
       >
         <button type="button" className="aw-fabrics-close" onClick={onClose} aria-label="Închide">
-          <X size={18} />
+          <X size={18} strokeWidth={1.5} />
         </button>
 
-        <p className="aw-label">Moodilier Fabrics</p>
-        <h2 id={titleId} className="aw-h2">
-          Solicită ofertă draperii
-        </h2>
-        <p className="aw-body" style={{ marginBottom: "1.25rem" }}>
-          Perdele, draperii, sisteme de umbrire, sine electrice și storuri romane.
-        </p>
+        <header className="aw-fabrics-head">
+          <p className="aw-label">Perdele și draperii</p>
+          <h2 id={titleId} className="aw-h2">
+            Solicită ofertă
+          </h2>
+          <p className="aw-fabrics-lead">
+            Perdele, draperii, sisteme de umbrire, sine electrice și storuri romane.
+          </p>
+        </header>
 
-        <div className="aw-fabrics-contacts">
-          <a href={`tel:${FABRICS_PHONE.replace(/\s/g, "")}`}>{FABRICS_PHONE}</a>
-          <a href={`mailto:${FABRICS_EMAIL}`}>{FABRICS_EMAIL}</a>
+        <div className="aw-fabrics-contacts" aria-label="Contact draperii">
+          <a className="aw-fabrics-contact" href={`tel:${FABRICS_PHONE.replace(/\s/g, "")}`}>
+            <span className="aw-fabrics-contact-label">Telefon</span>
+            <span className="aw-fabrics-contact-value">{FABRICS_PHONE}</span>
+          </a>
+          <a className="aw-fabrics-contact" href={`mailto:${FABRICS_EMAIL}`}>
+            <span className="aw-fabrics-contact-label">Email</span>
+            <span className="aw-fabrics-contact-value">{FABRICS_EMAIL}</span>
+          </a>
         </div>
 
         {done ? (
-          <p className="aw-body" style={{ marginTop: "1.25rem" }}>
-            Mulțumim! Cererea pentru draperii a fost trimisă. Te contactăm în curând.
-          </p>
+          <div className="aw-fabrics-done">
+            <p>Mulțumim. Cererea pentru perdele și draperii a fost trimisă.</p>
+            <button type="button" className="aw-btn aw-btn-primary aw-btn-fill" onClick={onClose}>
+              Închide
+            </button>
+          </div>
         ) : (
           <form className="aw-fabrics-form" onSubmit={submit}>
-            <label className="sr-only" htmlFor="fabrics-website">
-              Website
-            </label>
             <input
-              id="fabrics-website"
               name="website"
               value={website}
               onChange={(e) => setWebsite(e.target.value)}
@@ -123,46 +133,63 @@ export default function FabricsOfferModal({ open, onClose }: Props) {
               className="aw-hp"
               aria-hidden
             />
+
+            <div className="aw-fabrics-row">
+              <label>
+                <span>Nume *</span>
+                <input
+                  ref={firstFieldRef}
+                  required
+                  value={nume}
+                  onChange={(e) => setNume(e.target.value)}
+                  placeholder="Nume și prenume"
+                  autoComplete="name"
+                />
+              </label>
+              <label>
+                <span>Email *</span>
+                <input
+                  required
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="email@exemplu.ro"
+                  autoComplete="email"
+                />
+              </label>
+            </div>
+
             <label>
-              Nume *
-              <input
-                required
-                value={nume}
-                onChange={(e) => setNume(e.target.value)}
-                placeholder="Nume și prenume"
-              />
-            </label>
-            <label>
-              Email *
-              <input
-                required
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="email@exemplu.ro"
-              />
-            </label>
-            <label>
-              Telefon
+              <span>Telefon</span>
               <input
                 value={telefon}
                 onChange={(e) => setTelefon(e.target.value)}
                 placeholder={FABRICS_PHONE}
+                autoComplete="tel"
+                inputMode="tel"
               />
             </label>
+
             <label>
-              Mesaj *
+              <span>Mesaj *</span>
               <textarea
                 required
-                rows={4}
+                rows={2}
                 value={mesaj}
                 onChange={(e) => setMesaj(e.target.value)}
-                placeholder="Descrie spațiul, tipul de umbrire dorit, dimensiuni estimative..."
+                placeholder="Spațiu, tip umbrire, dimensiuni estimative…"
               />
             </label>
+
             {error ? <p className="aw-fabrics-error">{error}</p> : null}
-            <button type="submit" className="aw-btn aw-btn-primary aw-btn-fill" disabled={busy}>
+
+            <button
+              type="submit"
+              className="aw-btn aw-btn-primary aw-btn-fill aw-fabrics-submit"
+              disabled={busy}
+            >
               {busy ? "Se trimite…" : "Trimite cererea"}
+              {!busy ? <ArrowRight size={14} /> : null}
             </button>
           </form>
         )}

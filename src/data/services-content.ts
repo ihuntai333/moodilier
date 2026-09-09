@@ -34,11 +34,11 @@ export const mainServices = [
     image: "/projects/villa-01/01.bucatarii.cover.webp",
   },
   {
-    slug: "moodilier-fabrics",
-    title: "Moodilier Fabrics",
+    slug: "perdele-draperii",
+    title: "Perdele și draperii",
     short:
       "Soluții de perdele și draperii, sisteme de umbrire, sine electrice și storuri romane — integrate în amenajarea spațiului.",
-    href: "/servicii#moodilier-fabrics",
+    href: "/servicii#perdele-draperii",
     image: "/projects/villa-05/01.living.cover.webp",
   },
 ] as const;

@@ -17,7 +17,7 @@ const sections = [
     title: "Servicii oferite",
     content: [
       "SC Moodilier SRL, cu sediul social în Municipiul București, oferă servicii de proiectare, producție și montaj de mobilier premium la comandă, inclusiv: bucătării, dressinguri, livinguri, dormitoare, spații comerciale, recepții și birouri.",
-      "Serviciile sunt furnizate exclusiv pe teritoriul României, cu excepția cazurilor expres convenite în scris cu Clientul. Moodilier SRL furnizează, de asemenea, servicii de design interior, consultanță și Moodilier Fabrics (perdele, draperii și sisteme de umbrire).",
+      "Serviciile sunt furnizate exclusiv pe teritoriul României, cu excepția cazurilor expres convenite în scris cu Clientul. Moodilier SRL furnizează, de asemenea, servicii de design interior, consultanță și perdele / draperii (sisteme de umbrire).",
       "Societatea își rezervă dreptul de a modifica, extinde sau restrânge gama de servicii, cu notificare prealabilă a Clienților afectați, în măsura în care contractele individuale nu prevăd altfel.",
     ],
   },
@@ -48,7 +48,7 @@ const sections = [
     content: [
       "SC Moodilier SRL acordă o garanție de 24 de luni pentru produsele fabricate în atelierul propriu, calculată de la data semnării procesului-verbal de recepție.",
       "Garanția acoperă defectele de fabricație și de material apărute în condiții normale de utilizare. Sunt excluse deteriorările din utilizare necorespunzătoare, intervenții neautorizate sau factori externi.",
-      "Produsele și montajele Moodilier Fabrics beneficiază de garanția aplicabilă tipului de sistem. Solicitările în garanție se adresează la draperii@moodilier.com.",
+      "Produsele și montajele de perdele și draperii beneficiază de garanția aplicabilă tipului de sistem. Solicitările în garanție se adresează la draperii@moodilier.com.",
     ],
   },
   {

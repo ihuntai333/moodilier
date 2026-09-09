@@ -34,7 +34,10 @@ export async function GET(request: NextRequest) {
       null;
 
     if (sync) {
-      syncResult = await syncCatalogToSupabase();
+      // Fast path: insert missing only. Heavy media backfill is ?sync=1&backfill=1
+      const backfill =
+        request.nextUrl.searchParams.get("backfill") === "1";
+      syncResult = await syncCatalogToSupabase({ backfill });
       bustCache();
     }
 
@@ -63,7 +66,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     if (body?.action === "sync-catalog") {
-      const result = await syncCatalogToSupabase();
+      const result = await syncCatalogToSupabase({
+        backfill: body?.backfill !== false,
+      });
       bustCache();
       const { projects, catalogCount, cmsCount } = await getAdminProjectsMerged();
       return NextResponse.json({

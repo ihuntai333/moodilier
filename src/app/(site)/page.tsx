@@ -6,7 +6,6 @@ import { ArrowRight } from "lucide-react";
 import FrontpageAwardsClient from "@/components/home/FrontpageAwardsClient";
 import AwardsIntroLoader from "@/components/home/AwardsIntroLoader";
 import HomeHeroSlider from "@/components/home/HomeHeroSlider";
-import HomeCategoryMarquee from "@/components/home/HomeCategoryMarquee";
 import AwardsProjectCard from "@/components/site/AwardsProjectCard";
 import { getFeaturedProjects } from "@/lib/projects";
 import { getSiteChrome } from "@/lib/site-settings";
@@ -167,7 +166,7 @@ const services = [
   },
   {
     num: "03",
-    title: "Moodilier Fabrics",
+    title: "Perdele și draperii",
     desc: "Perdele, draperii, sisteme de umbrire, sine electrice și storuri romane.",
     icon: (
       <svg className="aw-service-icon" viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -278,8 +277,30 @@ export default async function HomePage() {
           body=""
         />
 
-        {/* ── Marquee mapped to gallery categories ── */}
-        <HomeCategoryMarquee />
+        {/* ── Marquee ── */}
+        <div className="aw-marquee" aria-hidden>
+          <div className="aw-marquee-track">
+            {(
+              [
+                "Bucătării",
+                "Dressinguri",
+                "Livinguri",
+                "Dormitoare",
+                "Spații comerciale",
+                "Design interior",
+                "Mobilier premium",
+                "Execuție proprie",
+              ] as const
+            )
+              .flatMap((item) => [item, item, item])
+              .map((item, i) => (
+                <span key={`${item}-${i}`} className="aw-marquee-item">
+                  {item}
+                  <span className="aw-marquee-dot">✦</span>
+                </span>
+              ))}
+          </div>
+        </div>
 
         {/* ── Benefits cu icoane ── */}
         <section

@@ -15,7 +15,7 @@ const CSS = `
   color: #fff;
   cursor: pointer;
   opacity: 1;
-  transition: opacity 320ms cubic-bezier(0.23, 1, 0.32, 1);
+  transition: opacity 420ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 .aw-intro.is-leaving {
   opacity: 0;
@@ -24,8 +24,10 @@ const CSS = `
 .aw-intro-veil {
   position: absolute; inset: 0; z-index: 2;
   background:
-    radial-gradient(ellipse 55% 50% at 50% 48%, rgba(7,7,7,.2) 0%, rgba(7,7,7,.75) 55%, rgba(7,7,7,.94) 100%);
+    radial-gradient(ellipse 55% 50% at 50% 48%, rgba(7,7,7,.18) 0%, rgba(7,7,7,.72) 55%, rgba(7,7,7,.94) 100%);
   pointer-events: none;
+  opacity: 0;
+  animation: aw-intro-veil-in 900ms cubic-bezier(0.16, 1, 0.3, 1) 0.35s forwards;
 }
 .aw-intro-grid {
   position: absolute; inset: -2%;
@@ -42,30 +44,54 @@ const CSS = `
   border-radius: 4px;
   background: #151515;
   opacity: 0;
-  animation: aw-intro-fade 0.7s ease forwards;
+  clip-path: inset(12% 12% 12% 12%);
+  transform: translate3d(0, 18px, 0) scale(0.97);
+  animation:
+    aw-intro-reveal 1.05s cubic-bezier(0.16, 1, 0.3, 1) forwards,
+    aw-intro-settle 4.8s cubic-bezier(0.23, 1, 0.32, 1) 1.05s forwards;
 }
 .aw-intro-frame img {
   width: 100%; height: 100%;
   object-fit: cover; display: block;
   filter: saturate(.55) brightness(.72);
-  transform: scale(1.08);
-  animation: aw-intro-ken 5.5s ease-in-out infinite alternate;
+  transform: scale(1.12);
+  animation: aw-intro-ken 6s cubic-bezier(0.23, 1, 0.32, 1) 0.55s both;
 }
-.aw-intro-frame:nth-child(1) { grid-column: 1; grid-row: 1 / span 2; animation-delay: 0.05s; }
-.aw-intro-frame:nth-child(2) { grid-column: 2 / span 2; grid-row: 1; animation-delay: 0.18s; }
-.aw-intro-frame:nth-child(3) { grid-column: 2 / span 2; grid-row: 2; animation-delay: 0.3s; }
-.aw-intro-frame:nth-child(4) { grid-column: 4; grid-row: 1 / span 2; animation-delay: 0.42s; }
-.aw-intro-frame:nth-child(1) img { animation-delay: 0s; }
-.aw-intro-frame:nth-child(2) img { animation-delay: 0.45s; }
-.aw-intro-frame:nth-child(3) img { animation-delay: 0.9s; }
-.aw-intro-frame:nth-child(4) img { animation-delay: 1.2s; }
+.aw-intro-frame:nth-child(1) { grid-column: 1; grid-row: 1 / span 2; animation-delay: 0.08s, 1.13s; }
+.aw-intro-frame:nth-child(2) { grid-column: 2 / span 2; grid-row: 1; animation-delay: 0.22s, 1.27s; }
+.aw-intro-frame:nth-child(3) { grid-column: 2 / span 2; grid-row: 2; animation-delay: 0.36s, 1.41s; }
+.aw-intro-frame:nth-child(4) { grid-column: 4; grid-row: 1 / span 2; animation-delay: 0.5s, 1.55s; }
+.aw-intro-frame:nth-child(1) img { animation-delay: 0.2s; }
+.aw-intro-frame:nth-child(2) img { animation-delay: 0.35s; }
+.aw-intro-frame:nth-child(3) img { animation-delay: 0.5s; }
+.aw-intro-frame:nth-child(4) img { animation-delay: 0.65s; }
+@keyframes aw-intro-reveal {
+  from {
+    opacity: 0;
+    clip-path: inset(14% 14% 14% 14%);
+    transform: translate3d(0, 22px, 0) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+@keyframes aw-intro-settle {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(0, -4px, 0) scale(1.01); }
+}
 @keyframes aw-intro-ken {
-  from { transform: scale(1.06) translate3d(0, 0, 0); }
-  to { transform: scale(1.14) translate3d(-1.5%, -1%, 0); }
+  from { transform: scale(1.12) translate3d(0, 2%, 0); }
+  to { transform: scale(1.04) translate3d(0, -1%, 0); }
 }
-@keyframes aw-intro-fade {
-  from { opacity: 0; transform: scale(1.02); }
-  to { opacity: 1; transform: scale(1); }
+@keyframes aw-intro-veil-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes aw-intro-logo-in {
+  from { opacity: 0; transform: translate3d(0, 10px, 0) scale(0.97); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
 }
 @media (max-width: 700px) {
   .aw-intro-grid {
@@ -83,6 +109,8 @@ const CSS = `
   text-align: center;
   padding: 1.25rem 1.5rem;
   max-width: min(92vw, 420px);
+  opacity: 0;
+  animation: aw-intro-logo-in 780ms cubic-bezier(0.16, 1, 0.3, 1) 0.7s forwards;
 }
 .aw-intro-logo {
   display: block;
@@ -145,7 +173,7 @@ const CSS = `
   width: 100%;
   background: #efae74;
   transform-origin: left center;
-  animation: aw-intro-bar 1.75s linear forwards;
+  animation: aw-intro-bar 2.6s linear forwards;
 }
 @keyframes aw-intro-bar {
   from { transform: scaleX(0); }
@@ -155,7 +183,9 @@ const CSS = `
   .aw-intro { transition: opacity 160ms ease; }
   .aw-intro-progress > span { animation: none; transform: scaleX(1); }
   .aw-intro-frame,
-  .aw-intro-frame img { animation: none !important; opacity: 1; transform: none; }
+  .aw-intro-frame img,
+  .aw-intro-veil,
+  .aw-intro-plate { animation: none !important; opacity: 1; transform: none; clip-path: none; }
 }
 `;
 
@@ -192,7 +222,7 @@ export default function AwardsIntroLoader({
       return;
     }
     setLeaving(true);
-    window.setTimeout(() => setShow(false), 320);
+    window.setTimeout(() => setShow(false), 420);
   }
 
   useLayoutEffect(() => {
@@ -208,7 +238,6 @@ export default function AwardsIntroLoader({
     } catch {
       /* ignore */
     }
-    // Every homepage visit — cover is already set by head script
     document.documentElement.classList.add("aw-intro-pending");
     document.documentElement.classList.remove("aw-intro-done");
     document.body.style.overflow = "hidden";
@@ -217,7 +246,7 @@ export default function AwardsIntroLoader({
 
   useEffect(() => {
     if (!show) return;
-    const failsafe = window.setTimeout(close, 2000);
+    const failsafe = window.setTimeout(close, 2800);
     return () => window.clearTimeout(failsafe);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [show]);

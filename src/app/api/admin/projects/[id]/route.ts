@@ -14,6 +14,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabase";
 import {
+  decodeProjectParam,
   ensureProjectInCms,
   getAdminProjectById,
   normalizeAdminImages,
@@ -30,10 +31,10 @@ function bustProjectsCache() {
 }
 
 function isCatalogOrSlugId(id: string): boolean {
-  const decoded = decodeURIComponent(id || "");
+  const decoded = decodeProjectParam(id);
   return (
     decoded.startsWith("catalog:") ||
-    !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
       decoded
     )
   );
@@ -44,29 +45,31 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params;
+    const { id: rawId } = await params;
+    const id = decodeProjectParam(rawId);
 
     // Catalog / slug: materialize into CMS so edit saves against a real UUID
     if (isCatalogOrSlugId(id)) {
       const { project, error } = await ensureProjectInCms(id);
-      if (error && !project) {
-        return NextResponse.json({ error }, { status: 404 });
+      if (project) {
+        return NextResponse.json(project);
       }
+      return NextResponse.json(
+        { error: error || "Proiectul nu a fost găsit." },
+        { status: 404 }
+      );
+    }
+
+    let project = await getAdminProjectById(id);
+    if (!project) {
+      const ensured = await ensureProjectInCms(id);
+      project = ensured.project;
       if (!project) {
         return NextResponse.json(
-          { error: "Proiectul nu a fost găsit." },
+          { error: ensured.error || "Proiectul nu a fost găsit." },
           { status: 404 }
         );
       }
-      return NextResponse.json(project);
-    }
-
-    const project = await getAdminProjectById(id);
-    if (!project) {
-      return NextResponse.json(
-        { error: "Proiectul nu a fost găsit." },
-        { status: 404 }
-      );
     }
 
     return NextResponse.json(project);
@@ -81,10 +84,10 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params;
+    const { id: rawId } = await params;
     const body = await request.json();
 
-    let cmsId = decodeURIComponent(id);
+    let cmsId = decodeProjectParam(rawId);
 
     // Catalog / slug IDs must become real CMS UUIDs before update
     if (isCatalogOrSlugId(cmsId)) {
@@ -158,12 +161,15 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params;
-    const decoded = decodeURIComponent(id);
+    const { id: rawId } = await params;
+    const decoded = decodeProjectParam(rawId);
 
     if (decoded.startsWith("catalog:")) {
       return NextResponse.json(
-        { error: "Proiectele din catalog nu pot fi șterse (doar ascunse din CMS)." },
+        {
+          error:
+            "Proiectele din catalog nu pot fi șterse (doar ascunse din CMS).",
+        },
         { status: 400 }
       );
     }
