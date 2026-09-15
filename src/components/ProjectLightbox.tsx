@@ -237,6 +237,7 @@ export default function ProjectLightbox({
           alt={`${projectTitle} — fotografie ${displayIndex + 1}`}
           fill
           sizes="90vw"
+          quality={90}
           style={{
             objectFit: "contain",
             pointerEvents: "none",

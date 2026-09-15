@@ -159,7 +159,7 @@ export default function HomeHeroSlider({
             priority
             fetchPriority="high"
             sizes="100vw"
-            quality={75}
+            quality={90}
             style={{ objectFit: "cover", objectPosition: "center" }}
           />
         </div>
@@ -193,7 +193,7 @@ export default function HomeHeroSlider({
               alt=""
               fill
               sizes="100vw"
-              quality={75}
+              quality={90}
               style={{ objectFit: "cover", objectPosition: "center" }}
             />
           </div>

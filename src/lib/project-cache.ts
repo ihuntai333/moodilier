@@ -1,21 +1,9 @@
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidateTag } from "next/cache";
 
-/** Bust data cache + HTML for every public surface that shows project covers. */
+/** Bust the projects data tag. Do not revalidatePath here — that can hang admin saves. */
 export function bustProjectCaches() {
   try {
     revalidateTag("projects", "max");
-  } catch {
-    /* ignore */
-  }
-  for (const path of ["/", "/proiecte", "/frontpage-v2", "/despre-noi"]) {
-    try {
-      revalidatePath(path);
-    } catch {
-      /* ignore */
-    }
-  }
-  try {
-    revalidatePath("/proiecte/[slug]", "page");
   } catch {
     /* ignore */
   }

@@ -7,7 +7,7 @@ import { requireAdminMutation } from "@/lib/admin-auth";
 /**
  * POST /api/admin/upload
  * Uploads images or a single project video to Supabase Storage (bucket: "project-images").
- * Images are automatically resized (max 2400px) and converted to WebP before upload.
+ * Images are automatically resized (max 1920px) and converted to WebP before upload.
  *
  * Setup: in Supabase dashboard → Storage → New bucket:
  *   Name: project-images
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
 
       const raw = Buffer.from(await file.arrayBuffer());
       const optimized = await optimizeImageBuffer(raw, file.type, {
-        preset: "gallery",
+        preset: "cover",
       });
       const fileName = `${slug}/${randomUUID()}.${optimized.extension}`;
 

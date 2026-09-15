@@ -64,12 +64,13 @@ export default function SitePageHero({
         data-editable={imageKey ? "image" : undefined}
       >
         <Image
+          key={bgImage}
           src={bgImage}
           alt=""
           fill
           priority
           sizes="100vw"
-          quality={75}
+          quality={90}
           className={`aw-page-hero-poster${videoReady ? " is-dim" : ""}`}
           style={{ objectFit: "cover", objectPosition: "center" }}
         />

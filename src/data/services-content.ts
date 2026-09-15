@@ -55,7 +55,8 @@ export const atelierServices = [
       "Eficiență și reducerea erorilor",
     ],
     href: "/servicii#prelucrare-cnc",
-    image: "/images-scraped/proiecte/servicii-prelucrare-cnc/DSC06628-HDR-1.png",
+    image: "/brand/servicii/prelucrare-cnc.webp",
+    objectPosition: "center 35%",
   },
   {
     slug: "vopsitorie-mdf",
@@ -68,7 +69,8 @@ export const atelierServices = [
       "Finisaj durabil, ușor de întreținut",
     ],
     href: "/servicii#vopsitorie-mdf",
-    image: "/images-scraped/proiecte/servicii-vopsitorie-mdf/servicii-vopsitorie-imagine.png",
+    image: "/brand/servicii/vopsitorie-mdf.webp",
+    objectPosition: "82% center",
   },
   {
     slug: "termoformare",
@@ -77,6 +79,7 @@ export const atelierServices = [
     desc: "Termoformare pentru forme complexe și detaliate — proces precis, cost-eficient, cu materiale durabile și plăcute estetic.",
     points: ["Costuri reduse", "Forme complexe", "Calitate superioară"],
     href: "/servicii#termoformare",
-    image: "/images-scraped/proiecte/termoformare/Poza-Nr.-00A3-1.jpg",
+    image: "/brand/servicii/termoformare.webp",
+    objectPosition: "center 20%",
   },
 ] as const;

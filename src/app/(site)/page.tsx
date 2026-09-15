@@ -14,8 +14,12 @@ import {
   pageMetadata,
   supplierNameFromSrc,
 } from "@/lib/site-seo";
+import { versionedMediaUrl } from "@/lib/media-url";
 
 export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
+export const maxDuration = 30;
 
 export const metadata: Metadata = {
   ...pageMetadata({
@@ -354,7 +358,7 @@ export default async function HomePage() {
                     alt="Atelier Moodilier — mobilier premium"
                     fill
                     sizes="(max-width: 900px) 100vw, 48vw"
-                    quality={70}
+                    quality={90}
                     loading="lazy"
                     style={{ objectFit: "cover" }}
                   />
@@ -466,7 +470,12 @@ export default async function HomePage() {
                   key={p.slug}
                   title={p.title}
                   category={p.category}
-                  image={p.coverImage || "/projects/villa-06/01.cover.webp"}
+                  image={
+                    versionedMediaUrl(
+                      p.coverImage || "/projects/villa-06/01.cover.webp",
+                      p.updatedAt
+                    )
+                  }
                   href={`/proiecte/${p.slug}`}
                   video={p.video || null}
                   className="aw-project-reveal"

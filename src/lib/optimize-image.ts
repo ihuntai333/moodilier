@@ -28,18 +28,18 @@ export type OptimizedImage = {
 };
 
 const PRESETS: Record<ImagePreset, { maxEdge: number; quality: number }> = {
-  /** Listing cards + heroes — sharp on retina, light payload */
-  cover: { maxEdge: 1600, quality: 78 },
+  /** Listing cards + heroes — sharp on retina */
+  cover: { maxEdge: 1920, quality: 86 },
   /** Project gallery full-bleed */
-  gallery: { maxEdge: 1800, quality: 76 },
+  gallery: { maxEdge: 1920, quality: 84 },
   /** Tiny previews / lightbox thumbs */
-  thumb: { maxEdge: 640, quality: 72 },
+  thumb: { maxEdge: 640, quality: 78 },
   /** Brand marks — keep crisp edges */
   logo: { maxEdge: 1200, quality: 90 },
 };
 
-const DEFAULT_MAX_EDGE = 1800;
-const DEFAULT_QUALITY = 78;
+const DEFAULT_MAX_EDGE = 1920;
+const DEFAULT_QUALITY = 84;
 
 function resolveLimits(options: OptimizeImageOptions) {
   if (options.preset && PRESETS[options.preset]) {

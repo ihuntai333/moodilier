@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     }
 
     const optimized = await optimizeImageBuffer(bytes, file.type, {
-      preset: "gallery",
+      preset: "cover",
     });
     if (optimized.extension === "svg") {
       return NextResponse.json(

@@ -102,6 +102,53 @@ function coerceImages(raw: unknown, fallbackAlt = ""): ProjectImage[] {
   return out;
 }
 
+function roomFromUrl(url: string): string {
+  const base = url.split("/").pop() || "";
+  const m = base.match(/^\d+\.([a-z0-9-]+)\./i);
+  if (!m) return "Altele";
+  const map: Record<string, string> = {
+    bucatarii: "Bucătării",
+    living: "Living",
+    dressing: "Dressing",
+    dormitoare: "Dormitoare",
+    bai: "Băi",
+    hol: "Hol",
+  };
+  return map[m[1]] || "Altele";
+}
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+async function fetchJson(
+  url: string,
+  init: RequestInit,
+  timeoutMs = 20000
+): Promise<Response> {
+  const ctrl = new AbortController();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => {
+      ctrl.abort();
+      const err = new Error("TIMEOUT");
+      err.name = "AbortError";
+      reject(err);
+    }, timeoutMs);
+  });
+  try {
+    return await Promise.race([
+      fetch(url, {
+        ...init,
+        credentials: "same-origin",
+        signal: ctrl.signal,
+      }),
+      timeout,
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
   const router = useRouter();
   const slug = initialData?.slug || "";
@@ -118,6 +165,14 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [projectId, setProjectId] = useState(initialData?.id || "");
+
+  function resolveEditId(): string {
+    for (const id of [projectId, initialData?.id]) {
+      const s = String(id || "");
+      if (UUID_RE.test(s)) return s;
+    }
+    return initialData?.slug || projectId || initialData?.id || "";
+  }
 
   const [form, setForm] = useState<ProjectFormData>(() => ({
     title: initialData?.title || "",
@@ -237,18 +292,69 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
       const [moved] = imgs.splice(dragIndex, 1);
       imgs.splice(dragOverIndex, 0, moved);
       setForm((prev) => ({ ...prev, images: imgs }));
+      if (dragOverIndex === 0 || dragIndex === 0) {
+        void persistCover(imgs);
+      }
     }
     setDragIndex(null);
     setDragOverIndex(null);
   }
 
+  function persistCoverHint() {
+    setSuccess("Copertă setată — apasă Salvează ca să apară pe site.");
+  }
+
+  async function persistCover(nextImages: ProjectImage[]) {
+    const ready = nextImages.filter((img) => img.url);
+    if (!ready.length) {
+      persistCoverHint();
+      return;
+    }
+    if (mode !== "edit") {
+      persistCoverHint();
+      return;
+    }
+    const editId = resolveEditId();
+    if (!editId) {
+      persistCoverHint();
+      return;
+    }
+    const coverUrl = ready[0].url;
+    try {
+      const res = await fetchJson(
+        `/api/admin/projects/${encodeURIComponent(editId)}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            images: ready.map((img) => img.url),
+            coverImage: coverUrl,
+          }),
+        },
+        15000
+      );
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "save failed");
+      if (data?.id) setProjectId(String(data.id));
+      setSuccess("Imagine reprezentativă actualizată pe homepage și /proiecte.");
+      setTimeout(() => setSuccess(""), 4000);
+    } catch (err) {
+      setError(
+        err instanceof Error && err.message && err.message !== "save failed"
+          ? err.message
+          : "Coperta nu s-a salvat. Apasă Salvează."
+      );
+      persistCoverHint();
+    }
+  }
+
   function setAsCover(index: number) {
     if (index === 0) return;
-    setForm((prev) => {
-      const imgs = [...prev.images];
-      const [cover] = imgs.splice(index, 1);
-      return { ...prev, images: [cover, ...imgs] };
-    });
+    const imgs = [...form.images];
+    const [cover] = imgs.splice(index, 1);
+    const next = [cover, ...imgs];
+    setForm((prev) => ({ ...prev, images: next }));
+    void persistCover(next);
   }
 
   async function uploadPendingImages(slug: string): Promise<ProjectImage[]> {
@@ -260,25 +366,26 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
     formData.append("slug", slug);
     toUpload.forEach((img) => formData.append("images", img.file!));
 
-    const res = await fetch("/api/admin/upload", {
-      method: "POST",
-      body: formData,
-    });
-    const data = await res.json();
-    setUploadingImages(false);
+    try {
+      const res = await fetchJson("/api/admin/upload", {
+        method: "POST",
+        body: formData,
+      }, 25000);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Upload failed");
 
-    if (!res.ok) throw new Error(data.error || "Upload failed");
-
-    const uploadedUrls: string[] = data.paths;
-    let uploadIdx = 0;
-
-    return form.images.map((img) => {
-      if (img.file) {
-        const url = uploadedUrls[uploadIdx++] || "";
-        return { url, alt: img.alt };
-      }
-      return { url: img.url, alt: img.alt };
-    });
+      const uploadedUrls: string[] = data.paths;
+      let uploadIdx = 0;
+      return form.images.map((img) => {
+        if (img.file) {
+          const url = uploadedUrls[uploadIdx++] || "";
+          return { url, alt: img.alt };
+        }
+        return { url: img.url, alt: img.alt };
+      });
+    } finally {
+      setUploadingImages(false);
+    }
   }
 
   async function uploadPendingVideo(slug: string): Promise<string> {
@@ -288,16 +395,18 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
     formData.append("slug", slug);
     formData.append("video", pendingVideo);
 
-    const res = await fetch("/api/admin/upload", {
-      method: "POST",
-      body: formData,
-    });
-    const data = await res.json();
-    setUploadingVideo(false);
-
-    if (!res.ok) throw new Error(data.error || "Upload video eșuat");
-    if (!data.videoUrl) throw new Error("URL video lipsă după upload");
-    return data.videoUrl as string;
+    try {
+      const res = await fetchJson("/api/admin/upload", {
+        method: "POST",
+        body: formData,
+      }, 45000);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Upload video eșuat");
+      if (!data.videoUrl) throw new Error("URL video lipsă după upload");
+      return data.videoUrl as string;
+    } finally {
+      setUploadingVideo(false);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -318,32 +427,15 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
       const video = await uploadPendingVideo(slug);
       const coverUrl = images[0]?.url || "";
 
-      const roomFromUrl = (url: string) => {
-        const base = url.split("/").pop() || "";
-        const m = base.match(/^\d+\.([a-z0-9-]+)\./i);
-        if (!m) return "Altele";
-        const map: Record<string, string> = {
-          bucatarii: "Bucătării",
-          living: "Living",
-          dressing: "Dressing",
-          dormitoare: "Dormitoare",
-          bai: "Băi",
-          hol: "Hol",
-        };
-        return map[m[1]] || "Altele";
-      };
-
       const payload = {
         title: form.title.trim(),
         category: form.category,
         location: form.location.trim(),
         description: form.description.trim(),
-        images,
-        coverImage: coverUrl,
-        // Keep gallery in the same order as images (cover first)
-        gallery: images
+        images: images
           .filter((img) => img.url)
-          .map((img) => ({ url: img.url, room: roomFromUrl(img.url) })),
+          .map((img) => img.url),
+        coverImage: coverUrl,
         video,
         slug,
         status: form.status,
@@ -357,19 +449,21 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
       let res: Response;
 
       if (mode === "create") {
-        res = await fetch("/api/admin/projects", {
+        res = await fetchJson("/api/admin/projects", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
       } else {
-        const editId =
-          initialData?.slug || projectId || initialData?.id || "";
-        res = await fetch(`/api/admin/projects/${encodeURIComponent(editId)}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
+        const editId = resolveEditId();
+        res = await fetchJson(
+          `/api/admin/projects/${encodeURIComponent(editId)}`,
+          {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          }
+        );
       }
 
       const data = await res.json();
@@ -382,7 +476,7 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
         router.push("/admin/proiecte");
       } else {
         if (data?.id) setProjectId(String(data.id));
-        setSuccess("Proiect actualizat cu succes!");
+        setSuccess("Proiect actualizat — coperta e live pe site.");
         setTimeout(() => setSuccess(""), 3000);
         setForm((prev) => ({
           ...prev,
@@ -392,13 +486,20 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
         setPendingVideo(null);
       }
     } catch (err) {
+      const aborted =
+        (err instanceof Error && err.name === "AbortError") ||
+        (err instanceof DOMException && err.name === "AbortError");
       setError(
-        err instanceof Error
-          ? err.message
-          : "Eroare la salvare. Verificați conexiunea."
+        aborted
+          ? "Salvarea a durat prea mult. Reîncearcă."
+          : err instanceof Error
+            ? err.message
+            : "Eroare la salvare. Verificați conexiunea."
       );
     } finally {
       setSubmitting(false);
+      setUploadingImages(false);
+      setUploadingVideo(false);
     }
   }
 
@@ -607,9 +708,9 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
               }}
             />
             <span style={{ fontSize: "0.875rem", color: "#9a9088" }}>
-              Proiect featured{" "}
+              Fixează pe homepage{" "}
               <span style={{ color: "#5a5450", fontSize: "0.75rem" }}>
-                — apare prominent în portofoliu
+                — apare primul în portofoliul de pe prima pagină (nu e fotografia)
               </span>
             </span>
           </label>
@@ -775,13 +876,16 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
       </div>
 
       {/* ===== SECTION: Imagini ===== */}
-      <div style={{ ...sectionHeadingStyle, marginTop: "2rem" }}>Imagini</div>
+      <div style={{ ...sectionHeadingStyle, marginTop: "2rem" }}>
+        Imagine reprezentativă + galerie
+      </div>
 
       <div>
         <label style={{ ...labelStyle, marginBottom: "0.75rem" }}>
-          Imagini{" "}
+          Galerie{" "}
           <span style={{ color: "#5a5450", fontWeight: 400 }}>
-            ({form.images.length} selectat{form.images.length !== 1 ? "e" : ""})
+            ({form.images.length} foto) — prima / ★ Copertă e imaginea de pe
+            homepage, /proiecte și pagina proiectului
           </span>
         </label>
 

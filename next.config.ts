@@ -75,13 +75,15 @@ const nextConfig: NextConfig = {
 
   images: {
     formats: ["image/avif", "image/webp"],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1440, 1920],
     imageSizes: [64, 96, 128, 256, 384],
-    minimumCacheTTL: 60 * 60 * 24 * 30,
+    qualities: [75, 90],
+    minimumCacheTTL: 60,
     remotePatterns: [
       { protocol: "https", hostname: "moodilier.ro" },
+      { protocol: "https", hostname: "moodilier.vercel.app" },
       { protocol: "http", hostname: "localhost" },
-      { protocol: "https", hostname: "*.supabase.co" },
+      { protocol: "https", hostname: "*.supabase.co", pathname: "/**" },
     ],
   },
 

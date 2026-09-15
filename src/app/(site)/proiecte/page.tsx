@@ -5,6 +5,9 @@ import { pageMetadata } from "@/lib/site-seo";
 import ProiecteClient from "./ProiecteClient";
 
 export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
+export const maxDuration = 30;
 
 export const metadata: Metadata = pageMetadata({
   path: "/proiecte",

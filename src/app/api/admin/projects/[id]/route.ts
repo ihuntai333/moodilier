@@ -18,10 +18,13 @@ import {
   getAdminProjectById,
   normalizeAdminImages,
   parseProjectId,
+  adminProjectFromRow,
+  updateProjectRow,
 } from "@/lib/admin-projects";
 import { bustProjectCaches } from "@/lib/project-cache";
-import { sanitizeGallery, sanitizeMediaUrl } from "@/lib/media-url";
+import { sanitizeGallery, sanitizeMediaUrl, extractMediaUrl } from "@/lib/media-url";
 import { requireAdminApi, requireAdminMutation } from "@/lib/admin-auth";
+import { timeoutSignal } from "@/lib/with-timeout";
 import fs from "fs";
 import path from "path";
 
@@ -76,14 +79,14 @@ export async function PATCH(
 
     // Catalog / slug IDs must become real CMS UUIDs before update
     if (isCatalogOrSlugId(cmsId)) {
-      const { project, error } = await ensureProjectInCms(cmsId);
-      if (!project || String(project.id).startsWith("catalog:")) {
+      const ensured = await ensureProjectInCms(cmsId);
+      if (!ensured.project || String(ensured.project.id).startsWith("catalog:")) {
         return NextResponse.json(
-          { error: error || "Proiectul nu a fost găsit." },
-          { status: 404 }
+          { error: ensured.error || "Proiectul nu a fost găsit." },
+          { status: 503 }
         );
       }
-      cmsId = project.id;
+      cmsId = ensured.project.id;
     }
 
     const updatePayload: Record<string, unknown> = {};
@@ -92,17 +95,40 @@ export async function PATCH(
     if (body.category !== undefined) updatePayload.category = body.category;
     if (body.location !== undefined) updatePayload.location = body.location;
     if (body.description !== undefined) updatePayload.description = body.description;
-    if (body.coverImage !== undefined)
-      updatePayload.cover_image = sanitizeMediaUrl(body.coverImage);
-    if (body.cover_image !== undefined)
-      updatePayload.cover_image = sanitizeMediaUrl(body.cover_image);
+
+    const requestedCover =
+      sanitizeMediaUrl(body.coverImage) || sanitizeMediaUrl(body.cover_image);
+
     if (body.images !== undefined) {
-      updatePayload.images = normalizeAdminImages(
+      const urls = normalizeAdminImages(
         body.images,
         typeof body.title === "string" ? body.title : ""
-      ).filter((img) => sanitizeMediaUrl(img.url));
+      )
+        .map((img) => extractMediaUrl(img.url) || sanitizeMediaUrl(img.url))
+        .filter(Boolean);
+      const cover = requestedCover || urls[0] || "";
+      // WordPress featured image: cover_image is the card on homepage + /proiecte.
+      updatePayload.cover_image = cover;
+      updatePayload.images = cover
+        ? [cover, ...urls.filter((u) => u !== cover)]
+        : urls;
+    } else if (body.coverImage !== undefined || body.cover_image !== undefined) {
+      updatePayload.cover_image = requestedCover;
     }
-    if (body.gallery !== undefined) updatePayload.gallery = sanitizeGallery(body.gallery);
+
+    if (body.gallery !== undefined) {
+      const gallery = sanitizeGallery(body.gallery);
+      const cover =
+        (typeof updatePayload.cover_image === "string" &&
+          updatePayload.cover_image) ||
+        requestedCover;
+      updatePayload.gallery = cover
+        ? [
+            ...gallery.filter((g) => g.url === cover),
+            ...gallery.filter((g) => g.url !== cover),
+          ]
+        : gallery;
+    }
     if (body.rooms !== undefined) updatePayload.rooms = body.rooms;
     if (body.status !== undefined) updatePayload.status = body.status;
     if (body.year !== undefined) updatePayload.year = body.year || null;
@@ -116,51 +142,43 @@ export async function PATCH(
     if (body.isFeatured !== undefined) updatePayload.is_featured = body.isFeatured;
     if (body.is_featured !== undefined) updatePayload.is_featured = body.is_featured;
     if (body.video !== undefined) updatePayload.video = body.video || null;
+    updatePayload.updated_at = new Date().toISOString();
 
-    let { data, error } = await supabaseAdmin
-      .from("projects")
-      .update(updatePayload)
-      .eq("id", cmsId)
-      .select()
-      .single();
-
-    if (error && error.code !== "PGRST116") {
-      const core: Record<string, unknown> = {};
-      for (const key of [
-        "title",
-        "slug",
-        "category",
-        "location",
-        "description",
-        "cover_image",
-        "images",
-        "video",
-      ]) {
-        if (updatePayload[key] !== undefined) core[key] = updatePayload[key];
-      }
-      const retry = await supabaseAdmin
-        .from("projects")
-        .update(core)
-        .eq("id", cmsId)
-        .select()
-        .single();
-      data = retry.data;
-      error = retry.error;
-    }
-
-    if (error) {
-      if (error.code === "PGRST116") {
+    const written = await updateProjectRow(cmsId, updatePayload);
+    if (!written.data) {
+      const message = written.error || "Eroare la salvare.";
+      if (/nu a fost găsit|PGRST116/i.test(message)) {
         return NextResponse.json(
           { error: "Proiectul nu a fost găsit." },
           { status: 404 }
         );
       }
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: message }, { status: 500 });
+    }
+
+    const saved = written.data;
+    const savedSlug = typeof saved.slug === "string" ? saved.slug : "";
+    if (savedSlug && updatePayload.cover_image) {
+      const dup: Record<string, unknown> = {
+        cover_image: updatePayload.cover_image,
+        updated_at: updatePayload.updated_at,
+      };
+      if (updatePayload.images !== undefined) dup.images = updatePayload.images;
+      if (updatePayload.gallery !== undefined) dup.gallery = updatePayload.gallery;
+      try {
+        await supabaseAdmin
+          .from("projects")
+          .update(dup)
+          .eq("slug", savedSlug)
+          .neq("id", cmsId)
+          .abortSignal(timeoutSignal(4000));
+      } catch {
+        /* duplicate rows are best-effort */
+      }
     }
 
     bustProjectCaches();
-    const normalized = await getAdminProjectById(String(data.id));
-    return NextResponse.json(normalized || data);
+    return NextResponse.json(adminProjectFromRow(saved));
   } catch (error) {
     console.error("Project PATCH error:", error);
     return NextResponse.json({ error: "Eroare internă." }, { status: 500 });

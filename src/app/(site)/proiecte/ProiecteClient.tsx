@@ -7,6 +7,7 @@ import SiteCTA from "@/components/site/SiteCTA";
 import AwardsProjectCard from "@/components/site/AwardsProjectCard";
 import { ROOM_FILTERS, normalizeRoomLabel, type SiteProject } from "@/lib/projects";
 import { galleryRoomId } from "@/lib/room-anchor";
+import { versionedMediaUrl } from "@/lib/media-url";
 
 const CATEGORIES = [
   "Toate",
@@ -203,7 +204,13 @@ export default function ProiecteClient({
                   category={project.category}
                   tags={tags}
                   activeTag={activeCategory === "Toate" ? null : activeCategory}
-                  image={project.coverImage || "/projects/villa-06/01.living.cover.webp"}
+                  image={
+                    versionedMediaUrl(
+                      project.coverImage ||
+                        "/projects/villa-06/01.living.cover.webp",
+                      project.updatedAt
+                    )
+                  }
                   href={projectHref(project.slug, activeCategory)}
                   video={project.video || null}
                 />

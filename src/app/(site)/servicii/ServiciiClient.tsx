@@ -183,7 +183,8 @@ export default function ServiciiClient() {
                   alt={service.title}
                   fill
                   sizes="(max-width: 900px) 100vw, 33vw"
-                  style={{ objectFit: "cover" }}
+                  quality={90}
+                  style={{ objectFit: "cover", objectPosition: service.objectPosition }}
                 />
               </EditableMedia>
               <div className="svc-atelier-copy">

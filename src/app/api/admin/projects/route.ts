@@ -14,6 +14,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import {
   getAdminProjectsMerged,
+  insertProjectRow,
   normalizeAdminImages,
   syncCatalogToSupabase,
 } from "@/lib/admin-projects";
@@ -77,35 +78,36 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const { data, error } = await supabaseAdmin
-      .from("projects")
-      .insert({
-        title: body.title || "",
-        slug: body.slug || slugify(body.title || "proiect") + "-" + Date.now(),
-        category: body.category || "Rezidențial",
-        location: body.location || "",
-        description: body.description || "",
-        cover_image: body.coverImage || body.cover_image || "",
-        images: normalizeAdminImages(body.images || [], body.title || ""),
-        gallery: body.gallery || [],
-        rooms: body.rooms || [],
-        video: body.video || null,
-        status: body.status || "published",
-        year: body.year || null,
-        surface: body.surface || null,
-        seo_title: body.seoTitle || body.seo_title || null,
-        seo_description: body.seoDescription || body.seo_description || null,
-        is_featured: body.isFeatured ?? body.is_featured ?? false,
-      })
-      .select()
-      .single();
+    const written = await insertProjectRow({
+      title: body.title || "",
+      slug: body.slug || slugify(body.title || "proiect") + "-" + Date.now(),
+      category: body.category || "Rezidențial",
+      location: body.location || "",
+      description: body.description || "",
+      cover_image: body.coverImage || body.cover_image || "",
+      images: normalizeAdminImages(body.images || [], body.title || "").map(
+        (img) => img.url
+      ),
+      gallery: body.gallery || [],
+      rooms: body.rooms || [],
+      video: body.video || null,
+      status: body.status || "published",
+      year: body.year || null,
+      surface: body.surface || null,
+      seo_title: body.seoTitle || body.seo_title || null,
+      seo_description: body.seoDescription || body.seo_description || null,
+      is_featured: body.isFeatured ?? body.is_featured ?? false,
+    });
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    if (!written.data) {
+      return NextResponse.json(
+        { error: written.error || "Insert eșuat" },
+        { status: 500 }
+      );
     }
 
     bustProjectCaches();
-    return NextResponse.json(data, { status: 201 });
+    return NextResponse.json(written.data, { status: 201 });
   } catch (error) {
     console.error("Projects POST error:", error);
     return NextResponse.json({ error: "Eroare internă." }, { status: 500 });

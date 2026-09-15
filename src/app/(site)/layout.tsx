@@ -9,7 +9,10 @@ import VisualEditorLoader from "@/components/VisualEditorLoader";
 import { getSiteChrome } from "@/lib/site-settings";
 import "@/styles/site.css";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
+export const maxDuration = 30;
 
 const playfair = Playfair_Display({
   subsets: ["latin", "latin-ext"],

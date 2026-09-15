@@ -12,8 +12,12 @@ import {
   getPublishedProjects,
 } from "@/lib/projects";
 import { pageMetadata } from "@/lib/site-seo";
+import { versionedMediaUrl } from "@/lib/media-url";
 
 export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
+export const maxDuration = 30;
 export const dynamicParams = true;
 
 export function generateStaticParams() {
@@ -48,7 +52,9 @@ export async function generateMetadata({
     path: `/proiecte/${project.slug}`,
     title,
     description,
-    image: project.coverImage || null,
+    image: project.coverImage
+      ? versionedMediaUrl(project.coverImage, project.updatedAt)
+      : null,
     type: "article",
   });
 }
@@ -100,8 +106,10 @@ export default async function ProjectPage({
         label={project.rooms?.[0] || project.category}
         title={project.title}
         bgImage={
-          project.coverImage ||
-          "/projects/villa-06/01.living.cover.webp"
+          versionedMediaUrl(
+            project.coverImage || "/projects/villa-06/01.living.cover.webp",
+            project.updatedAt
+          )
         }
         bgVideo={heroVideo}
         overlayOpacity={0.45}

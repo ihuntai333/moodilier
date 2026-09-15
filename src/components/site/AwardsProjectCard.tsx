@@ -99,11 +99,12 @@ export default function AwardsProjectCard({
     >
       <div className="aw-project-media">
         <Image
+          key={image}
           src={image || "/projects/villa-06/01.cover.webp"}
           alt={alt}
           fill
-          sizes="(max-width: 700px) 50vw, (max-width: 1100px) 33vw, 25vw"
-          quality={70}
+          sizes="(max-width: 900px) 50vw, 33vw"
+          quality={90}
           loading="lazy"
           className={`aw-project-img${hovered && hasVideo ? " is-dim" : ""}`}
           style={{ objectFit: "cover" }}

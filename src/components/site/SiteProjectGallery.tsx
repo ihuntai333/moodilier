@@ -154,8 +154,8 @@ export default function SiteProjectGallery({
                       src={img.url}
                       alt={`${title}${section.room ? ` — ${section.room}` : ""} — fotografie ${i + 1}`}
                       fill
-                      sizes="(max-width: 700px) 50vw, (max-width: 1100px) 33vw, 25vw"
-                      quality={70}
+                      sizes="(max-width: 900px) 50vw, 33vw"
+                      quality={90}
                       loading="lazy"
                       style={{ objectFit: "cover" }}
                       onError={() =>

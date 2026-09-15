@@ -1,6 +1,6 @@
 import { cache } from "react";
-import { unstable_cache } from "next/cache";
 import { hasSupabaseConfig, supabaseAdmin } from "@/lib/supabase";
+import { timeoutSignal } from "@/lib/with-timeout";
 import {
   projects as staticProjects,
   PROJECT_AUG_ORDER,
@@ -8,9 +8,18 @@ import {
   type ProjectImage,
 } from "@/data/projects-aug";
 import { PROJECT_DESCRIPTIONS_AUG } from "@/data/project-descriptions-aug";
-/** CMS covers must win over the static catalog. Don't abort the whole list. */
+import { extractMediaUrl } from "@/lib/media-url";
+/** Full row — only columns that exist on the live Moodilier DB. */
 const PROJECT_SELECT =
-  "id, slug, title, category, description, seo_title, short_description, project_type, cover_image, images, gallery, rooms, location, video, is_featured, year, surface, status";
+  "id, slug, title, category, description, seo_title, seo_description, cover_image, images, location, is_featured, year, surface, status, updated_at";
+
+/** Listing/cards. */
+const PROJECT_LIST_SELECT =
+  "id, slug, title, category, cover_image, images, location, is_featured, status, updated_at";
+
+function slugKey(slug: string): string {
+  return slug.trim().toLowerCase();
+}
 
 export { ROOM_FILTERS };
 export type { ProjectImage };
@@ -39,6 +48,7 @@ export type SiteProject = {
   year?: string | null;
   surface?: string | null;
   status?: string;
+  updatedAt?: string | null;
 };
 
 type RawRow = Record<string, unknown>;
@@ -48,16 +58,11 @@ function asString(v: unknown, fallback = ""): string {
 }
 
 function normalizeImages(raw: unknown): string[] {
-  if (!Array.isArray(raw)) return [];
-  return raw
-    .map((item) => {
-      if (typeof item === "string") return item.trim();
-      if (item && typeof item === "object" && "url" in item) {
-        return asString((item as { url?: unknown }).url).trim();
-      }
-      return "";
-    })
-    .filter(Boolean);
+  if (!Array.isArray(raw)) {
+    const one = extractMediaUrl(raw);
+    return one ? [one] : [];
+  }
+  return raw.map((item) => extractMediaUrl(item)).filter(Boolean);
 }
 
 function normalizeRow(row: RawRow): SiteProject | null {
@@ -115,6 +120,8 @@ function normalizeRow(row: RawRow): SiteProject | null {
     year: asString(row.year) || null,
     surface: asString(row.surface) || null,
     status: asString(row.status, "published") || "published",
+    updatedAt:
+      asString(row.updated_at || row.updatedAt).trim() || null,
   };
 }
 
@@ -270,41 +277,97 @@ function staticAsSite(): SiteProject[] {
 }
 
 function publishedFromRows(rows: unknown[]): SiteProject[] {
-  return rows
+  const list = rows
     .map((row) => normalizeRow(row as RawRow))
     .filter((p): p is SiteProject => Boolean(p))
     .filter((p) => (p.status || "published") !== "draft");
+
+  // Newest CMS row wins when the same slug was inserted more than once.
+  const bySlug = new Map<string, SiteProject>();
+  for (const project of list) {
+    const key = slugKey(project.slug);
+    if (!bySlug.has(key)) bySlug.set(key, project);
+  }
+  return [...bySlug.values()];
+}
+
+async function fetchRows(
+  columns: string,
+  orderCol: "updated_at" | "created_at",
+  ms: number
+) {
+  return supabaseAdmin
+    .from("projects")
+    .select(columns)
+    .order(orderCol, { ascending: false })
+    .abortSignal(timeoutSignal(ms));
 }
 
 async function fetchFromSupabase(): Promise<SiteProject[] | null> {
   if (!hasSupabaseConfig) return null;
   try {
-    const first = await supabaseAdmin
-      .from("projects")
-      .select(PROJECT_SELECT)
-      .order("created_at", { ascending: false });
-
-    let rows: unknown[] | null = !first.error ? (first.data as unknown[]) : null;
-
-    if (first.error) {
-      const fallback = await supabaseAdmin
-        .from("projects")
-        .select(
-          "id, slug, title, category, description, cover_image, images, location, video, is_featured, status"
-        )
-        .order("created_at", { ascending: false });
-      if (fallback.error || !fallback.data?.length) {
-        console.warn("Projects CMS fetch failed:", first.error.message);
-        return null;
-      }
-      rows = fallback.data as unknown[];
+    // Slim list first — full gallery JSON was aborting and the site fell back
+    // to the static catalog cover (Villa 02 never updated).
+    let result = await fetchRows(PROJECT_LIST_SELECT, "updated_at", 12000);
+    if (result.error) {
+      await new Promise((r) => setTimeout(r, 250));
+      result = await fetchRows(PROJECT_LIST_SELECT, "updated_at", 12000);
     }
-
-    if (!rows?.length) return null;
-    const list = publishedFromRows(rows);
+    if (result.error) {
+      result = await fetchRows(
+        "id, slug, title, category, cover_image, images, location, is_featured, status",
+        "created_at",
+        8000
+      );
+    }
+    if (result.error || !result.data?.length) {
+      if (result.error) {
+        console.warn("Projects CMS fetch failed:", result.error.message);
+      }
+      return null;
+    }
+    const list = publishedFromRows(result.data as unknown[]);
     return list.length ? list : null;
   } catch (err) {
-    console.warn("Projects CMS fetch failed:", err);
+    const cause =
+      err instanceof Error && "cause" in err
+        ? (err as Error & { cause?: unknown }).cause
+        : undefined;
+    console.warn("Projects CMS fetch failed:", err, cause ?? "");
+    return null;
+  }
+}
+
+async function fetchCmsBySlug(slug: string): Promise<SiteProject | null> {
+  if (!hasSupabaseConfig || !slug) return null;
+  try {
+    const full = await supabaseAdmin
+      .from("projects")
+      .select(PROJECT_SELECT)
+      .ilike("slug", slug)
+      .order("updated_at", { ascending: false })
+      .limit(5)
+      .abortSignal(timeoutSignal(10000));
+
+    const result = full.error
+      ? await supabaseAdmin
+          .from("projects")
+          .select(
+            "id, slug, title, category, cover_image, images, location, is_featured, status"
+          )
+          .eq("slug", slug)
+          .order("created_at", { ascending: false })
+          .limit(5)
+          .abortSignal(timeoutSignal(8000))
+      : full;
+
+    if (result.error || !result.data?.length) return null;
+    const list = publishedFromRows(result.data as unknown[]);
+    return (
+      list.find((p) => slugKey(p.slug) === slugKey(slug)) || list[0] || null
+    );
+  } catch (err) {
+    console.warn("Project CMS slug fetch failed:", err);
     return null;
   }
 }
@@ -333,62 +396,71 @@ function sortByAugOrder(list: SiteProject[]): SiteProject[] {
   });
 }
 
+function mergeCmsOverCatalog(
+  catalog: SiteProject,
+  cms: SiteProject
+): SiteProject {
+  const cmsImages = cms.images?.length ? cms.images : [];
+  // WordPress featured image: cover_image drives homepage, /proiecte, project page.
+  const cover =
+    (cms.coverImage || "").trim() ||
+    cmsImages[0] ||
+    catalog.coverImage;
+  const merged: SiteProject = {
+    ...catalog,
+    ...cms,
+    slug: catalog.slug || cms.slug,
+    images: cmsImages.length ? cmsImages : catalog.images,
+    coverImage: cover,
+    gallery: cms.gallery?.length
+      ? cms.gallery
+      : cmsImages.length
+        ? cmsImages.map((url) => ({ url, room: roomFromImageUrl(url) }))
+        : catalog.gallery,
+    rooms: cms.rooms?.length ? cms.rooms : catalog.rooms,
+    video: cms.video?.trim() || catalog.video || null,
+    isFeatured: Boolean(cms.isFeatured),
+    description: resolveDescription(
+      catalog.slug,
+      cms.description,
+      catalog.description
+    ),
+    shortDescription:
+      cms.shortDescription?.trim() ||
+      firstParagraph(
+        resolveDescription(catalog.slug, cms.description, catalog.description),
+        180
+      ),
+    updatedAt: cms.updatedAt || catalog.updatedAt || null,
+  };
+  return preferCoverFirst(merged);
+}
+
 async function loadPublishedProjects(): Promise<SiteProject[]> {
   // Canonical catalog = projects-aug; order = Villa 01→N, then Apartment 01→N.
   const staticList = staticAsSite();
   const remote = await fetchFromSupabase();
   if (!remote?.length) return sortByAugOrder(staticList);
 
-  const staticBySlug = new Map(staticList.map((p) => [p.slug, p]));
+  const staticBySlug = new Map(staticList.map((p) => [slugKey(p.slug), p]));
+  const remoteBySlug = new Map(remote.map((p) => [slugKey(p.slug), p]));
   const enriched = staticList.map((p) => {
-    const r = remote.find((x) => x.slug === p.slug);
+    const r = remoteBySlug.get(slugKey(p.slug));
     if (!r) return p;
-    const cover =
-      (r.coverImage || "").trim() ||
-      r.images?.[0] ||
-      p.coverImage;
-    const cmsImages = r.images?.length ? r.images : [];
-    const merged: SiteProject = {
-      ...p,
-      ...r,
-      // CMS media wins whenever present (admin cover / reorder)
-      images: cmsImages.length ? cmsImages : p.images,
-      coverImage: cover,
-      gallery: r.gallery?.length
-        ? r.gallery
-        : cmsImages.length
-          ? cmsImages.map((url) => ({ url, room: roomFromImageUrl(url) }))
-          : p.gallery,
-      rooms: r.rooms?.length ? r.rooms : p.rooms,
-      video: r.video?.trim() || p.video || null,
-      isFeatured: Boolean(r.isFeatured),
-      description: resolveDescription(p.slug, r.description, p.description),
-      shortDescription:
-        r.shortDescription?.trim() ||
-        firstParagraph(
-          resolveDescription(p.slug, r.description, p.description),
-          180
-        ),
-    };
-    return preferCoverFirst(merged);
+    return mergeCmsOverCatalog(p, r);
   });
   const extras = remote
     .filter(
       (r) =>
-        !staticBySlug.has(r.slug) && (r.status || "published") !== "draft"
+        !staticBySlug.has(slugKey(r.slug)) &&
+        (r.status || "published") !== "draft"
     )
     .map(preferCoverFirst);
   return sortByAugOrder([...enriched, ...extras]);
 }
 
-const cachedPublishedProjects = unstable_cache(
-  loadPublishedProjects,
-  ["published-projects-v14-cms-cover"],
-  { revalidate: 15, tags: ["projects"] }
-);
-
-/** Published projects for the live site (Supabase → static fallback). */
-export const getPublishedProjects = cache(cachedPublishedProjects);
+/** Live CMS covers — request-scoped only, so admin saves show immediately. */
+export const getPublishedProjects = cache(loadPublishedProjects);
 
 /**
  * Homepage cards — featured projects first (admin ★), then fill from portfolio order.
@@ -405,9 +477,16 @@ export const getFeaturedProjects = cache(async (limit = 6): Promise<SiteProject[
 
 export const getProjectBySlug = cache(async (slug: string): Promise<SiteProject | null> => {
   if (!slug) return null;
-  // Always use the cached published list — no extra per-slug Supabase roundtrip.
-  const all = await getPublishedProjects();
-  return all.find((p) => p.slug === slug) ?? null;
+  const [fromList, fromCms] = await Promise.all([
+    getPublishedProjects(),
+    fetchCmsBySlug(slug),
+  ]);
+  const catalogOrList =
+    fromList.find((p) => slugKey(p.slug) === slugKey(slug)) ?? null;
+  if (fromCms && catalogOrList) {
+    return mergeCmsOverCatalog(catalogOrList, fromCms);
+  }
+  return fromCms || catalogOrList;
 });
 
 /** Catalog slugs only — no CMS roundtrip (safe at build). */
