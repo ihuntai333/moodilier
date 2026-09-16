@@ -94,7 +94,7 @@ export default function NotaLegalaPage() {
         label="Legal"
         title="Notă legală"
         subtitle="Identificarea societății, condiții de utilizare, proprietate intelectuală și limitarea răspunderii."
-        bgImage="/images-scraped/Mogosoaia_01.jpg"
+        bgImage="/brand/pages/nota-legala.jpg"
         overlayOpacity={0.6}
       />
 

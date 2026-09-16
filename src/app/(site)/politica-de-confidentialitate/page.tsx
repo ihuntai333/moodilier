@@ -18,7 +18,7 @@ export default function PoliticaConfidentialitatePage() {
         label="Legal"
         title="Politică de confidențialitate"
         subtitle="Cum prelucrăm datele dumneavoastră cu caracter personal, în conformitate cu GDPR."
-        bgImage="/images-scraped/living_06_.jpg"
+        bgImage="/brand/pages/living-06.jpg"
         overlayOpacity={0.6}
       />
 

@@ -1,3 +1,5 @@
-# Keep Vercel deploys lean — never upload raw source masters
+# Keep Vercel deploys lean
 public/videos/*.orig.mp4
 public/videos/0603(2).mp4
+public/videos/*.jpg
+public/images-scraped/

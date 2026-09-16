@@ -247,14 +247,14 @@ const steps = [
 ];
 
 const supplierLogos = [
-  "/images-scraped/logo_01_egger.png",
-  "/images-scraped/logo_03_blum.png",
-  "/images-scraped/logo_06_himacs.png",
-  "/images-scraped/logo_05_krono.png",
-  "/images-scraped/logo_02_avo.png",
-  "/images-scraped/logo_07_hafele.png",
-  "/images-scraped/logo_04_corian.png",
-  "/images-scraped/logo_08_sch.png",
+  "/brand/logos/egger.png",
+  "/brand/logos/blum.png",
+  "/brand/logos/himacs.png",
+  "/brand/logos/krono.png",
+  "/brand/logos/avo.png",
+  "/brand/logos/hafele.png",
+  "/brand/logos/corian.png",
+  "/brand/logos/sch.png",
 ];
 
 export default async function HomePage() {

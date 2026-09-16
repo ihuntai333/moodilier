@@ -89,7 +89,7 @@ export default function TermeniSiConditiiPage() {
         label="Legal"
         title="Termeni și condiții"
         subtitle="Condițiile de utilizare ale site-ului și serviciilor SC Moodilier SRL."
-        bgImage="/images-scraped/living_01_.jpg"
+        bgImage="/brand/pages/living-01.jpg"
         overlayOpacity={0.6}
       />
 

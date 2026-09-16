@@ -3,7 +3,7 @@ export function isAllowedMediaUrl(raw: string): boolean {
   const url = String(raw || "").trim();
   if (!url || url.length > 2000) return false;
   if (url.startsWith("/projects/") || url.startsWith("/uploads/")) return true;
-  if (url.startsWith("/images-scraped/") || url.startsWith("/brand/")) return true;
+  if (url.startsWith("/brand/")) return true;
   try {
     const parsed = new URL(url);
     if (parsed.protocol !== "https:") return false;

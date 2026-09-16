@@ -442,21 +442,15 @@ async function loadPublishedProjects(): Promise<SiteProject[]> {
   const remote = await fetchFromSupabase();
   if (!remote?.length) return sortByAugOrder(staticList);
 
-  const staticBySlug = new Map(staticList.map((p) => [slugKey(p.slug), p]));
   const remoteBySlug = new Map(remote.map((p) => [slugKey(p.slug), p]));
+  // Public site = catalog only (Villa/Apartment/Showroom). CMS overlays covers
+  // on those slugs. Extra rows from the old moodilier.ro import stay in admin.
   const enriched = staticList.map((p) => {
     const r = remoteBySlug.get(slugKey(p.slug));
     if (!r) return p;
     return mergeCmsOverCatalog(p, r);
   });
-  const extras = remote
-    .filter(
-      (r) =>
-        !staticBySlug.has(slugKey(r.slug)) &&
-        (r.status || "published") !== "draft"
-    )
-    .map(preferCoverFirst);
-  return sortByAugOrder([...enriched, ...extras]);
+  return sortByAugOrder(enriched);
 }
 
 /** Live CMS covers — request-scoped only, so admin saves show immediately. */
@@ -483,10 +477,9 @@ export const getProjectBySlug = cache(async (slug: string): Promise<SiteProject 
   ]);
   const catalogOrList =
     fromList.find((p) => slugKey(p.slug) === slugKey(slug)) ?? null;
-  if (fromCms && catalogOrList) {
-    return mergeCmsOverCatalog(catalogOrList, fromCms);
-  }
-  return fromCms || catalogOrList;
+  if (!catalogOrList) return null;
+  if (fromCms) return mergeCmsOverCatalog(catalogOrList, fromCms);
+  return catalogOrList;
 });
 
 /** Catalog slugs only — no CMS roundtrip (safe at build). */

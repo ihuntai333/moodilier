@@ -43,7 +43,7 @@ export default function PoliticaCookiesPage() {
         label="Legal"
         title="Politică cookies"
         subtitle="Ce cookie-uri folosim, de ce și cum vă puteți gestiona preferințele."
-        bgImage="/images-scraped/living_01_.jpg"
+        bgImage="/brand/pages/living-01.jpg"
         overlayOpacity={0.6}
       />
 
