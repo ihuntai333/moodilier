@@ -10,10 +10,7 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "node --test scripts/form-leads.test.mjs",
-    "import:projects": "node scripts/import-download-aug.mjs",
-    "editor:server": "npm --prefix visual-editor/server start",
-    "editor:install": "npm --prefix visual-editor/server install",
-    "editor:sync": "node -e \"require('fs').copyFileSync('visual-editor/public/editor.js','public/editor.js'); console.log('synced public/editor.js')\""
+    "import:projects": "node scripts/import-download-aug.mjs"
   },
   "engines": {
     "node": ">=20"
@@ -27,8 +24,7 @@
     "nodemailer": "^6.9.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "sharp": "^0.35.3",
-    "sql.js": "^1.14.1"
+    "sharp": "^0.35.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

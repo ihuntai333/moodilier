@@ -3,6 +3,46 @@ import { revalidateTag } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabase";
 import { SETTINGS_STRING_DEFAULTS } from "@/lib/site-settings";
 import { requireAdminApi, requireAdminMutation } from "@/lib/admin-auth";
+import {
+  isValidGa4Id,
+  isValidPixelId,
+  isValidVerificationToken,
+} from "@/lib/security/sanitize";
+
+const SETTINGS_KEYS = new Set(Object.keys(SETTINGS_STRING_DEFAULTS));
+
+function sanitizeSettingsBody(
+  body: Record<string, unknown>
+): { ok: true; values: Record<string, string> } | { ok: false; error: string } {
+  const values: Record<string, string> = {};
+  for (const [key, raw] of Object.entries(body)) {
+    if (!SETTINGS_KEYS.has(key)) continue;
+    const value = String(raw ?? "");
+    if (key === "ga4Id" && value.trim() && !isValidGa4Id(value)) {
+      return { ok: false, error: "GA4 ID invalid. Format: G-XXXXXXXX." };
+    }
+    if (key === "pixelId" && value.trim() && !isValidPixelId(value)) {
+      return {
+        ok: false,
+        error: "Facebook Pixel ID invalid. Folosiți doar cifre.",
+      };
+    }
+    if (
+      (key === "googleSiteVerification" ||
+        key === "facebookDomainVerification") &&
+      value.trim() &&
+      !isValidVerificationToken(value)
+    ) {
+      return { ok: false, error: "Token de verificare invalid." };
+    }
+    if (key === "pixelEnabled") {
+      values[key] = value === "0" ? "0" : "1";
+      continue;
+    }
+    values[key] = value;
+  }
+  return { ok: true, values };
+}
 
 function rowsToSettings(
   data: { key?: string; value?: string | null }[] | null
@@ -37,9 +77,13 @@ export async function PATCH(request: NextRequest) {
   if (denied) return denied;
 
   try {
-    const body: Record<string, string> = await request.json();
+    const body: Record<string, unknown> = await request.json();
+    const sanitized = sanitizeSettingsBody(body);
+    if (!sanitized.ok) {
+      return NextResponse.json({ error: sanitized.error }, { status: 400 });
+    }
 
-    const upserts = Object.entries(body).map(([key, value]) =>
+    const upserts = Object.entries(sanitized.values).map(([key, value]) =>
       supabaseAdmin
         .from("settings")
         .upsert({ key, value: String(value ?? "") }, { onConflict: "key" })

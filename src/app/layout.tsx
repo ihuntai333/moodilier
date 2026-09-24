@@ -106,7 +106,11 @@ export default async function RootLayout({
       <body>
         <ScrollToTopOnNavigate />
         {children}
-        <ConsentAnalytics ga4Id={chrome.ga4Id} pixelId={chrome.pixelId} />
+        <ConsentAnalytics
+          ga4Id={chrome.ga4Id}
+          pixelId={chrome.pixelId}
+          pixelEnabled={chrome.pixelEnabled}
+        />
       </body>
     </html>
   );

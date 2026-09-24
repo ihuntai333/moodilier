@@ -158,6 +158,7 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
   const [submitting, setSubmitting] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
   const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [optimizeNote, setOptimizeNote] = useState("");
   const [pendingVideo, setPendingVideo] = useState<File | null>(null);
   const [videoPreviewUrl, setVideoPreviewUrl] = useState<string>("");
   const [error, setError] = useState("");
@@ -375,6 +376,15 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
       if (!res.ok) throw new Error(data.error || "Upload failed");
 
       const uploadedUrls: string[] = data.paths;
+      const stats = Array.isArray(data.optimize) ? data.optimize : [];
+      if (stats.length) {
+        const first = stats[0] as { from?: string; to?: string; skipped?: boolean };
+        setOptimizeNote(
+          first.skipped
+            ? "Imaginea a fost păstrată fără reconversie (GIF animat)."
+            : `Optimizat: ${first.from} → ${first.to}`
+        );
+      }
       let uploadIdx = 0;
       return form.images.map((img) => {
         if (img.file) {
@@ -928,7 +938,8 @@ export default function ProjectForm({ initialData, mode }: ProjectFormProps) {
             <span style={{ color: "#c9a984" }}>click pentru selecție</span>
           </div>
           <div style={{ fontSize: "0.75rem", color: "#5a5450", lineHeight: 1.45 }}>
-            JPG, PNG, WEBP, GIF · la salvare se optimizează automat
+            JPG, PNG, WEBP, GIF · la încărcare se convertesc automat în WebP (max 1920px)
+            {optimizeNote ? ` · ${optimizeNote}` : ""}
             <br />
             (max ~2400px, WebP, fără metadata)
           </div>

@@ -5,7 +5,6 @@ import SiteFooter from "@/components/site/SiteFooter";
 import SiteScrollProgress from "@/components/site/SiteScrollProgress";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import CookieBanner from "@/components/CookieBanner";
-import VisualEditorLoader from "@/components/VisualEditorLoader";
 import { getSiteChrome } from "@/lib/site-settings";
 import "@/styles/site.css";
 
@@ -48,7 +47,6 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
       <SiteFooter chrome={chrome} />
       <WhatsAppButton phone={chrome.whatsapp || "40729555431"} />
       <CookieBanner />
-      <VisualEditorLoader />
     </div>
   );
 }

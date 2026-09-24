@@ -400,7 +400,7 @@ export default function AdminSettingsPage() {
               <input
                 ref={logoInputRef}
                 type="file"
-                accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                accept="image/png,image/jpeg,image/webp"
                 hidden
                 onChange={(e) => {
                   const file = e.target.files?.[0];
@@ -534,7 +534,7 @@ export default function AdminSettingsPage() {
               <input
                 ref={introLogoInputRef}
                 type="file"
-                accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                accept="image/png,image/jpeg,image/webp"
                 hidden
                 onChange={(e) => {
                   const file = e.target.files?.[0];
@@ -735,12 +735,60 @@ export default function AdminSettingsPage() {
             marginBottom: "1.25rem",
           }}
         >
-          <SectionTitle>Google Analytics &amp; Facebook Pixel</SectionTitle>
+          <SectionTitle>Google Analytics &amp; Meta Pixel</SectionTitle>
           <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+            <div>
+              <label style={labelStyle}>GA4 Measurement ID</label>
+              <input
+                style={inputStyle}
+                value={settings.ga4Id || ""}
+                placeholder="G-XXXXXXXXXX"
+                onChange={(e) => setField("ga4Id", e.target.value)}
+              />
+              <p style={{ fontSize: "0.75rem", color: "#4a4540", marginTop: "0.5rem" }}>
+                Se încarcă doar după consimțământul „Statistici”. Format obligatoriu: G-…
+              </p>
+            </div>
+
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.65rem",
+                color: "#e8e0d5",
+                fontSize: "0.875rem",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={settings.pixelEnabled !== "0"}
+                onChange={(e) =>
+                  setField("pixelEnabled", e.target.checked ? "1" : "0")
+                }
+              />
+              Activează Meta Pixel (Facebook / Instagram ads)
+            </label>
+
+            <div>
+              <label style={labelStyle}>Facebook Pixel ID</label>
+              <input
+                style={{
+                  ...inputStyle,
+                  opacity: settings.pixelEnabled === "0" ? 0.5 : 1,
+                }}
+                value={settings.pixelId || ""}
+                placeholder="1234567890123456"
+                disabled={settings.pixelEnabled === "0"}
+                onChange={(e) => setField("pixelId", e.target.value.replace(/\D/g, ""))}
+              />
+              <p style={{ fontSize: "0.75rem", color: "#4a4540", marginTop: "0.5rem" }}>
+                Doar cifre. Se încarcă după consimțământul „Marketing”. Poți păstra ID-ul
+                și opri pixel-ul din checkbox.
+              </p>
+            </div>
+
             {(
               [
-                ["ga4Id", "GA4 Measurement ID", "G-XXXXXXXXXX"],
-                ["pixelId", "Facebook Pixel ID", "1234567890123456"],
                 ["googleSiteVerification", "Google Search Console", "abc123..."],
                 ["facebookDomainVerification", "Facebook Domain Verification", "abc123..."],
               ] as const

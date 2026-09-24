@@ -2,6 +2,12 @@ import { cache } from "react";
 import { unstable_cache } from "next/cache";
 import { hasSupabaseConfig, supabaseAdmin } from "@/lib/supabase";
 import { timeoutSignal } from "@/lib/with-timeout";
+import {
+  isValidGa4Id,
+  isValidPixelId,
+  isValidVerificationToken,
+  sanitizeHref,
+} from "@/lib/security/sanitize";
 
 const SUPABASE_MS = 1800;
 
@@ -45,6 +51,7 @@ export type SiteChrome = {
   metaDescription: string;
   ga4Id: string;
   pixelId: string;
+  pixelEnabled: boolean;
   googleSiteVerification: string;
   facebookDomainVerification: string;
   intro: IntroConfig;
@@ -122,6 +129,7 @@ export const SITE_CHROME_DEFAULTS: SiteChrome = {
   metaDescription: "Mobilier premium la comandă din București",
   ga4Id: "",
   pixelId: "",
+  pixelEnabled: true,
   googleSiteVerification: "",
   facebookDomainVerification: "",
   intro: DEFAULT_INTRO,
@@ -132,6 +140,7 @@ export const SITE_CHROME_DEFAULTS: SiteChrome = {
 export const SETTINGS_STRING_DEFAULTS: Record<string, string> = {
   ga4Id: "",
   pixelId: "",
+  pixelEnabled: "1",
   googleSiteVerification: "",
   facebookDomainVerification: "",
   phone: SITE_CHROME_DEFAULTS.phone,
@@ -178,7 +187,9 @@ function parseMenu(raw: string | undefined, fallback: NavLink[]): NavLink[] {
       .map((item) => {
         if (!item || typeof item !== "object") return null;
         const label = String((item as { label?: unknown }).label ?? "").trim();
-        const href = String((item as { href?: unknown }).href ?? "").trim();
+        const href = sanitizeHref(
+          String((item as { href?: unknown }).href ?? "").trim()
+        );
         if (!label || !href) return null;
         return { label, href };
       })
@@ -287,7 +298,8 @@ export function chromeFromFlat(flat: Record<string, string>): SiteChrome {
     logoUrl: withBrandLogoCache(flat.logoUrl?.trim() || SITE_CHROME_DEFAULTS.logoUrl),
     headerMenu: parseMenu(flat.headerMenu, DEFAULT_HEADER_MENU),
     ctaLabel: flat.ctaLabel?.trim() || SITE_CHROME_DEFAULTS.ctaLabel,
-    ctaHref: flat.ctaHref?.trim() || SITE_CHROME_DEFAULTS.ctaHref,
+    ctaHref:
+      sanitizeHref(flat.ctaHref?.trim() || "") || SITE_CHROME_DEFAULTS.ctaHref,
     footerBrand: flat.footerBrand?.trim() || SITE_CHROME_DEFAULTS.footerBrand,
     footerTagline: (() => {
       const t =
@@ -309,10 +321,19 @@ export function chromeFromFlat(flat: Record<string, string>): SiteChrome {
     siteTitle: flat.siteTitle?.trim() || SITE_CHROME_DEFAULTS.siteTitle,
     metaDescription:
       flat.metaDescription?.trim() || SITE_CHROME_DEFAULTS.metaDescription,
-    ga4Id: flat.ga4Id?.trim() || "",
-    pixelId: flat.pixelId?.trim() || "",
-    googleSiteVerification: flat.googleSiteVerification?.trim() || "",
-    facebookDomainVerification: flat.facebookDomainVerification?.trim() || "",
+    ga4Id: isValidGa4Id(flat.ga4Id || "") ? flat.ga4Id.trim() : "",
+    pixelId: isValidPixelId(flat.pixelId || "") ? flat.pixelId.trim() : "",
+    pixelEnabled: flat.pixelEnabled !== "0",
+    googleSiteVerification: isValidVerificationToken(
+      flat.googleSiteVerification || ""
+    )
+      ? (flat.googleSiteVerification || "").trim()
+      : "",
+    facebookDomainVerification: isValidVerificationToken(
+      flat.facebookDomainVerification || ""
+    )
+      ? (flat.facebookDomainVerification || "").trim()
+      : "",
     intro: {
       enabled: flat.introEnabled !== "0",
       logoUrl: `/brand/logo-white.png?v=${BRAND_LOGO_CACHE}`,
@@ -363,7 +384,7 @@ async function loadSiteChrome(): Promise<SiteChrome> {
   }
 }
 
-const cachedSiteChrome = unstable_cache(loadSiteChrome, ["site-chrome-v6-hero-logo"], {
+const cachedSiteChrome = unstable_cache(loadSiteChrome, ["site-chrome-v7-pixel"], {
   revalidate: 60,
   tags: ["site-chrome"],
 });

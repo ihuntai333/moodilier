@@ -20,9 +20,6 @@ function withPathname(request: NextRequest) {
 function isPublicWhenLocked(pathname: string): boolean {
   if (pathname === SITE_LOCK_PATH) return true;
   if (pathname.startsWith("/api/preview/")) return true;
-  if (pathname === "/api/content" || pathname.startsWith("/api/content/")) return true;
-  if (pathname === "/api/media") return true;
-  if (pathname === "/editor.js") return true;
   if (pathname === "/favicon.ico") return true;
   if (pathname === "/robots.txt") return true;
   return false;
@@ -52,25 +49,6 @@ export async function middleware(request: NextRequest) {
       const unlock = new URL(SITE_LOCK_PATH, request.url);
       unlock.searchParams.set("from", pathname);
       return NextResponse.redirect(unlock);
-    }
-  }
-
-  // ── Protect visual-editor APIs (defense in depth) ───────────────────────
-  if (
-    pathname === "/api/content" ||
-    pathname.startsWith("/api/content/") ||
-    pathname === "/api/media"
-  ) {
-    if (request.method !== "GET" && request.method !== "HEAD" && request.method !== "OPTIONS") {
-      const token = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
-      if (!(await verifyAdminSessionToken(token))) {
-        return NextResponse.json({ error: "Neautentificat." }, { status: 401 });
-      }
-    } else if (pathname === "/api/media") {
-      const token = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
-      if (!(await verifyAdminSessionToken(token))) {
-        return NextResponse.json({ error: "Neautentificat." }, { status: 401 });
-      }
     }
   }
 

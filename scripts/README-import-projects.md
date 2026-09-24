@@ -8,7 +8,7 @@ Backend module for web-ready project photos.
 
 - Presets: `cover` (1600px), `gallery` (1800px), `thumb` (640px), `logo`
 - Output: WebP (or JPEG if smaller), EXIF-rotated
-- Used by `/api/admin/upload` and `/api/content/upload`
+- Used by `/api/admin/upload`
 
 ## Import from DOWNLOAD AUG
 

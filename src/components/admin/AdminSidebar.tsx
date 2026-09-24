@@ -11,6 +11,7 @@ import {
   ArrowLeft,
   LogOut,
   Plus,
+  Shield,
 } from "lucide-react";
 
 const navItems = [
@@ -19,6 +20,7 @@ const navItems = [
   { href: "/admin/proiecte", label: "Proiecte", icon: FolderOpen },
   { href: "/admin/mesaje", label: "Mesaje", icon: MessageSquare },
   { href: "/admin/setari", label: "Setări", icon: Settings },
+  { href: "/admin/securitate", label: "Securitate", icon: Shield },
 ];
 
 export default function AdminSidebar() {
