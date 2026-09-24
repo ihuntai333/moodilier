@@ -1,3 +1,0 @@
-# Keep folder for local sqlite/json; ignore contents
-*
-!.gitignore
