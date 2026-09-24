@@ -1,8 +1,10 @@
 # Moodilier — Audit complet
 
+> **Obsolete pentru deploy:** producția e Hostinger (GitHub `main`, Node 22, `next start`). Notele despre cPanel / Passenger / `app.js` de mai jos nu mai sunt planul de lucru.
+
 **Data:** 15 septembrie 2026  
 **Mod:** audit only (fără modificări de cod, fără install, fără refactor)  
-**Repo analizat:** proiectul Next.js din working tree (inclusiv `app.js` și `build:cpanel`)
+**Repo analizat:** proiectul Next.js din working tree la data auditului
 
 ---
 

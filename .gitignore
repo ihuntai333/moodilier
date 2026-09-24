@@ -59,5 +59,4 @@ public/videos/0603(2).mp4
 public/videos/*.jpg
 
 # local diagnostics
-build-cpanel.log
 scripts/modificari-sept-2026-media/
